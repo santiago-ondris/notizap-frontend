@@ -4,7 +4,7 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
 
-// Interceptor para agregar el token automáticamente a cada request
+// Interceptor para agregar el token automaticamente a cada request
 api.interceptors.request.use(
   (config) => {
     if (

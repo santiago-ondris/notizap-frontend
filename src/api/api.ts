@@ -3,7 +3,6 @@ import axios from "axios";
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
-console.log("VITE_API_URL:", import.meta.env.VITE_API_URL);
 
 // Interceptor para agregar el token automaticamente a cada request
 api.interceptors.request.use(

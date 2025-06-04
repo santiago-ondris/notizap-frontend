@@ -36,18 +36,34 @@ export default function ReportsTable({ adminView = false }: { adminView?: boolea
     try {
       await deleteManualReport(id);
       toast.success("Informe eliminado");
-      fetchReports(); // Refresca la lista
+      fetchReports();
     } catch {
       toast.error("No se pudo eliminar el informe");
     }
   };
 
+  // Ordenamos por año y mes descendente
+  const sortedReports = [...reports].sort(
+    (a, b) => b.year !== a.year ? b.year - a.year : b.month - a.month
+  );
+
+  function getVariation(current: number, previous: number | undefined) {
+    if (previous === undefined || previous === 0) return null;
+    return ((current - previous) / previous) * 100;
+  }
+
+  const formatVar = (v: number | null) => {
+    if (v === null) return <span className="text-gray-400">–</span>;
+    if (v > 0) return <span className="text-green-700 font-semibold">+{v.toFixed(1)}%</span>;
+    if (v < 0) return <span className="text-red-600 font-semibold">{v.toFixed(1)}%</span>;
+    return <span className="text-gray-500">0%</span>;
+  };
+
   return (
     <div className="mt-8">
-      <h2 className="text-lg font-bold mb-2 text-center text-[#51590E]">Informes Cargados</h2>
       {loading ? (
-        <div className="p-4 text-center">Cargando...</div>
-      ) : reports.length === 0 ? (
+        <div className="p-4 text-center text-white">Cargando...</div>
+      ) : sortedReports.length === 0 ? (
         <div className="p-4 text-center text-white-500">No hay informes cargados aún.</div>
       ) : (
         <table className="min-w-full bg-white rounded-xl shadow overflow-hidden">
@@ -56,30 +72,45 @@ export default function ReportsTable({ adminView = false }: { adminView?: boolea
               <th className="px-4 py-2 text-left">Año</th>
               <th className="px-4 py-2 text-left">Mes</th>
               <th className="px-4 py-2 text-right">Unidades</th>
+              <th className="px-4 py-2 text-right">Var. % Unidades</th>
               <th className="px-4 py-2 text-right">Facturación</th>
+              <th className="px-4 py-2 text-right">Var. % Facturación</th>
               {adminView && <th className="px-4 py-2"></th>}
             </tr>
           </thead>
           <tbody>
-            {reports.map(rep => (
-              <tr key={rep.id} className="border-t hover:bg-violet-50 transition">
-                <td className="px-4 py-2">{rep.year}</td>
-                <td className="px-4 py-2">{rep.month}</td>
-                <td className="px-4 py-2 text-right">{rep.unitsSold}</td>
-                <td className="px-4 py-2 text-right">${rep.revenue.toLocaleString("es-AR", { minimumFractionDigits: 2 })}</td>
-                {adminView && (
+            {sortedReports.map((rep) => {
+              const prev = sortedReports.find(
+                r =>
+                  (rep.month === 1 ? rep.year - 1 : rep.year) === r.year &&
+                  (rep.month === 1 ? 12 : rep.month - 1) === r.month
+              );
+              const varUnits = getVariation(rep.unitsSold, prev?.unitsSold);
+              const varRevenue = getVariation(rep.revenue, prev?.revenue);
+
+              return (
+                <tr key={rep.id} className="border-t hover:bg-violet-50 transition">
+                  <td className="px-4 py-2">{rep.year}</td>
+                  <td className="px-4 py-2">{rep.month}</td>
+                  <td className="px-4 py-2 text-right">{rep.unitsSold}</td>
+                  <td className="px-4 py-2 text-right">{formatVar(varUnits)}</td>
                   <td className="px-4 py-2 text-right">
-                    {/* Editar se suma más adelante */}
-                    <button
-                      onClick={() => handleDelete(rep.id)}
-                      className="text-red-600 hover:underline"
-                    >
-                      Eliminar
-                    </button>
+                    ${rep.revenue.toLocaleString("es-AR", { minimumFractionDigits: 2 })}
                   </td>
-                )}
-              </tr>
-            ))}
+                  <td className="px-4 py-2 text-right">{formatVar(varRevenue)}</td>
+                  {adminView && (
+                    <td className="px-4 py-2 text-right">
+                      <button
+                        onClick={() => handleDelete(rep.id)}
+                        className="text-red-600 hover:underline"
+                      >
+                        Eliminar
+                      </button>
+                    </td>
+                  )}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}

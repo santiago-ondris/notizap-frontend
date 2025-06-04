@@ -6,7 +6,6 @@ import LandingPage from "@/pages/Landing/LandingPage";
 import CambiosPage from "@/pages/Cambios/CambiosPage";
 import InstagramPage from "@/pages/Instagram/InstagramPage";
 import WooCommercePage from "@/pages/WooCommerce/WooCommercePage";
-import MercadoLibrePage from "@/pages/MercadoLibre/MercadoLibrePage";
 import MailingPage from "@/pages/Mailing/MailingPage";
 import GastosPage from "@/pages/Gastos/GastosPage";
 import EnviosPage from "@/pages/Envios/EnviosPage";
@@ -17,6 +16,8 @@ import GraficoEvolucionPage from "@/pages/Analisis/GraficoEvolucionPage";
 import ProcesadorImagenesPage from "@/pages/ProcesadorImagenes/ProcesadorImagenesPage";
 import { UsersPage } from "@/pages/Login/UsersPage";
 import { RequireAuth } from "./RequireAuth";
+import MercadoLibreReportsPage from "@/pages/MercadoLibre/MercadoLibreReportsPage";
+import AdminMercadoLibrePage from "@/pages/MercadoLibre/AdminMercadoLibrePage";
 
 const AppRoutes: React.FC = () => (
   <Routes>
@@ -44,7 +45,24 @@ const AppRoutes: React.FC = () => (
     <Route path="/cambios" element={<AppLayout><CambiosPage /></AppLayout>} />
     <Route path="/instagram" element={<AppLayout><InstagramPage /></AppLayout>} />
     <Route path="/woocommerce" element={<AppLayout><WooCommercePage /></AppLayout>} />
-    <Route path="/mercadolibre" element={<AppLayout><MercadoLibrePage /></AppLayout>} />
+    <Route
+      path="/mercadolibre"
+      element={
+        <AppLayout>
+          <MercadoLibreReportsPage />
+        </AppLayout>
+      }
+    />
+    <Route
+      path="/mercadolibre/admin"
+      element={
+        <AppLayout>
+          <RequireAuth allowedRoles={["admin", "superadmin"]}>
+            <AdminMercadoLibrePage />
+          </RequireAuth>
+        </AppLayout>
+      }
+    />
     <Route path="/mailing" element={<AppLayout><MailingPage /></AppLayout>} />
     <Route path="/gastos" element={<AppLayout><GastosPage /></AppLayout>} />
     <Route path="/envios" element={<AppLayout><EnviosPage /></AppLayout>} />

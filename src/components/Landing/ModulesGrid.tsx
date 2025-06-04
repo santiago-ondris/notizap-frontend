@@ -107,7 +107,7 @@ export const ModulesGrid: React.FC = () => {
         </h2>
         <div className="flex justify-center items-center py-24">
           <span className="text-lg text-gray-300">
-            Inicia sesión o regístrate para acceder a los módulos de Notizap.
+            Inicia sesión para acceder a los módulos de Notizap.
           </span>
         </div>
       </section>

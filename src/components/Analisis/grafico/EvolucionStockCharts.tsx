@@ -1,54 +1,25 @@
-import React, { useState, useMemo } from "react";
 import { type EvolucionStockPorPuntoDeVenta } from "@/types/analisis/analisis";
 import { Card } from "@/components/ui/card";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
 
+
 type Props = {
   data: EvolucionStockPorPuntoDeVenta[];
 };
 
 export const EvolucionStockCharts: React.FC<Props> = ({ data }) => {
-  const [sucursal, setSucursal] = useState<string>("TODOS");
-
-  const dataFiltradaPorSucursal = useMemo(() => {
-    if (sucursal === "TODOS") return data;
-    return data.filter(
-      (d) =>
-        d.puntoDeVenta === sucursal ||
-        (sucursal === "GLOBAL" && d.puntoDeVenta === "GLOBAL")
-    );
-  }, [data, sucursal]);
+  const dataGlobal = data.filter((d) => d.puntoDeVenta === "GLOBAL");
 
   return (
     <div className="space-y-8">
-      <Card className="bg-[#ffffff] px-8 py-6 rounded-2xl border-none shadow-none flex flex-col md:flex-row gap-4 mb-8">
-        <div className="flex-1">
-          <label className="font-semibold text-[#212026] mr-2">Sucursal:</label>
-          <select
-            className="border rounded p-2 text-[#212026]"
-            value={sucursal}
-            onChange={(e) => setSucursal(e.target.value)}
-          >
-            <option value="TODOS">Todas (Global y sucursales)</option>
-            <option value="GLOBAL">Solo Global</option>
-            {data
-              .filter((d) => d.puntoDeVenta !== "GLOBAL")
-              .map((d) => (
-                <option key={d.puntoDeVenta} value={d.puntoDeVenta}>
-                  {d.puntoDeVenta}
-                </option>
-              ))}
-          </select>
-        </div>
-      </Card>
-      {dataFiltradaPorSucursal.length === 0 ? (
+      {dataGlobal.length === 0 ? (
         <div className="text-[#212026] text-lg font-semibold p-6">
-          No hay datos para la sucursal seleccionada.
+          No hay datos de GLOBAL.
         </div>
       ) : (
-        dataFiltradaPorSucursal.map((sucursal) => {
+        dataGlobal.map((sucursal) => {
           const stocks = sucursal.evolucion.map((e) => e.stock);
           const minStock = Math.min(...stocks);
           const maxStock = Math.max(...stocks);

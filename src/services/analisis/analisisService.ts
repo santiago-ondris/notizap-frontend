@@ -15,3 +15,13 @@ export const fetchEvolucionStock = async (
   });
   return response.data;
 };
+
+export async function fetchEvolucionVentas(archivo: File) {
+  const formData = new FormData();
+  formData.append("ArchivoVentas", archivo);
+
+  const response = await api.post("/api/v1/analisis/rotacion/evolucion-ventas", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+}

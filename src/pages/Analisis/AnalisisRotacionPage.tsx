@@ -97,13 +97,20 @@ const AnalisisRotacionPage: React.FC = () => {
           Análisis de Rotación de Productos
         </h1>
 
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center gap-4 mb-8">
           <Button
             className="bg-[#D94854] hover:bg-[#F23D5E] text-white font-semibold flex items-center gap-2 px-6 py-3 rounded-xl shadow"
             onClick={() => navigate("/analisis/grafico")}
           >
             <LineChart className="w-5 h-5" />
             Ver gráfico de evolución de stock
+          </Button>
+          <Button
+            className="bg-[#51590E] hover:bg-[#B695BF] text-white font-semibold flex items-center gap-2 px-6 py-3 rounded-xl shadow"
+            onClick={() => navigate("/analisis/ventas")}
+          >
+            <LineChart className="w-5 h-5" />
+            Ver gráfico de evolución de ventas
           </Button>
         </div>
 

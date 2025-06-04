@@ -12,6 +12,7 @@ import GastosPage from "@/pages/Gastos/GastosPage";
 import EnviosPage from "@/pages/Envios/EnviosPage";
 import PublicidadPage from "@/pages/Publicidad/PublicidadPage";
 import AnalisisRotacionPage from "@/pages/Analisis/AnalisisRotacionPage"
+import VentasPage from "@/pages/Analisis/VentasPage";
 import GraficoEvolucionPage from "@/pages/Analisis/GraficoEvolucionPage";
 import ProcesadorImagenesPage from "@/pages/ProcesadorImagenes/ProcesadorImagenesPage";
 import { UsersPage } from "@/pages/Login/UsersPage";
@@ -26,6 +27,16 @@ const AppRoutes: React.FC = () => (
         <AppLayout>
           <RequireAuth allowedRoles={["superadmin"]}>
             <UsersPage />
+          </RequireAuth>
+        </AppLayout>
+      }
+    />
+    <Route
+      path="/analisis/ventas"
+      element={
+        <AppLayout>
+          <RequireAuth allowedRoles={["admin", "superadmin"]}>
+            <VentasPage />
           </RequireAuth>
         </AppLayout>
       }

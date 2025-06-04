@@ -1,4 +1,3 @@
-import React, { useEffect, useRef } from "react";
 import { ModuleCard } from "./ModuleCard";
 import {
   ShoppingCart,
@@ -9,11 +8,9 @@ import {
   Repeat,
   Send,
   Megaphone,
-  Zap,
   ImageIcon,
   ChartNoAxesCombined
 } from "lucide-react";
-import gsap from "gsap";
 import { useAuth } from "@/contexts/AuthContext";
 
 const modules = [
@@ -100,39 +97,13 @@ const modules = [
 ];
 
 export const ModulesGrid: React.FC = () => {
-  const zapRef = useRef<HTMLSpanElement>(null);
-  const animatedRef = useRef(false);
   const { isAuthenticated, role } = useAuth();
-
-  useEffect(() => {
-    if (zapRef.current && !animatedRef.current) {
-      animatedRef.current = true;
-      gsap.fromTo(
-        zapRef.current,
-        { y: -120, opacity: 0, rotate: -60 },
-        {
-          y: 0,
-          opacity: 1,
-          rotate: 0,
-          duration: 2,
-          ease: "bounce.out"
-        }
-      );
-    }
-  }, []);
 
   if (!isAuthenticated)
     return (
-      <section className="pt-4 pb-20 max-w-6xl mx-auto px-4">
-        <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-12 flex justify-center items-center gap-3 relative">
+      <section className="pt-4 pb-10 max-w-6xl mx-auto px-4">
+        <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-8 flex justify-center items-center gap-3 relative">
           <span>Módulos principales</span>
-          <span
-            ref={zapRef}
-            className="inline-block absolute left-full top-1/2 -translate-y-1/2 -ml-3 opacity-0"
-            style={{ pointerEvents: "none" }}
-          >
-            <Zap className="w-8 h-8 text-[#F23D5E] drop-shadow-xl" strokeWidth={2.2} />
-          </span>
         </h2>
         <div className="flex justify-center items-center py-24">
           <span className="text-lg text-gray-300">
@@ -146,16 +117,9 @@ export const ModulesGrid: React.FC = () => {
   const filteredModules = modules.filter((mod) => mod.roles.includes(role!));
 
   return (
-    <section className="pt-4 pb-20 max-w-6xl mx-auto px-4">
-      <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-12 flex justify-center items-center gap-3 relative">
+    <section className="pt-4 pb-10 max-w-6xl mx-auto px-4">
+      <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-8 flex justify-center items-center gap-3 relative">
         <span>Módulos principales</span>
-        <span
-          ref={zapRef}
-          className="inline-block absolute left-full top-1/2 -translate-y-1/2 -ml-3 opacity-0"
-          style={{ pointerEvents: "none" }}
-        >
-          <Zap className="w-8 h-8 text-[#F23D5E] drop-shadow-xl" strokeWidth={2.2} />
-        </span>
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredModules.map((mod) => (

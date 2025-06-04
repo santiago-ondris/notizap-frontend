@@ -14,7 +14,7 @@ const LandingPage: React.FC = () => {
   const [showForgot, setShowForgot] = useState(false);
 
   return (
-    <div className="bg-[#212026] min-h-screen w-full">
+    <div className="bg-gradient-to-b from-[#23232e] to-[#191922] min-h-screen flex flex-col">
       <Navbar
        onLoginClick={() => setShowLogin(true)}
       />
@@ -41,7 +41,7 @@ const LandingPage: React.FC = () => {
       {showForgot && (
         <ForgotPasswordForm onClose={() => setShowForgot(false)} />
       )}
-      <main className="pt-2">
+      <main className="pt-2 flex-1 flex flex-col">
         <Hero 
          onLoginClick={() => setShowLogin(true)}
          onRegisterClick={() => setShowRegister(true)}

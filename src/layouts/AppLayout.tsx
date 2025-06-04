@@ -43,6 +43,9 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <ForgotPasswordForm onClose={() => setShowForgot(false)} />
       )}
       <main className="pt-8">{children}</main>
+      <footer className="w-full py-4 flex justify-center border-t border-white/10 mt-auto">
+        <span className="text-xs text-gray-400">© 2025 Montella | Powered by Notizap</span>
+      </footer>
     </div>
   );
 };

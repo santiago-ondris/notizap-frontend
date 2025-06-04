@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import gsap from "gsap";
 import { Rocket } from "lucide-react";
+import gsap from "gsap";
 
 interface HeroProps {
   onLoginClick: () => void;
@@ -8,34 +8,15 @@ interface HeroProps {
 }
 
 export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLParagraphElement>(null);
-  const rocketRef = useRef<HTMLDivElement>(null);
+  // Refs para ambos cohetes
+  const rocketLeftRef = useRef<HTMLDivElement>(null);
+  const rocketRightRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (titleRef.current) {
-      const letters = titleRef.current.innerText.split("");
-      titleRef.current.innerHTML = letters
-        .map((l) => `<span class='inline-block opacity-0' style='transform: translateY(32px)'>${l === " " ? "&nbsp;" : l}</span>`)
-        .join("");
-      gsap.to(titleRef.current.querySelectorAll("span"), {
-        opacity: 1,
-        y: 0,
-        stagger: 0.06,
-        duration: 0.7,
-        ease: "back.out(1.7)"
-      });
-    }
-    if (subtitleRef.current) {
+    // Animación rebote en ambos cohetes (sólo desktop)
+    if (rocketLeftRef.current) {
       gsap.fromTo(
-        subtitleRef.current,
-        { opacity: 0, y: 24 },
-        { opacity: 1, y: 0, delay: 0.6, duration: 0.8, ease: "power2.out" }
-      );
-    }
-    if (rocketRef.current) {
-      gsap.fromTo(
-        rocketRef.current,
+        rocketLeftRef.current,
         { y: 0 },
         {
           y: -30,
@@ -43,38 +24,76 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
           yoyo: true,
           ease: "power1.inOut",
           duration: 0.8,
-          delay: 1.2
+          delay: 1.2,
+        }
+      );
+    }
+    if (rocketRightRef.current) {
+      gsap.fromTo(
+        rocketRightRef.current,
+        { y: 0 },
+        {
+          y: -30,
+          repeat: -1,
+          yoyo: true,
+          ease: "power1.inOut",
+          duration: 0.8,
+          delay: 1.4, // Leve desfase para que no vayan exactos
         }
       );
     }
   }, []);
 
   return (
-    <section className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
-      <h1
-        ref={titleRef}
-        className="text-[clamp(2.5rem,8vw,6rem)] font-extrabold text-[#D94854] tracking-tight text-center"
-        style={{ letterSpacing: "0.08em" }}
+    <section
+      className="relative flex items-center justify-center min-h-[60vh] w-full py-16 bg-gradient-to-br from-[#26263a] via-[#2f283a] to-[#1a1c23] overflow-hidden"
+      style={{
+        backgroundImage:
+          "radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), radial-gradient(rgba(255,255,255,0.015) 1px, transparent 1px)",
+        backgroundSize: "32px 32px",
+        backgroundPosition: "0 0, 16px 16px",
+      }}
+    >
+      {/* SVG decorations... */}
+
+      <div
+        ref={rocketLeftRef}
+        className="hidden md:block absolute left-[16vw] top-1/2 -translate-y-1/2 z-10 opacity-40"
       >
-        Notizap
-      </h1>
-      <p
-        ref={subtitleRef}
-        className="text-[clamp(1.2rem,3vw,2rem)] text-[#B695BF] font-semibold text-center"
+        <Rocket className="w-28 h-28 text-[#51590E]" strokeWidth={2.2} />
+      </div>
+      <div
+        ref={rocketRightRef}
+        className="hidden md:block absolute right-[16vw] top-1/2 -translate-y-1/2 z-10 opacity-40"
       >
-        Para Montella
-      </p>
-      <div className="flex gap-4 mt-6">
+        <Rocket className="w-28 h-28 text-[#51590E]" strokeWidth={2.2} />
+      </div>
+
+      {/* Central glass card */}
+      <div className="relative z-20 flex flex-col items-center justify-center bg-white/5 backdrop-blur-lg rounded-2xl px-14 py-10 shadow-2xl border border-white/10 max-w-2xl mx-auto">
+        <h1 className="text-6xl md:text-7xl font-extrabold text-[#D94854] tracking-tight text-center drop-shadow-sm">
+          Notizap
+        </h1>
+        <p className="mt-2 text-2xl text-[#B695BF] font-semibold text-center">
+          Para Montella
+        </p>
         <button
           onClick={onLoginClick}
-          className="px-8 py-3 rounded-2xl text-lg font-bold bg-[#D94854] text-white shadow-lg hover:bg-[#F23D5E] transition"
+          className="mt-7 px-10 py-3 rounded-xl text-lg font-bold bg-[#D94854] text-white shadow-lg hover:bg-[#F23D5E] transition"
         >
           Login
         </button>
       </div>
-      <div ref={rocketRef} className="mt-10">
-        <Rocket className="w-16 h-16 text-[#51590E] drop-shadow-xl" strokeWidth={2.2} />
-      </div>
+      {/* Otros decorativos opcionales */}
+      <svg className="absolute top-0 left-0 w-32 h-32 opacity-40" viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r="80" fill="#B695BF" fillOpacity="0.1" />
+      </svg>
+      <svg className="absolute bottom-0 right-0 w-48 h-48 opacity-30" viewBox="0 0 200 200">
+        <rect x="40" y="40" width="120" height="120" rx="60" fill="#D94854" fillOpacity="0.1" />
+      </svg>
+      <svg className="absolute top-1/3 right-0 w-28 h-20 opacity-10" viewBox="0 0 200 80">
+        <ellipse cx="100" cy="40" rx="90" ry="30" fill="#51590E" fillOpacity="0.5" />
+      </svg>
     </section>
   );
 };

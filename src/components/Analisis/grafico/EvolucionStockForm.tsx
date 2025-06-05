@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { type ProductoBase, type EvolucionStockRequest } from "@/types/analisis/analisis";
 import { getProductosDeCompras } from "@/utils/analisis/getProductosDeCompras";
+import { useArchivosAnalisis } from "@/store/useArchivosAnalisis"; // 👈 ¡IMPORTANTE!
 
 type Props = {
   onSubmit: (data: EvolucionStockRequest) => void;
@@ -10,17 +11,24 @@ type Props = {
 };
 
 export const EvolucionStockForm: React.FC<Props> = ({ onSubmit, loading }) => {
-  const [archivoCabecera, setArchivoCabecera] = useState<File | null>(null);
-  const [archivoDetalles, setArchivoDetalles] = useState<File | null>(null);
-  const [archivoVentas, setArchivoVentas] = useState<File | null>(null);
+  const { archivos, setArchivo } = useArchivosAnalisis();
   const [producto, setProducto] = useState<string>("");
   const [productos, setProductos] = useState<ProductoBase[]>([]);
   const [buscandoProductos, setBuscandoProductos] = useState(false);
 
-  // Cuando se selecciona el archivo de detalles, se leen productos unicos
+  useEffect(() => {
+    if (archivos.archivoEvolucionStockDetalles && productos.length === 0) {
+      setBuscandoProductos(true);
+      getProductosDeCompras(archivos.archivoEvolucionStockDetalles)
+        .then(setProductos)
+        .catch(() => setProductos([]))
+        .finally(() => setBuscandoProductos(false));
+    }
+  }, [archivos.archivoEvolucionStockDetalles]);
+
   const handleDetallesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setArchivoDetalles(file);
+    setArchivo("archivoEvolucionStockDetalles", file!);
     setProductos([]);
     setProducto("");
     if (file) {
@@ -37,16 +45,31 @@ export const EvolucionStockForm: React.FC<Props> = ({ onSubmit, loading }) => {
     }
   };
 
+  const handleCabeceraChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setArchivo("archivoEvolucionStockCabecera", file!);
+  };
+
+  const handleVentasChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setArchivo("archivoEvolucionStockVentas", file!);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!archivoCabecera || !archivoDetalles || !archivoVentas || !producto) {
+    if (
+      !archivos.archivoEvolucionStockCabecera ||
+      !archivos.archivoEvolucionStockDetalles ||
+      !archivos.archivoEvolucionStockVentas ||
+      !producto
+    ) {
       alert("Completa todos los campos y selecciona un producto");
       return;
     }
     onSubmit({
-      archivoCabecera,
-      archivoDetalles,
-      archivoVentas,
+      archivoCabecera: archivos.archivoEvolucionStockCabecera,
+      archivoDetalles: archivos.archivoEvolucionStockDetalles,
+      archivoVentas: archivos.archivoEvolucionStockVentas,
       producto,
     });
   };
@@ -63,10 +86,14 @@ export const EvolucionStockForm: React.FC<Props> = ({ onSubmit, loading }) => {
             <input
               type="file"
               accept=".xlsx"
-              onChange={(e) => setArchivoCabecera(e.target.files?.[0] || null)}
+              onChange={handleCabeceraChange}
               className="w-full border rounded-lg p-2 bg-white"
-              required
             />
+            {archivos.archivoEvolucionStockCabecera && (
+              <span className="text-xs text-[#51590E] block mt-1">
+                Archivo cargado: <b>{archivos.archivoEvolucionStockCabecera.name}</b>
+              </span>
+            )}
           </label>
           <label className="flex-1">
             <span className="block font-semibold mb-1 text-[#212026]">Detalle de compras</span>
@@ -75,10 +102,14 @@ export const EvolucionStockForm: React.FC<Props> = ({ onSubmit, loading }) => {
               accept=".xlsx"
               onChange={handleDetallesChange}
               className="w-full border rounded-lg p-2 bg-white"
-              required
             />
             {buscandoProductos && (
               <span className="text-xs text-[#51590E]">Buscando productos...</span>
+            )}
+            {archivos.archivoEvolucionStockDetalles && (
+              <span className="text-xs text-[#51590E] block mt-1">
+                Archivo cargado: <b>{archivos.archivoEvolucionStockDetalles.name}</b>
+              </span>
             )}
           </label>
           <label className="flex-1">
@@ -86,10 +117,14 @@ export const EvolucionStockForm: React.FC<Props> = ({ onSubmit, loading }) => {
             <input
               type="file"
               accept=".xlsx"
-              onChange={(e) => setArchivoVentas(e.target.files?.[0] || null)}
+              onChange={handleVentasChange}
               className="w-full border rounded-lg p-2 bg-white"
-              required
             />
+            {archivos.archivoEvolucionStockVentas && (
+              <span className="text-xs text-[#51590E] block mt-1">
+                Archivo cargado: <b>{archivos.archivoEvolucionStockVentas.name}</b>
+              </span>
+            )}
           </label>
         </div>
         <div>
@@ -102,7 +137,6 @@ export const EvolucionStockForm: React.FC<Props> = ({ onSubmit, loading }) => {
             value={producto}
             onChange={(e) => setProducto(e.target.value)}
             disabled={productos.length === 0}
-            required
             autoComplete="off"
           />
           <datalist id="productos-list">

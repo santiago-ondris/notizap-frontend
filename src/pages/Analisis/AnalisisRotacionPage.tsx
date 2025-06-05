@@ -4,7 +4,6 @@ import AnalisisRotacionForm from "@/components/Analisis/AnalisisRotacionForm";
 import { VentasSinComprasTable } from "@/components/Analisis/VentasSinComprasTable";
 import { Navbar } from "@/components/Landing/Navbar";
 import { Button } from "@/components/ui/button";
-import { type RotacionResult } from "@/types/analisis/analisisRotacion";
 import { 
   agruparRotacionPorProductoColor, 
   filtrarRotacionPorSucursal, 
@@ -14,12 +13,13 @@ import { paginarArray, calcularTotalPaginas } from "@/utils/paginacion";
 import { RotacionTable } from "@/components/Analisis/RotacionTable";
 import { LineChart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useArchivosAnalisis } from "@/store/useArchivosAnalisis";
 
 const opcionesPorPagina = [15, 30, 50, 100];
 
 const AnalisisRotacionPage: React.FC = () => {
   // Estado principal
-  const [resultados, setResultados] = useState<RotacionResult | null>(null);
+  const { resultado, setResultado } = useArchivosAnalisis();
   const [isLoading, setIsLoading] = useState(false);
   const [puntoDeVenta, setPuntoDeVenta] = useState<string>("TODOS");
   const [busqueda, setBusqueda] = useState<string>("");
@@ -50,8 +50,8 @@ const AnalisisRotacionPage: React.FC = () => {
   };
 
   // Sucursales únicas
-  const puntosDeVenta = resultados
-    ? Array.from(new Set(resultados.rotacion.map((r) => r.puntoDeVenta)))
+  const puntosDeVenta = resultado
+    ? Array.from(new Set(resultado.rotacion.map((r) => r.puntoDeVenta)))
     : [];
 
   // Cambio de sucursal
@@ -69,11 +69,11 @@ const AnalisisRotacionPage: React.FC = () => {
 
   // Procesamiento de datos usando utils
   let datosFiltrados: any[] = [];
-  if (resultados) {
+  if (resultado) {
     datosFiltrados =
       puntoDeVenta === "TODOS"
-        ? agruparRotacionPorProductoColor(resultados.rotacion, busqueda)
-        : filtrarRotacionPorSucursal(resultados.rotacion, busqueda, puntoDeVenta);
+        ? agruparRotacionPorProductoColor(resultado.rotacion, busqueda)
+        : filtrarRotacionPorSucursal(resultado.rotacion, busqueda, puntoDeVenta);
     datosFiltrados = ordenarRotacion(datosFiltrados, columnaOrden, ordenAsc);
   }
 
@@ -116,13 +116,13 @@ const AnalisisRotacionPage: React.FC = () => {
 
         {/* Formulario de carga */}
         <AnalisisRotacionForm
-          onSuccess={setResultados}
+          onSuccess={setResultado}
           loading={isLoading}
           setLoading={setIsLoading}
         />
 
         {/* Botón de productos vendidos sin compras */}
-        {resultados && resultados.ventasSinCompras.length > 0 && (
+        {resultado && resultado.ventasSinCompras.length > 0 && (
           <div className="flex flex-col items-center gap-2 mt-6 mb-6">
             <Button
               variant="default"
@@ -135,7 +135,7 @@ const AnalisisRotacionPage: React.FC = () => {
             </Button>
             {mostrarVentasSinCompras && (
               <VentasSinComprasTable
-                ventasSinCompras={resultados.ventasSinCompras}
+                ventasSinCompras={resultado.ventasSinCompras}
                 pagina={paginaVSC}
                 setPagina={setPaginaVSC}
                 filasPorPagina={filasPorPaginaVSC}
@@ -145,7 +145,7 @@ const AnalisisRotacionPage: React.FC = () => {
           </div>
         )}
 
-        {resultados && (
+        {resultado && (
           <section className="space-y-6 mt-8">
             <Card className="bg-[#ffffff] p-6 flex flex-col md:flex-row md:items-center gap-4 shadow-none border-none">
               {/* Selector de sucursal */}

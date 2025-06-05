@@ -4,6 +4,7 @@ import LoginForm from "@/components/Login/LoginForm";
 import RegisterForm from "@/components/Login/RegisterForm";
 import ForgotPasswordForm from "@/components/Login/ForgotPasswordForm";
 import { useAuth } from "@/contexts/AuthContext";
+import "@/store/useArchivosAnalisis";
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();

@@ -9,7 +9,9 @@ import {
   Send,
   Megaphone,
   ImageIcon,
-  ChartNoAxesCombined
+  ChartNoAxesCombined,
+  Receipt,
+  PersonStanding
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -42,7 +44,7 @@ const modules = [
     title: "MercadoLibre",
     description: "Estadísticas y reportes manuales",
     icon: DollarSign,
-    color: "#D94854",
+    color: "#F23D5E",
     to: "/mercadolibre",
     roles: ["viewer", "admin", "superadmin"]
   },
@@ -50,7 +52,7 @@ const modules = [
     title: "Gastos",
     description: "Control y registro de gastos mensuales",
     icon: Package,
-    color: "#B695BF",
+    color: "#51590E",
     to: "/gastos",
     roles: ["viewer", "admin", "superadmin"]
   },
@@ -58,7 +60,7 @@ const modules = [
     title: "Envíos",
     description: "Envíos diarios y resúmenes por tipo",
     icon: Send,
-    color: "#F23D5E",
+    color: "#B695BF",
     to: "/envios",
     roles: ["viewer", "admin", "superadmin"]
   },
@@ -66,7 +68,7 @@ const modules = [
     title: "Cambios/Devoluciones",
     description: "Gestión estructurada de cambios y devoluciones",
     icon: Repeat,
-    color: "#D94854",
+    color: "#F23D5E",
     to: "/cambios",
     roles: ["admin", "superadmin"]
   },
@@ -82,7 +84,7 @@ const modules = [
     title: "Procesador de Imágenes",
     description: "Redimensiona, convierte y descarga imágenes en lote",
     icon: ImageIcon,
-    color: "#F23D5E",
+    color: "#B695BF",
     to: "/procesador-imagenes",
     roles: ["viewer", "admin", "superadmin"]
   },
@@ -93,7 +95,21 @@ const modules = [
     color: "#F23D5E",
     to: "/woocommerce",
     roles: ["viewer", "admin", "superadmin"]
-  }
+  },
+  {
+    title: "Mayorista",
+    description: "Gestion de clientes mayoristas",
+    icon: Receipt,
+    color: "#51590E",
+    roles: ["viewer", "admin", "superadmin"]
+  },
+  {
+    title: "Clientes",
+    description: "Analisis de clientes de Montella",
+    icon: PersonStanding,
+    color: "#B695BF",
+    roles: ["viewer", "admin", "superadmin"]
+  },
 ];
 
 export const ModulesGrid: React.FC = () => {

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
-import AnalisisRotacionForm from "@/components/Analisis/AnalisisRotacionForm";
-import { VentasSinComprasTable } from "@/components/Analisis/VentasSinComprasTable";
+import AnalisisRotacionForm from "@/components/Analisis/rotacion/AnalisisRotacionForm";
+import { VentasSinComprasTable } from "@/components/Analisis/rotacion/VentasSinComprasTable";
 import { Navbar } from "@/components/Landing/Navbar";
 import { Button } from "@/components/ui/button";
 import { 
@@ -10,7 +10,7 @@ import {
   ordenarRotacion 
 } from "@/utils/analisis/analisisRotacion";
 import { paginarArray, calcularTotalPaginas } from "@/utils/paginacion";
-import { RotacionTable } from "@/components/Analisis/RotacionTable";
+import { RotacionTable } from "@/components/Analisis/rotacion/RotacionTable";
 import { LineChart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useArchivosAnalisis } from "@/store/useArchivosAnalisis";

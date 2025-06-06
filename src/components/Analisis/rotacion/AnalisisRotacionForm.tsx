@@ -45,13 +45,13 @@ const AnalisisRotacionForm: React.FC<AnalisisFormProps> = ({ onSuccess, loading,
     formData.append("ArchivoVentas", archivos.ventas);
 
     try {
-      // Usa tu lógica original para enviar formData
       const res = await api.post(
         "/api/v1/analisis/rotacion",
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
       toast.success("¡Análisis realizado correctamente!");
+      console.log(JSON.stringify(res.data))
       onSuccess(res.data);
     } catch (error: any) {
       toast.error(

@@ -19,7 +19,8 @@ export function agruparRotacionPorProductoColor(rotacion: RotacionItem[], busque
         const cantidadComprada = arrTyped[0]?.cantidadComprada ?? 0;
         const cantidadVendida = arrTyped.reduce((acc, item) => acc + item.cantidadVendida, 0);
         const tasaRotacion = cantidadComprada > 0 ? cantidadVendida / cantidadComprada : 0;
-        return { producto, color, cantidadComprada, cantidadVendida, tasaRotacion };
+        const categoria = arrTyped[0]?.categoria || "-";
+        return { producto, color, cantidadComprada, cantidadVendida, tasaRotacion, categoria };
       })
       .filter((item) => item.cantidadComprada > 0);
   }
@@ -42,6 +43,7 @@ export function agruparRotacionPorProductoColor(rotacion: RotacionItem[], busque
         cantidadComprada: r.cantidadComprada,
         cantidadVendida: r.cantidadVendida,
         tasaRotacion: r.tasaRotacion,
+        categoria: r.categoria || "-",
       }));
   }
   

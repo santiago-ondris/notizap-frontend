@@ -22,6 +22,7 @@ const AnalisisRotacionPage: React.FC = () => {
   const { resultado, setResultado } = useArchivosAnalisis();
   const [isLoading, setIsLoading] = useState(false);
   const [puntoDeVenta, setPuntoDeVenta] = useState<string>("TODOS");
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<string>("TODAS");
   const [busqueda, setBusqueda] = useState<string>("");
 
   const navigate = useNavigate();
@@ -53,6 +54,10 @@ const AnalisisRotacionPage: React.FC = () => {
   const puntosDeVenta = resultado
     ? Array.from(new Set(resultado.rotacion.map((r) => r.puntoDeVenta)))
     : [];
+    
+  const categoriasDisponibles = resultado
+    ? Array.from(new Set(resultado.rotacion.map((r) => r.categoria || "Sin Categoría"))).sort()
+    : [];
 
   // Cambio de sucursal
   const handleSucursalChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -70,11 +75,17 @@ const AnalisisRotacionPage: React.FC = () => {
   // Procesamiento de datos usando utils
   let datosFiltrados: any[] = [];
   if (resultado) {
-    datosFiltrados =
+    let filtrados =
       puntoDeVenta === "TODOS"
         ? agruparRotacionPorProductoColor(resultado.rotacion, busqueda)
         : filtrarRotacionPorSucursal(resultado.rotacion, busqueda, puntoDeVenta);
-    datosFiltrados = ordenarRotacion(datosFiltrados, columnaOrden, ordenAsc);
+  
+    datosFiltrados = ordenarRotacion(filtrados, columnaOrden, ordenAsc);
+    if (categoriaSeleccionada !== "TODAS") {
+      datosFiltrados = datosFiltrados.filter(
+        (item) => (item.categoria || "Sin Categoría") === categoriaSeleccionada
+      );
+    }
   }
 
   const totalPaginasRotacion = calcularTotalPaginas(
@@ -161,6 +172,25 @@ const AnalisisRotacionPage: React.FC = () => {
                   {puntosDeVenta.map((suc) => (
                     <option key={suc} value={suc}>
                       {suc}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="font-semibold text-[#212026]">Categoría:</label>
+                <select
+                  className="ml-2 p-1 rounded-md border"
+                  value={categoriaSeleccionada}
+                  onChange={(e) => {
+                    setCategoriaSeleccionada(e.target.value);
+                    setPaginaRotacion(1); // opcional: volver a página 1 al filtrar
+                  }}
+                  style={{ color: "#212026" }}
+                >
+                  <option value="TODAS">Todas</option>
+                  {categoriasDisponibles.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
                     </option>
                   ))}
                 </select>

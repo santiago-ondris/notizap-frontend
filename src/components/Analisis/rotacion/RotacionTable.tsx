@@ -22,6 +22,7 @@ export const RotacionTable: React.FC<RotacionTableProps> = ({
           <tr>
             <th className="px-4 py-2 text-left">Producto</th>
             <th className="px-4 py-2 text-left">Color</th>
+            <th className="px-4 py-2 text-left">Categoría</th>
             {puntoDeVenta !== "TODOS" && (
               <th className="px-4 py-2 text-left">Sucursal</th>
             )}
@@ -51,6 +52,7 @@ export const RotacionTable: React.FC<RotacionTableProps> = ({
               <tr key={i} className="hover:bg-[#F23D5E]/10 text-[#212026]">
                 <td className="px-4 py-2">{r.producto}</td>
                 <td className="px-4 py-2">{r.color}</td>
+                <td className="px-4 py-2">{r.categoria || "-"}</td>
                 {puntoDeVenta !== "TODOS" && (
                   <td className="px-4 py-2">{r.puntoDeVenta}</td>
                 )}

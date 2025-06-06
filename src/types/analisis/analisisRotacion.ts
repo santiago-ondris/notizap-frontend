@@ -5,6 +5,7 @@ export type RotacionItem = {
     cantidadComprada: number;
     cantidadVendida: number;
     tasaRotacion: number;
+    categoria?: string;
   };
   export type VentasSinComprasItem = {
     producto: string;

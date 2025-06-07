@@ -25,3 +25,19 @@ export async function fetchEvolucionVentas(archivo: File) {
   });
   return response.data;
 }
+
+export const fetchFechasCompra = async (
+  archivoCabecera: File,
+  archivoDetalles: File,
+  producto: string
+): Promise<string[]> => {
+  const formData = new FormData();
+  formData.append("ArchivoCabecera", archivoCabecera);
+  formData.append("ArchivoDetalles", archivoDetalles);
+  formData.append("Producto", producto);
+
+  const response = await api.post("/api/v1/analisis/rotacion/compras/fechas-compra", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};

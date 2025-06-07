@@ -1,7 +1,7 @@
-import React, { useRef } from "react";
+import React from "react";
 import { toast } from "react-toastify";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useArchivosAnalisis } from "@/store/useArchivosAnalisis";
 import api from "@/api/api";
 
@@ -11,12 +11,12 @@ type AnalisisFormProps = {
   setLoading: (b: boolean) => void;
 };
 
-const AnalisisRotacionForm: React.FC<AnalisisFormProps> = ({ onSuccess, loading, setLoading }) => {
+const AnalisisRotacionForm: React.FC<AnalisisFormProps> = ({
+  onSuccess,
+  loading,
+  setLoading,
+}) => {
   const { archivos, setArchivo, limpiarArchivos } = useArchivosAnalisis();
-
-  const cabeceraRef = useRef<HTMLInputElement>(null);
-  const detalleRef = useRef<HTMLInputElement>(null);
-  const ventasRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -51,101 +51,110 @@ const AnalisisRotacionForm: React.FC<AnalisisFormProps> = ({ onSuccess, loading,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
       toast.success("¡Análisis realizado correctamente!");
-      console.log(JSON.stringify(res.data))
       onSuccess(res.data);
     } catch (error: any) {
       toast.error(
-        error.response?.data?.message || "Error al procesar el análisis. Intenta nuevamente."
+        error.response?.data?.message ||
+          "Error al procesar el análisis. Intenta nuevamente."
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const archivosCargados = archivos.cabecera && archivos.detalle && archivos.ventas;
+  // Los archivos como estado local para preview visual
+  const fileCabecera = archivos.cabecera || null;
+  const fileDetalle = archivos.detalle || null;
+  const fileVentas = archivos.ventas || null;
 
   return (
-    <Card className="p-8 max-w-2xl mx-auto mb-8 shadow-2xl border border-primary/20">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-        <h2 className="text-xl font-semibold text-center mb-2 text-[#D94854]">
-          Subir archivos para análisis
+    <Card className="bg-white p-6 rounded-2xl shadow-xl max-w-xl mx-auto mb-8 border border-primary/20">
+      <form
+        onSubmit={handleSubmit}
+        autoComplete="off"
+        className="flex flex-col gap-5"
+      >
+        <h2 className="text-xl font-semibold text-[#D94854] mb-2">
+          Subí los archivos para análisis de rotación
         </h2>
-        {archivosCargados ? (
-          <div className="flex flex-col items-center gap-3">
-            <ul className="mb-3">
-              <li>Cabecera de compras: <span className="font-semibold">{archivos.cabecera?.name}</span></li>
-              <li>Detalle de compras: <span className="font-semibold">{archivos.detalle?.name}</span></li>
-              <li>Ventas: <span className="font-semibold">{archivos.ventas?.name}</span></li>
-            </ul>
-            <Button type="button" variant="outline" onClick={limpiarArchivos}>
-              Cargar otro archivo
-            </Button>
-            <Button type="submit" className="w-56" disabled={loading}>
-              {loading ? "Procesando..." : "Lanzar análisis"}
-            </Button>
-          </div>
-        ) : (
-          <div className="flex flex-col md:flex-row gap-4 justify-between">
-            <label className="flex-1">
-              <span className="block font-semibold mb-1">Cabecera de compras</span>
-              <input
-                ref={cabeceraRef}
-                type="file"
-                accept=".xlsx"
-                onChange={(e) => handleFileChange(e, "cabecera")}
-                className="hidden"
-                required
-              />
-              <Button
-                type="button"
-                className="w-full"
-                variant="outline"
-                onClick={() => cabeceraRef.current?.click()}
-              >
-                {archivos.cabecera ? archivos.cabecera.name : "Cargar archivo"}
-              </Button>
-            </label>
-            <label className="flex-1">
-              <span className="block font-semibold mb-1">Detalle de compras</span>
-              <input
-                ref={detalleRef}
-                type="file"
-                accept=".xlsx"
-                onChange={(e) => handleFileChange(e, "detalle")}
-                className="hidden"
-                required
-              />
-              <Button
-                type="button"
-                className="w-full"
-                variant="outline"
-                onClick={() => detalleRef.current?.click()}
-              >
-                {archivos.detalle ? archivos.detalle.name : "Cargar archivo"}
-              </Button>
-            </label>
-            <label className="flex-1">
-              <span className="block font-semibold mb-1">Ventas</span>
-              <input
-                ref={ventasRef}
-                type="file"
-                accept=".xlsx"
-                onChange={(e) => handleFileChange(e, "ventas")}
-                className="hidden"
-                required
-              />
-              <Button
-                type="button"
-                className="w-full"
-                variant="outline"
-                onClick={() => ventasRef.current?.click()}
-              >
-                {archivos.ventas ? archivos.ventas.name : "Cargar archivo"}
-              </Button>
-            </label>
-          </div>
-        )}
+
+        {/* Ventas */}
+        <div>
+          <label className="block text-base text-[#51590E] mb-1 font-medium">
+            Archivo de <span className="font-bold">ventas</span> (.xlsx)
+          </label>
+          <input
+            type="file"
+            accept=".xlsx"
+            onChange={e => handleFileChange(e, "ventas")}
+            disabled={loading}
+            className="block w-full text-base file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-base file:bg-[#F9F6F2] file:text-[#51590E] hover:file:bg-[#F3ECE6]"
+          />
+          {fileVentas && (
+            <span className="text-sm text-[#51590E]">
+              Seleccionado: <b>{fileVentas.name}</b>
+            </span>
+          )}
+        </div>
+
+        {/* Cabecera compras */}
+        <div>
+          <label className="block text-base text-[#51590E] mb-1 font-medium">
+            Archivo de <span className="font-bold">compras (cabecera)</span> (.xlsx)
+          </label>
+          <input
+            type="file"
+            accept=".xlsx"
+            onChange={e => handleFileChange(e, "cabecera")}
+            disabled={loading}
+            className="block w-full text-base file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-base file:bg-[#F9F6F2] file:text-[#51590E] hover:file:bg-[#F3ECE6]"
+          />
+          {fileCabecera && (
+            <span className="text-sm text-[#51590E]">
+              Seleccionado: <b>{fileCabecera.name}</b>
+            </span>
+          )}
+        </div>
+
+        {/* Detalle compras */}
+        <div>
+          <label className="block text-base text-[#51590E] mb-1 font-medium">
+            Archivo de <span className="font-bold">compras (detalle)</span> (.xlsx)
+          </label>
+          <input
+            type="file"
+            accept=".xlsx"
+            onChange={e => handleFileChange(e, "detalle")}
+            disabled={loading}
+            className="block w-full text-base file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-base file:bg-[#F9F6F2] file:text-[#51590E] hover:file:bg-[#F3ECE6]"
+          />
+          {fileDetalle && (
+            <span className="text-sm text-[#51590E]">
+              Seleccionado: <b>{fileDetalle.name}</b>
+            </span>
+          )}
+        </div>
+
+        <Button
+          type="submit"
+          className="bg-[#D94854] hover:bg-[#F23D5E] text-white font-bold py-3 px-6 rounded-xl mt-2 shadow"
+          disabled={loading || !fileCabecera || !fileDetalle || !fileVentas}
+        >
+          {loading ? "Procesando..." : "Subir archivos y analizar"}
+        </Button>
       </form>
+      {fileCabecera || fileDetalle || fileVentas ? (
+        <div className="flex flex-col items-center mt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={limpiarArchivos}
+            disabled={loading}
+          >
+            Limpiar selección
+          </Button>
+        </div>
+      ) : null}
     </Card>
   );
 };

@@ -80,52 +80,64 @@ export const EvolucionStockForm: React.FC<Props> = ({ onSubmit, loading }) => {
         <h2 className="text-xl font-semibold text-[#D94854] text-center mb-2">
           Evolución de Stock: Selecciona archivos y producto
         </h2>
-        <div className="flex flex-col md:flex-row gap-4 justify-between">
-          <label className="flex-1">
-            <span className="block font-semibold mb-1 text-[#212026]">Cabecera de compras</span>
+        <div className="flex flex-col gap-4">
+          {/* Archivo de ventas */}
+          <div>
+            <label className="block text-base text-[#51590E] mb-1 font-medium">
+              Archivo de <span className="font-bold">ventas</span> (.xlsx)
+            </label>
+            <input
+              type="file"
+              accept=".xlsx"
+              onChange={handleVentasChange}
+              disabled={loading}
+              className="block w-full text-base file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-base file:bg-[#F9F6F2] file:text-[#51590E] hover:file:bg-[#F3ECE6]"
+            />
+            {archivos.archivoEvolucionStockVentas && (
+              <span className="text-sm text-[#51590E]">
+                Seleccionado: <b>{archivos.archivoEvolucionStockVentas.name}</b>
+              </span>
+            )}
+          </div>
+          {/* Cabecera de compras */}
+          <div>
+            <label className="block text-base text-[#51590E] mb-1 font-medium">
+              Archivo de <span className="font-bold">compras (cabecera)</span> (.xlsx)
+            </label>
             <input
               type="file"
               accept=".xlsx"
               onChange={handleCabeceraChange}
-              className="w-full border rounded-lg p-2 bg-white"
+              disabled={loading}
+              className="block w-full text-base file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-base file:bg-[#F9F6F2] file:text-[#51590E] hover:file:bg-[#F3ECE6]"
             />
             {archivos.archivoEvolucionStockCabecera && (
-              <span className="text-xs text-[#51590E] block mt-1">
-                Archivo cargado: <b>{archivos.archivoEvolucionStockCabecera.name}</b>
+              <span className="text-sm text-[#51590E]">
+                Seleccionado: <b>{archivos.archivoEvolucionStockCabecera.name}</b>
               </span>
             )}
-          </label>
-          <label className="flex-1">
-            <span className="block font-semibold mb-1 text-[#212026]">Detalle de compras</span>
+          </div>
+          {/* Detalle de compras */}
+          <div>
+            <label className="block text-base text-[#51590E] mb-1 font-medium">
+              Archivo de <span className="font-bold">compras (detalle)</span> (.xlsx)
+            </label>
             <input
               type="file"
               accept=".xlsx"
               onChange={handleDetallesChange}
-              className="w-full border rounded-lg p-2 bg-white"
+              disabled={loading}
+              className="block w-full text-base file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-base file:bg-[#F9F6F2] file:text-[#51590E] hover:file:bg-[#F3ECE6]"
             />
             {buscandoProductos && (
               <span className="text-xs text-[#51590E]">Buscando productos...</span>
             )}
             {archivos.archivoEvolucionStockDetalles && (
-              <span className="text-xs text-[#51590E] block mt-1">
-                Archivo cargado: <b>{archivos.archivoEvolucionStockDetalles.name}</b>
+              <span className="text-sm text-[#51590E]">
+                Seleccionado: <b>{archivos.archivoEvolucionStockDetalles.name}</b>
               </span>
             )}
-          </label>
-          <label className="flex-1">
-            <span className="block font-semibold mb-1 text-[#212026]">Ventas</span>
-            <input
-              type="file"
-              accept=".xlsx"
-              onChange={handleVentasChange}
-              className="w-full border rounded-lg p-2 bg-white"
-            />
-            {archivos.archivoEvolucionStockVentas && (
-              <span className="text-xs text-[#51590E] block mt-1">
-                Archivo cargado: <b>{archivos.archivoEvolucionStockVentas.name}</b>
-              </span>
-            )}
-          </label>
+          </div>
         </div>
         <div>
           <span className="block font-semibold mb-1 text-[#212026]">Producto a analizar</span>

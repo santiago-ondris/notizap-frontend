@@ -108,6 +108,7 @@ const modules = [
     description: "Analisis de clientes de Montella",
     icon: PersonStanding,
     color: "#B695BF",
+    to: "/clientes",
     roles: ["viewer", "admin", "superadmin"]
   },
 ];

@@ -17,6 +17,10 @@ import { UsersPage } from "@/pages/Login/UsersPage";
 import { RequireAuth } from "./RequireAuth";
 import MercadoLibreReportsPage from "@/pages/MercadoLibre/MercadoLibreReportsPage";
 import AdminMercadoLibrePage from "@/pages/MercadoLibre/AdminMercadoLibrePage";
+import ClientesPage from "@/pages/Clientes/ClientesPage";
+import ClientesRankingPage from "@/pages/Clientes/ClienteRankingPage";
+import ClientesImportPage from "@/pages/Clientes/ClientesImportPage";
+import ClienteDetallePage from "@/pages/Clientes/ClienteDetallePage";
 
 const AppRoutes: React.FC = () => (
   <Routes>
@@ -71,6 +75,10 @@ const AppRoutes: React.FC = () => (
       }
     />
     <Route path="/mailing" element={<MailingPage />} />
+    <Route path="/clientes" element={<ClientesPage />} />
+    <Route path="/clientes/:id" element={<ClienteDetallePage />} />
+    <Route path="/clientes/ranking" element={<ClientesRankingPage />} />
+    <Route path="/clientes/import" element={<ClientesImportPage />} />
     <Route path="/gastos" element={<GastosPage />} />
     <Route path="/envios" element={<EnviosPage />} />
     <Route path="/publicidad" element={<RequireAuth allowedRoles={["viewer"]}><PublicidadPage /></RequireAuth>} />

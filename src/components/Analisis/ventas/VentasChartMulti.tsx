@@ -1,5 +1,7 @@
+// components/Analisis/ventas/VentasChartMulti.tsx
 import React from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { TrendingUp, Palette } from "lucide-react";
 
 interface SerieData {
   nombre: string;
@@ -8,17 +10,18 @@ interface SerieData {
   visible?: boolean;
 }
 
-interface Props {
+interface VentasChartMultiProps {
   fechas: string[];
   series: SerieData[];
   fechasCompra?: string[];
+  modoComparacion: "colores" | "sucursales";
 }
 
 const coloresPorDefecto = [
   "#51590E", // 1. Verde oliva (global, fijo)
   "#D94854", // 2. Rojo
   "#B695BF", // 3. Violeta
-  "#212026", // 4. Gris oscuro
+  "#F23D5E", // 4. Rojo secundario
   "#FFD700", // 5. Dorado
   "#00D5D5", // 6. Azul aqua
   "#465005", // 7. Verde oscuro
@@ -29,155 +32,232 @@ const coloresPorDefecto = [
   "#d4fc93", // 12. Verde pastel
   "#875f1e", // 13. Marrón
   "#2e2f69", // 14. Azul navy
-  "#020208", // 15. Negro azulado
-  "#772f00", // 16. Marrón rojizo
-  "#E67E22", // 17. Naranja
-  "#9B59B6", // 18. Púrpura
-  "#27AE60", // 19. Verde clásico
-  "#F39C12", // 20. Amarillo mango
-  "#2980B9", // 21. Azul fuerte
-  "#7F8C8D", // 22. Gris intermedio
-  "#F06D6A", // 23. Coral
-  "#34495E", // 24. Gris azul profundo
-  "#16A085", // 25. Verde azulado
+  "#772f00", // 15. Marrón rojizo
+  "#E67E22", // 16. Naranja
+  "#9B59B6", // 17. Púrpura
+  "#27AE60", // 18. Verde clásico
+  "#F39C12", // 19. Amarillo mango
+  "#2980B9", // 20. Azul fuerte
 ];
 
-export const VentasChartMulti: React.FC<Props> = ({ fechas, series, fechasCompra }) => {
+export const VentasChartMulti: React.FC<VentasChartMultiProps> = ({ 
+  fechas, 
+  series, 
+  fechasCompra,
+  modoComparacion
+}) => {
+  // Preparar datos para el gráfico
   const data = fechas.map((fecha, i) => {
-    const point: any = { fecha: fecha.slice(5) };
+    const point: any = { fecha: fecha.slice(5) }; // Solo MM-DD
     series.forEach((s) => {
       point[s.nombre] = s.serie[i] ?? 0;
     });
+    // Agregar puntos de compra SIEMPRE en Y = 0
     if (fechasCompra?.includes(fecha)) {
-      point.compra = 1; // valor dummy, solo para mostrar el punto
+      point.compra = 0; // ← SIEMPRE en Y = 0, no escalando
     } else {
-      point.compra = null; // para que solo aparezcan los puntos, sin línea
+      point.compra = null;
     }
     return point;
   });
 
+  // Calcular estadísticas
+  const serieGlobal = series.find(s => s.nombre === "GLOBAL");
+  const ventasGlobales = serieGlobal?.serie?.reduce((a, b) => a + b, 0) ?? 0;
+
+  // Tooltip personalizado
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-[#212026] border border-white/20 rounded-lg p-3 shadow-lg">
+          <p className="text-white font-medium mb-2">
+            {`Fecha: ${label}`}
+          </p>
+          {payload.map((entry: any, index: number) => {
+            if (entry.dataKey === "compra" && entry.value) {
+              return (
+                <p key={index} className="text-[#e327c4] font-semibold">
+                  🛒 Compra realizada
+                </p>
+              );
+            }
+            return (
+              <p key={index} style={{ color: entry.color }} className="font-semibold">
+                {`${entry.dataKey === "GLOBAL" ? "Ventas Globales" : `Color: ${entry.dataKey}`}: ${entry.value}`}
+              </p>
+            );
+          })}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <div className="rounded-2xl shadow-xl bg-white px-8 py-6 my-8 w-full">
-      <div className="flex flex-col items-center mb-2">
-        <h2 className="text-2xl font-bold text-[#D94854] text-center">
-          Evolución de ventas - comparativa
-        </h2>
+    <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
+      {/* Header del gráfico */}
+      <div className="p-6 border-b border-white/10">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-white flex items-center gap-3 mb-2">
+              <TrendingUp className="w-7 h-7 text-[#D94854]" />
+              Evolución de Ventas - {modoComparacion === "colores" ? "Por Colores" : "Por Sucursales"}
+            </h2>
+            <p className="text-white/60">
+              Análisis temporal de ventas {modoComparacion === "colores" ? "con comparativas por color" : "con comparativas por sucursal"} y fechas de compra
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-6 text-sm">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-[#51590E]">
+                {ventasGlobales.toLocaleString()}
+              </div>
+              <div className="text-white/60 text-xs">Ventas Globales</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-[#D94854]">
+                {series.length - 1}
+              </div>
+              <div className="text-white/60 text-xs">
+                {modoComparacion === "colores" ? "Colores" : "Sucursales"}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Leyenda personalizada fuera del gráfico */}
-      <div className="flex flex-wrap justify-center mb-4">
-        {series.map((s, idx) => (
-          <div
-            key={s.nombre}
-            className="flex items-center mx-2 my-1"
-            style={{ fontSize: 15, fontWeight: 500 }}
-          >
-            <span
-              style={{
-                display: "inline-block",
-                width: 16,
-                height: 6,
-                backgroundColor: coloresPorDefecto[idx % coloresPorDefecto.length],
-                marginRight: 8,
-                borderRadius: 2,
-              }}
-            />
-            {s.nombre === "GLOBAL" ? "Ventas acumuladas (GLOBAL)" : `Color: ${s.nombre}`}
-          </div>
-        ))}
-        {/* Punto de milestone de compra */}
-        {fechasCompra && fechasCompra.length > 0 && (
-          <div
-            className="flex items-center mx-2 my-1"
-            style={{ fontSize: 15, fontWeight: 500 }}
-          >
-            <span
-              style={{
-                display: "inline-block",
-                width: 12,
-                height: 12,
-                backgroundColor: "#e327c4",
-                marginRight: 8,
-                borderRadius: "50%",
-                border: "2.5px solid #222",
-              }}
-            />
-            Compra realizada
-          </div>
-        )}
-      </div>
-
-      <ResponsiveContainer width="100%" height={400}>
-        <LineChart data={data}>
-          <CartesianGrid stroke="#eee" strokeDasharray="4 4" />
-          <XAxis dataKey="fecha" tick={{ fontSize: 13, fill: "#212026" }} />
-          <YAxis allowDecimals={false} tick={{ fontSize: 13, fill: "#212026" }} />
-          <Tooltip
-            contentStyle={{ background: "#fff", borderColor: "#B695BF", color: "#212026" }}
-            labelStyle={{ color: "#B695BF" }}
-            cursor={{ stroke: "#B695BF", strokeWidth: 1 }}
-            formatter={(value, name, props) => {
-              if (props.dataKey === "compra" && value) {
-                return ["Compra realizada"];
-              }
-              return [value, name];
-            }}
-          />
-
-          {/* Líneas de ventas (colores) */}
+      {/* Leyenda personalizada */}
+      <div className="px-6 py-4 bg-white/5 border-b border-white/10">
+        <div className="flex items-center gap-2 mb-3">
+          <Palette className="w-4 h-4 text-[#B695BF]" />
+          <span className="text-white/80 text-sm font-medium">
+            Leyenda del gráfico - Modo: {modoComparacion === "colores" ? "Colores" : "Sucursales"}
+          </span>
+        </div>
+        
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
           {series.map((s, idx) => (
-            <Line
+            <div
               key={s.nombre}
-              type="monotone"
-              dataKey={s.nombre}
-              name={
-                s.nombre === "GLOBAL"
-                  ? "Ventas acumuladas (GLOBAL)"
-                  : `Color: ${s.nombre}`
-              }
-              stroke={coloresPorDefecto[idx % coloresPorDefecto.length]}
-              strokeWidth={3}
-              dot={{
-                stroke: coloresPorDefecto[idx % coloresPorDefecto.length],
-                strokeWidth: 2,
-                r: 4,
-                fill: "#fff",
-              }}
-              activeDot={{
-                stroke: "#B695BF",
-                r: 7,
-                fill: "#fff",
-              }}
-            />
+              className="flex items-center gap-2"
+            >
+              <div
+                className="w-4 h-1 rounded-full"
+                style={{ backgroundColor: coloresPorDefecto[idx % coloresPorDefecto.length] }}
+              />
+              <span className="text-white/80 text-sm font-medium">
+                {s.nombre === "GLOBAL" 
+                  ? "📊 Ventas Globales" 
+                  : modoComparacion === "colores"
+                    ? `🎨 ${s.nombre}`
+                    : `🏢 ${s.nombre}`
+                }
+              </span>
+            </div>
           ))}
-
-          {/* --- Puntos milestone: fechas de compra --- */}
+          
+          {/* Leyenda de puntos de compra */}
           {fechasCompra && fechasCompra.length > 0 && (
-            <Line
-              type="monotone"
-              dataKey="compra"
-              name="Compra realizada"
-              stroke="#222"
-              strokeWidth={0}
-              dot={{
-                stroke: "#222",
-                strokeWidth: 2,
-                r: 7,
-                fill: "#e327c4",
-              }}
-              activeDot={{
-                stroke: "#F23D5E",
-                strokeWidth: 2,
-                fill: "#e327c4",
-                r: 10,
-              }}
-              legendType="circle"
-              isAnimationActive={false}
-              connectNulls={false}
-            />
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-[#e327c4] border-2 border-[#212026]" />
+              <span className="text-white/80 text-sm font-medium">
+                🛒 Fechas de compra
+              </span>
+            </div>
           )}
-        </LineChart>
-      </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Gráfico */}
+      <div className="p-6">
+        <div style={{ width: "100%", height: 450 }}>
+          <ResponsiveContainer>
+            <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+              <XAxis 
+                dataKey="fecha" 
+                tick={{ fontSize: 12, fill: "rgba(255,255,255,0.7)" }}
+                stroke="rgba(255,255,255,0.3)"
+              />
+              <YAxis 
+                allowDecimals={false} 
+                tick={{ fontSize: 12, fill: "rgba(255,255,255,0.7)" }}
+                stroke="rgba(255,255,255,0.3)"
+              />
+              <Tooltip content={<CustomTooltip />} />
+
+              {/* Líneas de ventas por color */}
+              {series.map((s, idx) => (
+                <Line
+                  key={s.nombre}
+                  type="monotone"
+                  dataKey={s.nombre}
+                  name={s.nombre === "GLOBAL" ? "Ventas Globales" : `Color: ${s.nombre}`}
+                  stroke={coloresPorDefecto[idx % coloresPorDefecto.length]}
+                  strokeWidth={s.nombre === "GLOBAL" ? 4 : 3}
+                  dot={{
+                    stroke: coloresPorDefecto[idx % coloresPorDefecto.length],
+                    strokeWidth: 2,
+                    r: s.nombre === "GLOBAL" ? 5 : 4,
+                    fill: "#212026",
+                  }}
+                  activeDot={{
+                    stroke: coloresPorDefecto[idx % coloresPorDefecto.length],
+                    strokeWidth: 3,
+                    r: 8,
+                    fill: "#212026",
+                  }}
+                />
+              ))}
+
+              {/* Puntos de fechas de compra - SIEMPRE EN Y = 0 */}
+              {fechasCompra && fechasCompra.length > 0 && (
+                <Line
+                  type="monotone"
+                  dataKey="compra"
+                  name="Fechas de compra"
+                  stroke="transparent"
+                  strokeWidth={0}
+                  dot={{
+                    stroke: "#212026",
+                    strokeWidth: 3,
+                    r: 8,
+                    fill: "#e327c4",
+                  }}
+                  activeDot={{
+                    stroke: "#F23D5E",
+                    strokeWidth: 3,
+                    fill: "#e327c4",
+                    r: 12,
+                  }}
+                  connectNulls={false}
+                />
+              )}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Footer con información adicional */}
+      <div className="px-6 py-4 bg-white/5 border-t border-white/10">
+        <div className="flex items-center justify-between text-sm flex-wrap gap-4">
+          <div className="flex items-center gap-4">
+            <div className="text-white/60">
+              📅 Período: {fechas[0]?.slice(5)} - {fechas[fechas.length - 1]?.slice(5)}
+            </div>
+            {fechasCompra && fechasCompra.length > 0 && (
+              <div className="text-white/60">
+                🛒 {fechasCompra.length} fechas de compra
+              </div>
+            )}
+          </div>
+          
+          <div className="text-white/60">
+            📊 {fechas.length} días de datos
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,13 +1,16 @@
+// VentasPage.tsx - Página principal rediseñada
 import React, { useState } from "react";
-import { VentasUploadForm } from "@/components/Analisis/ventas/VentasUploadForm";
-import { VentasResultados } from "@/components/Analisis/ventas/VentasResultados";
-import { fetchEvolucionVentas, fetchFechasCompra } from "@/services/analisis/analisisService";
-import { Loader, FileUp, NotepadTextDashed, FileArchive, LineChart } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router";
 import { useArchivosAnalisis } from "@/store/useArchivosAnalisis";
+import { fetchEvolucionVentas, fetchFechasCompra } from "@/services/analisis/analisisService";
+
+// Componentes modularizados
+import { VentasPageHeader } from "@/components/Analisis/ventas/VentasPageHeader";
+import { VentasUploadForm } from "@/components/Analisis/ventas/VentasUploadForm";
+import { VentasResultados } from "@/components/Analisis/ventas/VentasResultados";
 
 const VentasPage: React.FC = () => {
+  // Estados y hooks
   const {
     archivos,
     setArchivo,
@@ -16,6 +19,7 @@ const VentasPage: React.FC = () => {
     limpiarResultadoVentas,
     fechaVentas,
   } = useArchivosAnalisis();
+
   const [loading, setLoading] = useState(false);
   const [fechasCompra, setFechasCompra] = useState<string[]>([]);
   const [archivosLocales, setArchivosLocales] = useState<{
@@ -26,6 +30,7 @@ const VentasPage: React.FC = () => {
 
   const navigate = useNavigate();
 
+  // Handler para el upload de archivos
   const handleUpload = async (
     fileVentas: File,
     fileCabecera: File,
@@ -33,14 +38,17 @@ const VentasPage: React.FC = () => {
   ) => {
     setLoading(true);
     try {
+      // Guardar archivos en el store
       setArchivo("archivoVentasEvolucion", fileVentas);
       setArchivo("archivoEvolucionStockCabecera", fileCabecera);
       setArchivo("archivoEvolucionStockDetalles", fileDetalles);
       setArchivosLocales({ ventas: fileVentas, cabecera: fileCabecera, detalles: fileDetalles });
 
+      // Procesar datos de ventas
       const data = await fetchEvolucionVentas(fileVentas);
       setResultadoVentas(data);
 
+      // Obtener fechas de compra del primer producto
       const primerProducto = data?.productos?.[0]?.nombre;
       if (primerProducto) {
         const fechas = await fetchFechasCompra(fileCabecera, fileDetalles, primerProducto);
@@ -53,6 +61,7 @@ const VentasPage: React.FC = () => {
     }
   };
 
+  // Handler para resetear datos
   const handleReset = () => {
     limpiarResultadoVentas();
     setArchivo("archivoVentasEvolucion", undefined as any);
@@ -62,7 +71,7 @@ const VentasPage: React.FC = () => {
     setArchivosLocales({});
   };
 
-  // Callback para cuando el usuario cambia el producto en el selector:
+  // Callback para cuando el usuario cambia el producto en el selector
   const handleProductoChange = async (producto: string) => {
     if (archivosLocales.cabecera && archivosLocales.detalles && producto) {
       setLoading(true);
@@ -81,62 +90,49 @@ const VentasPage: React.FC = () => {
     }
   };
 
-  return (
-    <div className="max-w-5xl w-full mx-auto mt-8 px-4">
-      <h1 className="text-3xl font-bold text-[#D94854] text-center flex flex-col items-center gap-2 mb-8">
-        <span className="flex items-center gap-2">
-          <FileUp className="w-8 h-8 text-[#D94854]" />
-          Análisis de Ventas Diarias
-        </span>
-      </h1>
-      <div className="flex justify-center gap-4 mb-8">
-        <Button
-          className="bg-[#D94854] hover:bg-[#F23D5E] text-white font-semibold flex items-center gap-2 px-6 py-3 rounded-xl shadow"
-          onClick={() => navigate("/analisis")}
-        >
-          <NotepadTextDashed className="w-5 h-5" />
-          Volver a tasa de rotación
-        </Button>
-        <Button
-          className="bg-[#51590E] hover:bg-[#F23D5E] text-white font-semibold flex items-center gap-2 px-6 py-3 rounded-xl shadow"
-          onClick={() => navigate("/analisis/grafico")}
-        >
-          <LineChart className="w-5 h-5" />
-          Ver gráfico de evolución de stock
-        </Button>
-      </div>
-      <Button
-        onClick={handleReset}
-        className="bg-[#B695BF] hover:bg-[#F23D5E] text-white font-semibold flex items-center gap-2 px-6 py-3 rounded-xl shadow m-2"
-      >
-        <FileArchive className="w-5 h-5" />
-        Subir otro archivo
-      </Button>
-      {/* Mostramos nombre de archivo y fecha si hay */}
-      {archivos.archivoVentasEvolucion && (
-        <div className="mb-4 text-sm text-[#51590E] text-center">
-          Archivo cargado: <span className="font-semibold">{archivos.archivoVentasEvolucion.name}</span>
-          {fechaVentas && (
-            <>
-              <br />
-              Último análisis: {new Date(fechaVentas).toLocaleString()}
-            </>
-          )}
-        </div>
-      )}
+  // Información de archivos para mostrar
+  const archivosInfo = {
+    ventas: archivos.archivoVentasEvolucion || null,
+    fecha: fechaVentas || null
+  };
 
-      {!resultadoVentas ? (
-        <VentasUploadForm onUpload={handleUpload} loading={loading} />
-      ) : (
-        <div>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#212026] via-[#1a1d22] to-[#2a1f2b]">
+      {/* Background pattern */}
+      <div 
+        className="absolute inset-0 opacity-[0.02]"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '32px 32px'
+        }}
+      />
+
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-8">
+        {/* Header */}
+        <VentasPageHeader 
+          navigate={navigate}
+          onReset={handleReset}
+          archivosInfo={archivosInfo}
+        />
+
+        {/* Content */}
+        {!resultadoVentas ? (
+          <VentasUploadForm 
+            onUpload={handleUpload} 
+            loading={loading} 
+          />
+        ) : (
           <VentasResultados
             data={resultadoVentas}
             fechasCompra={fechasCompra}
             onProductoChange={handleProductoChange}
+            loading={loading}
           />
-        </div>
-      )}
-      {loading && <Loader className="animate-spin mx-auto mt-6" />}
+        )}
+      </div>
     </div>
   );
 };

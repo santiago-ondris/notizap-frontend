@@ -25,10 +25,33 @@ export const getClienteDetalle = async (id: number): Promise<ClienteDetalleDto> 
 // Obtener ranking de clientes (por monto o cantidad)
 export const getRankingClientes = async (
   ordenarPor: "monto" | "cantidad" = "monto",
-  top: number = 10
+  top: number = 10,
+  filtros?: any // Parámetro opcional para filtros
 ): Promise<ClienteResumenDto[]> => {
-  const res = await api.get(`/api/v1/clientes/ranking?ordenarPor=${ordenarPor}&top=${top}`);
-  return res.data;
+  try {
+    // Construir parámetros de query
+    const params = new URLSearchParams({
+      ordenarPor,
+      top: top.toString()
+    });
+
+    // Agregar filtros si existen
+    if (filtros) {
+      if (filtros.desde) params.append('desde', filtros.desde);
+      if (filtros.hasta) params.append('hasta', filtros.hasta);
+      if (filtros.canal) params.append('canal', filtros.canal);
+      if (filtros.sucursal) params.append('sucursal', filtros.sucursal);
+      if (filtros.marca) params.append('marca', filtros.marca);
+      if (filtros.categoria) params.append('categoria', filtros.categoria);
+    }
+
+    // ⚠️ AQUÍ ESTABA EL ERROR: Faltaba la ruta completa
+    const response = await api.get(`/api/v1/clientes/ranking?${params.toString()}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error getting ranking clientes:", error);
+    throw error;
+  }
 };
 
 // Buscar clientes por nombre

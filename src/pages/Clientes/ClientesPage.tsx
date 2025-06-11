@@ -18,7 +18,20 @@ export default function ClientesPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6 mt-6">
+    <div className="min-h-screen bg-gradient-to-br from-[#212026] via-[#1a1d22] to-[#2a1f2b]">
+    {/* Background pattern */}
+    <div 
+      className="absolute inset-0 opacity-[0.02]"
+      style={{
+        backgroundImage: `
+          linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+        `,
+        backgroundSize: '32px 32px'
+      }}
+    />
+    
+    <div className="relative z-10 max-w-4xl mx-auto p-6 pt-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-[#D94854] flex items-center gap-2">
           <Users className="text-[#B695BF]" size={28} /> Clientes
@@ -52,6 +65,7 @@ export default function ClientesPage() {
         clientes={clientes} 
         activeFilters={activeFilters}
       />
+    </div>
     </div>
   );
 }

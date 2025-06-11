@@ -75,7 +75,20 @@ export default function ClienteDetallePage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 mt-6">
+    <div className="min-h-screen bg-gradient-to-br from-[#212026] via-[#1a1d22] to-[#2a1f2b]">
+    {/* Background pattern */}
+    <div 
+      className="absolute inset-0 opacity-[0.02]"
+      style={{
+        backgroundImage: `
+          linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+        `,
+        backgroundSize: '32px 32px'
+      }}
+    />
+    
+    <div className="relative z-10 max-w-4xl mx-auto p-6 pt-8">
       {/* Header con navegación */}
       <div className="mb-8">
         <div className="flex flex-wrap gap-3 mb-4">
@@ -366,6 +379,7 @@ export default function ClienteDetallePage() {
           </Button>
         </div>
       )}
+    </div>
     </div>
   );
 }

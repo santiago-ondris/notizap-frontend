@@ -27,9 +27,14 @@ import {
 interface Props {
   initialOrdenarPor?: "monto" | "cantidad";
   initialTop?: number;
+  filtros?: any;
 }
 
-export default function ClienteRankingTable({ initialOrdenarPor = "monto", initialTop = 10 }: Props) {
+export default function ClienteRankingTable({ 
+  initialOrdenarPor = "monto", 
+  initialTop = 10, 
+  filtros 
+}: Props) {
   const [ordenarPor, setOrdenarPor] = useState<"monto" | "cantidad">(initialOrdenarPor);
   const [top, setTop] = useState(initialTop);
   const [clientes, setClientes] = useState<ClienteResumenDto[] | null>(null);
@@ -38,10 +43,12 @@ export default function ClienteRankingTable({ initialOrdenarPor = "monto", initi
 
   useEffect(() => {
     setLoading(true);
-    getRankingClientes(ordenarPor, top)
+    
+    // Llamar a la función de ranking con filtros opcionales
+    getRankingClientes(ordenarPor, top, filtros)
       .then(setClientes)
       .finally(() => setLoading(false));
-  }, [ordenarPor, top]);
+  }, [ordenarPor, top, filtros]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {

@@ -1,0 +1,128 @@
+/**
+ * Representa un registro de envío diario
+ * Incluye todos los tipos de envío y totales calculados
+ */
+export interface EnvioDiario {
+    id: number;
+    fecha: string; // ISO string format "2025-06-11T19:07:27.112Z"
+    oca: number;
+    andreani: number;
+    retirosSucursal: number;
+    roberto: number;
+    tino: number;
+    caddy: number;
+    mercadoLibre: number;
+    totalCordobaCapital: number; // roberto + tino + caddy
+    totalEnvios: number; // suma de todos los envíos
+  }
+  
+  /**
+   * DTO para crear un nuevo envío diario
+   * No incluye id ni totales calculados
+   */
+  export interface CreateEnvioDiarioDto {
+    fecha: string; // ISO string format
+    oca: number;
+    andreani: number;
+    retirosSucursal: number;
+    roberto: number;
+    tino: number;
+    caddy: number;
+    mercadoLibre: number;
+  }
+  
+  /**
+   * DTO para actualizar un envío existente
+   * Mismo formato que CreateEnvioDiarioDto
+   */
+  export interface UpdateEnvioDiarioDto {
+    fecha: string;
+    oca: number;
+    andreani: number;
+    retirosSucursal: number;
+    roberto: number;
+    tino: number;
+    caddy: number;
+    mercadoLibre: number;
+  }
+  
+  /**
+   * Resumen mensual con totales por tipo de envío
+   * Usado para mostrar cards de estadísticas
+   */
+  export interface EnvioResumenMensual {
+    totalOca: number;
+    totalAndreani: number;
+    totalRetirosSucursal: number;
+    totalRoberto: number;
+    totalTino: number;
+    totalCaddy: number;
+    totalMercadoLibre: number;
+    totalCordobaCapital: number; // roberto + tino + caddy
+    totalGeneral: number; // suma de todos
+  }
+  
+  /**
+   * Parámetros para filtrar por mes y año
+   */
+  export interface EnviosFiltros {
+    year: number;
+    month: number; // 1-12
+  }
+  
+  /**
+   * Parámetros para filtrar por fecha específica
+   */
+  export interface EnviosFecha {
+    fecha: string; // formato "YYYY-MM-DD"
+  }
+  
+  /**
+   * Tipo para representar una celda editable en la tabla
+   */
+  export interface CeldaEditable {
+    dia: number;
+    campo: keyof Omit<EnvioDiario, 'id' | 'fecha' | 'totalCordobaCapital' | 'totalEnvios'>;
+    valor: number;
+  }
+  
+  /**
+   * Estados de la aplicación para el módulo de envíos
+   */
+  export interface EnviosState {
+    enviosMensuales: EnvioDiario[];
+    resumenMensual: EnvioResumenMensual | null;
+    mesActual: number;
+    añoActual: number;
+    cargando: boolean;
+    error: string | null;
+    editando: CeldaEditable | null;
+  }
+  
+  /**
+   * Respuesta de la API para operaciones CRUD
+   */
+  export interface ApiResponse<T = any> {
+    success: boolean;
+    data?: T;
+    message?: string;
+    error?: string;
+  }
+  
+  /**
+   * Tipos de envío disponibles (para UI)
+   */
+  export const TIPOS_ENVIO = {
+    oca: { label: 'OCA', color: '#D94854' },
+    andreani: { label: 'Andreani', color: '#B695BF' },
+    retirosSucursal: { label: 'Retiros Sucursal', color: '#51590E' },
+    roberto: { label: 'Roberto', color: '#F23D5E' },
+    tino: { label: 'Tino', color: '#FFD700' },
+    caddy: { label: 'Caddy', color: '#00D5D5' },
+    mercadoLibre: { label: 'Mercado Libre', color: '#e327c4' }
+  } as const;
+  
+  /**
+   * Utility type para los nombres de los campos editables
+   */
+  export type TipoEnvio = keyof typeof TIPOS_ENVIO;

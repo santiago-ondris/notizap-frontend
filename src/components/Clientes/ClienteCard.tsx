@@ -6,7 +6,8 @@ import {
   MapPin, 
   TrendingUp,
   Eye,
-  Store
+  Store,
+  AlertTriangle
 } from "lucide-react";
 
 interface Props {
@@ -32,6 +33,21 @@ export default function ClienteCard({ cliente, children }: Props) {
     });
   };
 
+  const calcularDiasSinComprar = (fechaUltimaCompra: string) => {
+    const hoy = new Date();
+    const ultimaCompra = new Date(fechaUltimaCompra);
+    const diferenciaTiempo = hoy.getTime() - ultimaCompra.getTime();
+    const diferenciaDias = Math.floor(diferenciaTiempo / (1000 * 3600 * 24));
+    return diferenciaDias;
+  };
+
+  const getEstiloAlerta = (dias: number) => {
+    if (dias <= 30) return "text-green-600 bg-green-50 border-green-200";
+    if (dias <= 90) return "text-yellow-600 bg-yellow-50 border-yellow-200";
+    if (dias <= 180) return "text-orange-600 bg-orange-50 border-orange-200";
+    return "text-red-600 bg-red-50 border-red-200";
+  };
+
   const getChannelColor = (channel: string) => {
     const colors: { [key: string]: string } = {
       'KIBOO': 'bg-[#D94854]/10 text-[#D94854]',
@@ -41,6 +57,8 @@ export default function ClienteCard({ cliente, children }: Props) {
     };
     return colors[channel.toUpperCase()] || 'bg-gray-100 text-[#212026]';
   };
+
+  const diasSinComprar = calcularDiasSinComprar(cliente.fechaUltimaCompra);
 
   return (
     <div className="group bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:border-[#B695BF]/30 transition-all duration-300 cursor-pointer overflow-hidden w-full max-w-md mx-auto">
@@ -102,6 +120,12 @@ export default function ClienteCard({ cliente, children }: Props) {
             <span className="font-medium text-[#212026]">
               {formatDate(cliente.fechaUltimaCompra)}
             </span>
+          </div>
+          
+          {/* Indicador de días sin comprar */}
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium ${getEstiloAlerta(diasSinComprar)}`}>
+            {diasSinComprar > 90 && <AlertTriangle size={14} />}
+            <span>No compra hace {diasSinComprar} día{diasSinComprar !== 1 ? 's' : ''}</span>
           </div>
         </div>
 

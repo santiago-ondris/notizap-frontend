@@ -1,5 +1,5 @@
 import React from "react";
-import { TrendingUp, MousePointer, Target, Loader2 } from "lucide-react";
+import { TrendingUp, MousePointer, Target, Loader2, Filter } from "lucide-react";
 
 interface HighlightsData {
   bestOpenRateCampaign: string;
@@ -13,16 +13,22 @@ interface HighlightsData {
 interface MailingHighlightsProps {
   highlights: HighlightsData | undefined;
   isLoading: boolean;
+  isDynamic?: boolean; // Nuevo prop para indicar si son highlights dinámicos
 }
 
 export const MailingHighlights: React.FC<MailingHighlightsProps> = ({
   highlights,
-  isLoading
+  isLoading,
+  isDynamic = false
 }) => {
   if (isLoading) {
     return (
       <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">Mejores métricas</h2>
+        <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 text-[#B695BF]" />
+          Mejores métricas
+          {isDynamic && <Filter className="w-4 h-4 text-[#B695BF]" />}
+        </h2>
         <div className="flex items-center justify-center py-8">
           <Loader2 className="animate-spin w-6 h-6 text-white/60" />
         </div>
@@ -33,7 +39,11 @@ export const MailingHighlights: React.FC<MailingHighlightsProps> = ({
   if (!highlights) {
     return (
       <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">Mejores métricas</h2>
+        <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 text-[#B695BF]" />
+          Mejores métricas
+          {isDynamic && <Filter className="w-4 h-4 text-[#B695BF]" />}
+        </h2>
         <div className="text-center py-8">
           <div className="text-white/60 text-sm">No hay datos disponibles</div>
         </div>
@@ -70,10 +80,20 @@ export const MailingHighlights: React.FC<MailingHighlightsProps> = ({
 
   return (
     <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6">
-      <h2 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+      <h2 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
         <TrendingUp className="w-5 h-5 text-[#B695BF]" />
         Mejores métricas
+        {isDynamic && <Filter className="w-4 h-4 text-[#B695BF]" />}
       </h2>
+      
+      {/* Indicador de filtros activos */}
+      {isDynamic && (
+        <div className="mb-4 px-3 py-1 bg-[#B695BF]/20 border border-[#B695BF]/30 rounded-lg">
+          <div className="text-xs text-[#B695BF] font-medium">
+            Basado en filtros aplicados
+          </div>
+        </div>
+      )}
       
       <div className="space-y-4">
         {highlightCards.map((card, index) => (

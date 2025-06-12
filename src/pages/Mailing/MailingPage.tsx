@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useMailingCampaigns, useMailingHighlights, useSyncMailingCampaigns } from "@/hooks/mailing/useMailing";
 import { useAuth } from "@/contexts/AuthContext";
 import { TrendingUp } from "lucide-react";
@@ -10,14 +10,52 @@ import { MailingHeader } from "@/components/Mailing/MailingHeader";
 import { MailingHighlights } from "@/components/Mailing/MailingHighlights";
 import { MailingFilters } from "@/components/Mailing/MailingFilters";
 import { MailingTable } from "@/components/Mailing/MailingTable";
+import { MailingPagination } from "@/components/Mailing/MailingPagination";
 
 const CUENTAS = ["Montella", "Alenka"] as const;
+const ITEMS_PER_PAGE = 15;
+
+// Función para calcular highlights dinámicos basados en campañas filtradas
+function calculateDynamicHighlights(campaigns: any[]) {
+  if (!campaigns || campaigns.length === 0) {
+    return {
+      bestOpenRateCampaign: "Sin datos",
+      bestClickRateCampaign: "Sin datos",
+      bestConversionCampaign: "Sin datos",
+      bestOpenRate: 0,
+      bestClickRate: 0,
+      bestConversions: 0
+    };
+  }
+
+  const bestOpen = campaigns.reduce((prev, current) => 
+    (prev.openRate > current.openRate) ? prev : current
+  );
+  
+  const bestClick = campaigns.reduce((prev, current) => 
+    (prev.clickRate > current.clickRate) ? prev : current
+  );
+  
+  const bestConv = campaigns.reduce((prev, current) => 
+    (prev.conversions > current.conversions) ? prev : current
+  );
+
+  return {
+    bestOpenRateCampaign: bestOpen.title,
+    bestOpenRate: bestOpen.openRate,
+    bestClickRateCampaign: bestClick.title,
+    bestClickRate: bestClick.clickRate,
+    bestConversionCampaign: bestConv.title,
+    bestConversions: bestConv.conversions
+  };
+}
 
 const MailingPage: React.FC = () => {
   const [cuenta, setCuenta] = useState<"Montella" | "Alenka">("Montella");
   const [search, setSearch] = useState("");
   const [fromDate, setFromDate] = useState<string>("");
   const [toDate, setToDate] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Datos y estados
   const { data: campañas, isLoading: loadingCampañas, error: errorCampañas } = useMailingCampaigns(cuenta);
@@ -34,14 +72,42 @@ const MailingPage: React.FC = () => {
     });
   };
 
-  // Filtrar campañas
-  let campañasFiltradas = campañas || [];
-  campañasFiltradas = filterByTitle(campañasFiltradas, search);
-  campañasFiltradas = filterByDateRange(
-    campañasFiltradas,
-    fromDate ? new Date(fromDate) : null,
-    toDate ? new Date(toDate + "T23:59:59") : null
-  );
+  // Filtrar campañas y calcular highlights dinámicos
+  const { campañasFiltradas, highlightsDinamicos, totalPages, campañasPaginadas } = useMemo(() => {
+    let filtered = campañas || [];
+    filtered = filterByTitle(filtered, search);
+    filtered = filterByDateRange(
+      filtered,
+      fromDate ? new Date(fromDate) : null,
+      toDate ? new Date(toDate + "T23:59:59") : null
+    );
+
+    // Calcular highlights basados en campañas filtradas
+    const dynamicHighlights = calculateDynamicHighlights(filtered);
+
+    // Calcular paginación
+    const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const paginatedCampaigns = filtered.slice(startIndex, endIndex);
+
+    return {
+      campañasFiltradas: filtered,
+      highlightsDinamicos: dynamicHighlights,
+      totalPages,
+      campañasPaginadas: paginatedCampaigns
+    };
+  }, [campañas, search, fromDate, toDate, currentPage]);
+
+  // Resetear página cuando cambien los filtros
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [search, fromDate, toDate, cuenta]);
+
+  // Determinar qué highlights mostrar: dinámicos si hay filtros activos, estáticos si no
+  const hayFiltrosActivos = !!(search || fromDate || toDate);
+  const highlightsAMostrar = hayFiltrosActivos ? highlightsDinamicos : highlights;
+  const cargandoHighlights = hayFiltrosActivos ? loadingCampañas : loadingHighlights;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#212026] via-[#1a1d22] to-[#2a1f2b]">
@@ -75,8 +141,9 @@ const MailingPage: React.FC = () => {
           <div className="lg:col-span-4 space-y-6">
             {/* Highlights */}
             <MailingHighlights 
-              highlights={highlights}
-              isLoading={loadingHighlights}
+              highlights={highlightsAMostrar}
+              isLoading={cargandoHighlights}
+              isDynamic={hayFiltrosActivos}
             />
 
             {/* Filters */}
@@ -115,17 +182,38 @@ const MailingPage: React.FC = () => {
                     {campañasFiltradas.reduce((acc, c) => acc + c.emailsSent, 0).toLocaleString()}
                   </span>
                 </div>
+                {hayFiltrosActivos && (
+                  <div className="pt-2 border-t border-white/10">
+                    <div className="text-xs text-[#B695BF] text-center">
+                      Mostrando resultados filtrados
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Right Column - Table */}
-          <div className="lg:col-span-8">
+          {/* Right Column - Table & Pagination */}
+          <div className="lg:col-span-8 space-y-6">
             <MailingTable
-              campañas={campañasFiltradas}
+              campañas={campañasPaginadas}
               isLoading={loadingCampañas}
               error={errorCampañas}
+              totalCampaigns={campañasFiltradas.length}
+              currentPage={currentPage}
+              itemsPerPage={ITEMS_PER_PAGE}
             />
+
+            {/* Paginación */}
+            {totalPages > 1 && (
+              <MailingPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                totalItems={campañasFiltradas.length}
+                itemsPerPage={ITEMS_PER_PAGE}
+              />
+            )}
           </div>
         </div>
       </div>

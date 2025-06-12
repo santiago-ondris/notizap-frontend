@@ -15,12 +15,18 @@ interface MailingTableProps {
   campañas: Campaign[];
   isLoading: boolean;
   error: Error | null;
+  totalCampaigns?: number;
+  currentPage?: number;
+  itemsPerPage?: number;
 }
 
 export const MailingTable: React.FC<MailingTableProps> = ({
   campañas,
   isLoading,
-  error
+  error,
+  totalCampaigns = 0,
+  currentPage = 1,
+  itemsPerPage = 15
 }) => {
   if (isLoading) {
     return (
@@ -63,17 +69,26 @@ export const MailingTable: React.FC<MailingTableProps> = ({
     );
   }
 
+  // Calcular rango de elementos mostrados
+  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalCampaigns);
+
   return (
     <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
       {/* Header */}
       <div className="px-6 py-4 border-b border-white/10">
-        <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-          <Mail className="w-5 h-5 text-[#B695BF]" />
-          Campañas enviadas
-          <span className="text-white/60 text-sm font-normal ml-2">
-            ({campañas.length} {campañas.length === 1 ? 'campaña' : 'campañas'})
-          </span>
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+            <Mail className="w-5 h-5 text-[#B695BF]" />
+            Campañas enviadas
+          </h2>
+          
+          {totalCampaigns > 0 && (
+            <div className="text-white/60 text-sm">
+              Mostrando {startItem}-{endItem} de {totalCampaigns} campañas
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Table */}

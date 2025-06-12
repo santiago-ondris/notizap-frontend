@@ -1,3 +1,4 @@
+// components/Analisis/ventas/VentasSucursalSelector.tsx
 import React from "react";
 import { Building2, Check, X } from "lucide-react";
 
@@ -11,12 +12,14 @@ interface VentasSucursalSelectorProps {
   sucursales: SucursalData[];
   sucursalesSeleccionadas: string[];
   setSucursalesSeleccionadas: React.Dispatch<React.SetStateAction<string[]>>;
+  tipoVista?: 'cantidad' | 'facturacion';
 }
 
 export const VentasSucursalSelector: React.FC<VentasSucursalSelectorProps> = ({
   sucursales,
   sucursalesSeleccionadas,
   setSucursalesSeleccionadas,
+  tipoVista = 'cantidad'
 }) => {
   // Filtrar sucursales: quitar GLOBAL y Sin Sucursal
   const sucursalesDisponibles = sucursales.filter(s => 
@@ -61,6 +64,11 @@ export const VentasSucursalSelector: React.FC<VentasSucursalSelectorProps> = ({
           <span className="text-white/80 text-sm font-medium">
             Sucursales disponibles ({sucursalesDisponibles.length})
           </span>
+          {tipoVista && (
+            <span className="text-white/50 text-xs">
+              • Vista por {tipoVista === 'cantidad' ? 'unidades' : 'facturación'}
+            </span>
+          )}
         </div>
         
         <div className="flex items-center gap-2">
@@ -127,9 +135,14 @@ export const VentasSucursalSelector: React.FC<VentasSucursalSelectorProps> = ({
               {/* Ventas totales de la sucursal */}
               <div className="text-right">
                 <div className={`text-sm font-semibold ${isSelected ? 'text-[#B695BF]' : 'text-white/60'}`}>
-                  {ventasFinales.toLocaleString()}
+                  {tipoVista === 'cantidad' 
+                    ? ventasFinales.toLocaleString()
+                    : `$${ventasFinales.toLocaleString()}`
+                  }
                 </div>
-                <div className="text-xs text-white/50">total</div>
+                <div className="text-xs text-white/50">
+                  {tipoVista === 'cantidad' ? 'unidades' : 'facturado'}
+                </div>
               </div>
             </button>
           );
@@ -188,6 +201,14 @@ export const VentasSucursalSelector: React.FC<VentasSucursalSelectorProps> = ({
       {/* Información adicional */}
       <div className="text-xs text-white/50 text-center">
         💡 Selecciona las sucursales que quieres comparar en los gráficos
+        {tipoVista && (
+          <span className="block mt-1">
+            {tipoVista === 'cantidad' 
+              ? '📦 Mostrando totales por unidades vendidas'
+              : '💰 Mostrando totales por facturación'
+            }
+          </span>
+        )}
       </div>
     </div>
   );

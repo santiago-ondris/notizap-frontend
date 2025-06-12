@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
-import { Upload, ArrowLeft, RotateCcw, Building2 } from "lucide-react";
+import { Upload, ArrowLeft, RotateCcw, Building2, TrendingUp } from "lucide-react";
 import { VentasResumenChart } from "@/components/Analisis/ventas/VentasResumenChart";
 import { VentasDiariasChart } from "@/components/Analisis/ventas/VentasDiariasChart";
 import { VentasSucursalSelector } from "@/components/Analisis/ventas/VentasSucursalSelector";
@@ -37,7 +37,7 @@ const filtrarDiasSinVentasDiario = (fechas: string[], sucursales: any[]) => {
   const sucursalesDiarias = sucursalesSinGlobal.map(sucursal => {
     const ventasDiarias = sucursal.serie.map((valorAcumulado: number, index: number) => {
       if (index === 0) return valorAcumulado;
-      return valorAcumulado - sucursal.serie[index - 1];
+      return Math.max(0, valorAcumulado - sucursal.serie[index - 1]);
     });
     return { ...sucursal, serie: ventasDiarias };
   });
@@ -66,17 +66,19 @@ const VentasResumenPage: React.FC = () => {
   const [data, setData] = useState<any>(null);
   const [archivo, setArchivo] = useState<File | null>(null);
   const [sucursalesSeleccionadas, setSucursalesSeleccionadas] = useState<string[]>([]);
+  const [tipoVista, setTipoVista] = useState<'cantidad' | 'facturacion'>('cantidad');
   const navigate = useNavigate();
 
   const handleUpload = async (file: File) => {
     setLoading(true);
     try {
       const resultado = await fetchEvolucionVentasResumen(file);
+      console.log('Resultado completo:', resultado);
       setData(resultado);
       setArchivo(file);
       
       // Auto-seleccionar todas las sucursales al cargar (excepto GLOBAL y Sin Sucursal)
-      const sucursalesDisponibles = resultado.sucursales
+      const sucursalesDisponibles = (resultado.cantidad?.sucursales || [])
         .filter((s: any) => 
           s.sucursal !== "GLOBAL" && 
           s.sucursal !== "Sin Sucursal" &&
@@ -85,6 +87,7 @@ const VentasResumenPage: React.FC = () => {
         .map((s: any) => s.sucursal);
       setSucursalesSeleccionadas(sucursalesDisponibles);
     } catch (err) {
+      console.error('Error:', err);
       alert("Error procesando el archivo. Verifica que sea un Excel válido.");
     } finally {
       setLoading(false);
@@ -218,7 +221,7 @@ const VentasResumenPage: React.FC = () => {
               </div>
 
               <div className="text-white/50 text-sm">
-                💡 El archivo debe contener las columnas: FECHA, NRO, PRODUCTO, CANT
+                💡 El archivo debe contener las columnas: FECHA, NRO, PRODUCTO, CANT, TOTAL
               </div>
             </div>
           </div>
@@ -229,45 +232,96 @@ const VentasResumenPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4 text-center">
                 <div className="text-2xl font-bold text-[#D94854] mb-1">
-                  {data.sucursales.length - 1}
+                  {(data.cantidad?.sucursales?.length || 0) - 1}
                 </div>
                 <div className="text-white/60 text-sm">Sucursales</div>
               </div>
               <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4 text-center">
                 <div className="text-2xl font-bold text-[#B695BF] mb-1">
-                  {filtrarDiasSinVentasDiario(data.fechas, data.sucursales).fechas.length}
+                  {data.fechas?.length || 0}
                 </div>
                 <div className="text-white/60 text-sm">Días con ventas</div>
               </div>
               <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4 text-center">
                 <div className="text-2xl font-bold text-[#51590E] mb-1">
-                  {data.sucursales.find((s: any) => s.sucursal === "GLOBAL")?.serie[data.sucursales.find((s: any) => s.sucursal === "GLOBAL")?.serie.length - 1]?.toLocaleString() || "0"}
+                  {(() => {
+                    const sucursalesActuales = tipoVista === 'cantidad' ? data.cantidad?.sucursales : data.facturacion?.sucursales;
+                    const globalSucursal = sucursalesActuales?.find((s: any) => s.sucursal === "GLOBAL");
+                    const totalVentas = globalSucursal?.serie[globalSucursal.serie.length - 1] || 0;
+                    return tipoVista === 'cantidad' 
+                      ? totalVentas.toLocaleString()
+                      : `$${totalVentas.toLocaleString()}`;
+                  })()}
                 </div>
-                <div className="text-white/60 text-sm">Ventas Totales</div>
+                <div className="text-white/60 text-sm">
+                  {tipoVista === 'cantidad' ? 'Unidades Totales' : 'Facturación Total'}
+                </div>
               </div>
               <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4 text-center">
                 <div className="text-2xl font-bold text-[#FFD700] mb-1">
-                  {data.fechas[0]?.slice(8) + '-' + data.fechas[0]?.slice(5, 7)} - {data.fechas[data.fechas.length - 1]?.slice(8) + '-' + data.fechas[data.fechas.length - 1]?.slice(5, 7)}
+                  {data.fechas?.[0]?.slice(8) + '-' + data.fechas?.[0]?.slice(5, 7)} - {data.fechas?.[data.fechas.length - 1]?.slice(8) + '-' + data.fechas?.[data.fechas.length - 1]?.slice(5, 7)}
                 </div>
                 <div className="text-white/60 text-sm">Período</div>
               </div>
             </div>
 
+            {/* Switcher Cantidad/Facturación */}
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6">
+              <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-[#D94854]" />
+                Tipo de análisis
+              </h3>
+              
+              <div className="flex items-center gap-4">
+                <div className="flex bg-white/10 rounded-lg p-1 border border-white/20">
+                  <button
+                    onClick={() => setTipoVista('cantidad')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                      tipoVista === 'cantidad'
+                        ? 'bg-[#51590E] text-white shadow-lg'
+                        : 'text-white/70 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    📦 Por Cantidad
+                  </button>
+                  <button
+                    onClick={() => setTipoVista('facturacion')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                      tipoVista === 'facturacion'
+                        ? 'bg-[#B695BF] text-white shadow-lg'
+                        : 'text-white/70 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    💰 Por Facturación
+                  </button>
+                </div>
+                
+                <div className="text-white/60 text-sm">
+                  {tipoVista === 'cantidad' 
+                    ? 'Análisis basado en unidades vendidas' 
+                    : 'Análisis basado en montos facturados'
+                  }
+                </div>
+              </div>
+            </div>    
+            
             {/* Selector de sucursales */}
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6">
               <h3 className="text-white font-semibold mb-4">Seleccionar sucursales</h3>
               <VentasSucursalSelector
-                sucursales={data.sucursales}
+                sucursales={tipoVista === 'cantidad' ? data.cantidad?.sucursales || [] : data.facturacion?.sucursales || []}
                 sucursalesSeleccionadas={sucursalesSeleccionadas}
                 setSucursalesSeleccionadas={setSucursalesSeleccionadas}
+                tipoVista={tipoVista}
               />
             </div>
 
             {/* Charts */}
             <div className="space-y-8">
               {(() => {
-                const datosAcumulado = filtrarDiasSinVentasAcumulado(data.fechas, data.sucursales);
-                const datosDiario = filtrarDiasSinVentasDiario(data.fechas, data.sucursales);
+                const sucursalesActuales = tipoVista === 'cantidad' ? data.cantidad?.sucursales || [] : data.facturacion?.sucursales || [];
+                const datosAcumulado = filtrarDiasSinVentasAcumulado(data.fechas || [], sucursalesActuales);
+                const datosDiario = filtrarDiasSinVentasDiario(data.fechas || [], sucursalesActuales);
                 return (
                   <>
                     {/* Gráfico 1: Ventas Acumuladas */}
@@ -275,6 +329,7 @@ const VentasResumenPage: React.FC = () => {
                       fechas={datosAcumulado.fechas}
                       sucursales={datosAcumulado.sucursales}
                       sucursalesSeleccionadas={sucursalesSeleccionadas}
+                      tipoVista={tipoVista}
                     />
                     
                     {/* Gráfico 2: Ventas Diarias */}
@@ -282,6 +337,7 @@ const VentasResumenPage: React.FC = () => {
                       fechas={datosDiario.fechas}
                       sucursales={datosDiario.sucursales}
                       sucursalesSeleccionadas={sucursalesSeleccionadas}
+                      tipoVista={tipoVista}
                     />
                   </>
                 );
@@ -296,15 +352,15 @@ const VentasResumenPage: React.FC = () => {
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {data.sucursales.map((sucursal: any) => {
-                  const ventasFinales = sucursal.serie[sucursal.serie.length - 1] || 0;
-                  const ventasIniciales = sucursal.serie[0] || 0;
+                {(tipoVista === 'cantidad' ? data.cantidad?.sucursales || [] : data.facturacion?.sucursales || []).map((sucursal: any, index: number) => {
+                  const ventasFinales = sucursal.serie?.[sucursal.serie.length - 1] || 0;
+                  const ventasIniciales = sucursal.serie?.[0] || 0;
                   const crecimiento = ventasIniciales > 0 
                     ? ((ventasFinales - ventasIniciales) / ventasIniciales * 100)
                     : 0;
                   
                   return (
-                    <div key={sucursal.sucursal} className="bg-white/5 rounded-xl p-4 border border-white/10">
+                    <div key={`${sucursal.sucursal}-${tipoVista}-${index}`} className="bg-white/5 rounded-xl p-4 border border-white/10">
                       <div className="flex items-center gap-3 mb-3">
                         <div 
                           className="w-4 h-4 rounded-full"
@@ -319,7 +375,10 @@ const VentasResumenPage: React.FC = () => {
                         <div className="flex justify-between text-sm">
                           <span className="text-white/60">Total:</span>
                           <span className="text-white font-medium">
-                            {ventasFinales.toLocaleString()}
+                            {tipoVista === 'cantidad' 
+                              ? ventasFinales.toLocaleString() 
+                              : `$${ventasFinales.toLocaleString()}`
+                            }
                           </span>
                         </div>
                         <div className="flex justify-between text-sm">

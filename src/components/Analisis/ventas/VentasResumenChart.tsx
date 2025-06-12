@@ -12,12 +12,14 @@ interface VentasResumenChartProps {
   fechas: string[];
   sucursales: SucursalData[];
   sucursalesSeleccionadas: string[];
+  tipoVista: 'cantidad' | 'facturacion';
 }
 
 export const VentasResumenChart: React.FC<VentasResumenChartProps> = ({ 
   fechas, 
   sucursales,
-  sucursalesSeleccionadas
+  sucursalesSeleccionadas,
+  tipoVista
 }) => {
   // Filtrar sucursales: quitar "Sin Sucursal" y mostrar solo las seleccionadas + GLOBAL
   const sucursalesFiltradas = sucursales.filter(s => {
@@ -25,6 +27,7 @@ export const VentasResumenChart: React.FC<VentasResumenChartProps> = ({
     if (s.sucursal === "Sin Sucursal" || s.sucursal.toLowerCase().includes("sin sucursal")) return false; // Nunca mostrar Sin Sucursal
     return sucursalesSeleccionadas.includes(s.sucursal); // Solo las seleccionadas
   });
+  
   // Preparar datos para el gráfico
   const data = fechas.map((fecha, i) => {
     const point: any = { fecha: fecha.slice(8) + '-' + fecha.slice(5, 7) }; // DD-MM
@@ -56,8 +59,12 @@ export const VentasResumenChart: React.FC<VentasResumenChartProps> = ({
             .map((entry: any, index: number) => (
               <p key={index} style={{ color: entry.color }} className="font-semibold text-sm">
                 {entry.dataKey === "GLOBAL" 
-                  ? `🌍 Global: ${entry.value?.toLocaleString()}`
-                  : `🏢 ${entry.dataKey}: ${entry.value?.toLocaleString()}`
+                  ? `🌍 Global: ${tipoVista === 'cantidad' 
+                      ? `${entry.value?.toLocaleString()} unid.`
+                      : `$${entry.value?.toLocaleString()}`}`
+                  : `🏢 ${entry.dataKey}: ${tipoVista === 'cantidad' 
+                      ? `${entry.value?.toLocaleString()} unid.`
+                      : `$${entry.value?.toLocaleString()}`}`
                 }
               </p>
             ))}
@@ -87,7 +94,7 @@ export const VentasResumenChart: React.FC<VentasResumenChartProps> = ({
               />
               <span className="text-white/80 text-sm font-medium">
                 {entry.dataKey === "GLOBAL" 
-                  ? "🌍 Ventas Globales" 
+                  ? `🌍 ${tipoVista === 'cantidad' ? 'Ventas' : 'Facturación'} Globales` 
                   : `🏢 ${entry.dataKey}`
                 }
               </span>
@@ -103,21 +110,29 @@ export const VentasResumenChart: React.FC<VentasResumenChartProps> = ({
       <div className="p-6 border-b border-white/10">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-white flex items-center gap-3 mb-2">
-              <TrendingUp className="w-7 h-7 text-[#D94854]" />
-              Evolución de Ventas por Sucursal
+            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-3">
+              <TrendingUp className="w-6 h-6 text-[#FF7675]" />
+              {tipoVista === 'cantidad' ? 'Evolución Acumulada de Ventas' : 'Evolución Acumulada de Facturación'}
             </h2>
-            <p className="text-white/60">
-              📊 Comparativa de rendimiento entre sucursales y ventas globales
+            <p className="text-white/60 mb-6">
+              {tipoVista === 'cantidad' 
+                ? '📈 Crecimiento acumulativo de unidades vendidas por sucursal'
+                : '💰 Crecimiento acumulativo de facturación por sucursal'
+              }
             </p>
           </div>
           
           <div className="flex items-center gap-6 text-sm">
             <div className="text-center">
               <div className="text-2xl font-bold text-[#51590E]">
-                {totalVentas.toLocaleString()}
+                {tipoVista === 'cantidad' 
+                  ? totalVentas.toLocaleString()
+                  : `$${totalVentas.toLocaleString()}`
+                }
               </div>
-              <div className="text-white/60 text-xs">Ventas Globales</div>
+              <div className="text-white/60 text-xs">
+                {tipoVista === 'cantidad' ? 'Unidades Totales' : 'Facturación Total'}
+              </div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-[#B695BF]">
@@ -165,7 +180,7 @@ export const VentasResumenChart: React.FC<VentasResumenChartProps> = ({
                   dataKey={sucursal.sucursal}
                   name={sucursal.sucursal}
                   stroke={sucursal.color}
-                  strokeWidth={sucursal.sucursal === "GLOBAL" ? 3 : 2}
+                  strokeWidth={sucursal.sucursal === "GLOBAL" ? 5 : 4}
                   dot={false}
                   activeDot={{
                     stroke: sucursal.color,
@@ -185,7 +200,7 @@ export const VentasResumenChart: React.FC<VentasResumenChartProps> = ({
         <div className="flex items-center justify-between text-sm flex-wrap gap-4">
           <div className="flex items-center gap-4">
             <div className="text-white/60">
-            📅 Período: {fechas[0]?.slice(8) + '-' + fechas[0]?.slice(5, 7)} - {fechas[fechas.length - 1]?.slice(8) + '-' + fechas[fechas.length - 1]?.slice(5, 7)}
+              📅 Período: {fechas[0]?.slice(8) + '-' + fechas[0]?.slice(5, 7)} - {fechas[fechas.length - 1]?.slice(8) + '-' + fechas[fechas.length - 1]?.slice(5, 7)}
             </div>
             <div className="text-white/60">
               🏆 Top sucursal: {
@@ -201,7 +216,9 @@ export const VentasResumenChart: React.FC<VentasResumenChartProps> = ({
             </div>
             <div className="flex items-center gap-2">
               <Building2 className="w-4 h-4 text-[#B695BF]" />
-              <span className="text-white/60">Vista ejecutiva</span>
+              <span className="text-white/60">
+                💡 Las líneas muestran {tipoVista === 'cantidad' ? 'unidades' : 'facturación'} acumuladas • GLOBAL incluye todas las sucursales
+              </span>
             </div>
           </div>
         </div>

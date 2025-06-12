@@ -1,6 +1,6 @@
 import React from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
-import { BarChart3, Calendar } from "lucide-react";
+import { BarChart3, TrendingDown } from "lucide-react";
 
 interface SucursalData {
   sucursal: string;
@@ -12,12 +12,14 @@ interface VentasDiariasChartProps {
   fechas: string[];
   sucursales: SucursalData[];
   sucursalesSeleccionadas: string[];
+  tipoVista: 'cantidad' | 'facturacion';
 }
 
 export const VentasDiariasChart: React.FC<VentasDiariasChartProps> = ({ 
   fechas, 
   sucursales,
-  sucursalesSeleccionadas
+  sucursalesSeleccionadas,
+  tipoVista
 }) => {
   // Filtrar sucursales: quitar GLOBAL, Sin Sucursal y mostrar solo las seleccionadas
   const sucursalesSinGlobal = sucursales.filter(s => 
@@ -30,24 +32,19 @@ export const VentasDiariasChart: React.FC<VentasDiariasChartProps> = ({
   // Convertir series acumuladas a ventas diarias
   const sucursalesDiarias = sucursalesSinGlobal.map(sucursal => {
     const ventasDiarias = sucursal.serie.map((valorAcumulado, index) => {
-      if (index === 0) return valorAcumulado; // Primer día = valor inicial
-      return valorAcumulado - sucursal.serie[index - 1]; // Resto = diferencia
+      if (index === 0) return valorAcumulado;
+      return Math.max(0, valorAcumulado - sucursal.serie[index - 1]);
     });
-
+    
     return {
       ...sucursal,
       serie: ventasDiarias
     };
   });
 
-  // Calcular el máximo de ventas diarias para fijar el eje Y
-  const todasLasVentasDiarias = sucursalesDiarias.flatMap(s => s.serie);
-  const maximoVentasDiarias = Math.max(...todasLasVentasDiarias);
-  const limiteEjeY = maximoVentasDiarias + 10; // +10 para dar espacio arriba
-
   // Preparar datos para el gráfico
   const data = fechas.map((fecha, i) => {
-    const point: any = { fecha: fecha.slice(8) + '-' + fecha.slice(5, 7) };
+    const point: any = { fecha: fecha.slice(8) + '-' + fecha.slice(5, 7) }; // DD-MM
     sucursalesDiarias.forEach((sucursal) => {
       point[sucursal.sucursal] = sucursal.serie[i] ?? 0;
     });
@@ -55,16 +52,23 @@ export const VentasDiariasChart: React.FC<VentasDiariasChartProps> = ({
   });
 
   // Calcular estadísticas
-  const totalDias = fechas.length;
-  const promediosPorSucursal = sucursalesDiarias.map(s => ({
-    sucursal: s.sucursal,
-    promedio: s.serie.reduce((acc, val) => acc + val, 0) / s.serie.length,
-    color: s.color
-  }));
+  const maxVentaDiaria = Math.max(
+    ...sucursalesDiarias.flatMap(s => s.serie)
+  );
+
+  const promedioVentas = sucursalesDiarias.map(sucursal => {
+    const total = sucursal.serie.reduce((acc, val) => acc + val, 0);
+    return {
+      sucursal: sucursal.sucursal,
+      promedio: total / sucursal.serie.length
+    };
+  });
 
   // Tooltip personalizado
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
+      const totalDia = payload.reduce((acc: number, entry: any) => acc + entry.value, 0);
+      
       return (
         <div className="bg-[#212026] border border-white/20 rounded-lg p-3 shadow-lg">
           <p className="text-white font-medium mb-2">
@@ -74,9 +78,18 @@ export const VentasDiariasChart: React.FC<VentasDiariasChartProps> = ({
             .sort((a: any, b: any) => b.value - a.value)
             .map((entry: any, index: number) => (
               <p key={index} style={{ color: entry.color }} className="font-semibold text-sm">
-                🏢 {entry.dataKey}: {entry.value} ventas
+                🏢 {entry.dataKey}: {tipoVista === 'cantidad' 
+                  ? `${entry.value?.toLocaleString()} unid.`
+                  : `$${entry.value?.toLocaleString()}`}
               </p>
             ))}
+          <div className="border-t border-white/20 mt-2 pt-2">
+            <p className="text-white/80 font-medium text-sm">
+              📊 Total del día: {tipoVista === 'cantidad' 
+                ? `${totalDia.toLocaleString()} unid.`
+                : `$${totalDia.toLocaleString()}`}
+            </p>
+          </div>
         </div>
       );
     }
@@ -110,31 +123,36 @@ export const VentasDiariasChart: React.FC<VentasDiariasChartProps> = ({
       <div className="p-6 border-b border-white/10">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-white flex items-center gap-3 mb-2">
-              <BarChart3 className="w-7 h-7 text-[#B695BF]" />
-              Ventas Diarias por Sucursal
+            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-3">
+              <BarChart3 className="w-6 h-6 text-[#B695BF]" />
+              {tipoVista === 'cantidad' ? 'Ventas Diarias por Sucursal' : 'Facturación Diaria por Sucursal'}
             </h2>
-            <p className="text-white/60">
-              📈 Evolución día a día de ventas por sucursal (sin acumular)
+            <p className="text-white/60 mb-6">
+              {tipoVista === 'cantidad' 
+                ? '📊 Evolución día a día de unidades vendidas por sucursal (sin acumular)'
+                : '💰 Evolución día a día de facturación por sucursal (sin acumular)'
+              }
             </p>
           </div>
           
           <div className="flex items-center gap-6 text-sm">
             <div className="text-center">
-              <div className="text-2xl font-bold text-[#D94854]">
-                {maximoVentasDiarias}
+              <div className="text-2xl font-bold text-[#B695BF]">
+                {tipoVista === 'cantidad' 
+                  ? maxVentaDiaria.toLocaleString()
+                  : `$${maxVentaDiaria.toLocaleString()}`}
               </div>
               <div className="text-white/60 text-xs">Máx. diario</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-[#B695BF]">
+              <div className="text-2xl font-bold text-[#51590E]">
                 {sucursalesDiarias.length}
               </div>
               <div className="text-white/60 text-xs">Sucursales</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-[#51590E]">
-                {totalDias}
+              <div className="text-2xl font-bold text-[#D94854]">
+                {fechas.length}
               </div>
               <div className="text-white/60 text-xs">Días</div>
             </div>
@@ -144,9 +162,12 @@ export const VentasDiariasChart: React.FC<VentasDiariasChartProps> = ({
 
       {/* Gráfico */}
       <div className="p-6">
-        <div style={{ width: "100%", height: 450 }}>
+        <div style={{ width: "100%", height: 500 }}>
           <ResponsiveContainer>
-            <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 80 }}>
+            <LineChart 
+              data={data} 
+              margin={{ top: 5, right: 30, left: 20, bottom: 80 }}
+            >
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
               <XAxis 
                 dataKey="fecha" 
@@ -157,10 +178,10 @@ export const VentasDiariasChart: React.FC<VentasDiariasChartProps> = ({
                 height={80}
               />
               <YAxis 
-                allowDecimals={false} 
+                allowDecimals={false}
+                domain={[0, 'dataMax']}
                 tick={{ fontSize: 12, fill: "rgba(255,255,255,0.7)" }}
                 stroke="rgba(255,255,255,0.3)"
-                domain={[0, limiteEjeY]} // Eje Y fijo desde 0 hasta máximo + 10
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend content={<CustomLegend />} />
@@ -173,11 +194,11 @@ export const VentasDiariasChart: React.FC<VentasDiariasChartProps> = ({
                   dataKey={sucursal.sucursal}
                   name={sucursal.sucursal}
                   stroke={sucursal.color}
-                  strokeWidth={2}
+                  strokeWidth={4}
                   dot={false}
                   activeDot={{
                     stroke: sucursal.color,
-                    strokeWidth: 2,
+                    strokeWidth: 3,
                     r: 10,
                     fill: "#212026",
                   }}
@@ -188,63 +209,55 @@ export const VentasDiariasChart: React.FC<VentasDiariasChartProps> = ({
         </div>
       </div>
 
-      {/* Promedios por sucursal */}
+      {/* Footer con promedios */}
       <div className="px-6 py-4 bg-white/5 border-t border-white/10">
-        <h4 className="text-white font-medium mb-3 flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-[#B695BF]" />
-          Promedio de ventas diarias por sucursal
-        </h4>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {promediosPorSucursal
-            .sort((a, b) => b.promedio - a.promedio)
-            .map((item) => (
-              <div key={item.sucursal} className="bg-white/5 rounded-lg p-3 border border-white/10">
-                <div className="flex items-center gap-2 mb-1">
-                  <div 
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <span className="text-white/80 text-sm font-medium">
-                    {item.sucursal}
-                  </span>
-                </div>
-                <div className="text-lg font-bold" style={{ color: item.color }}>
-                  {item.promedio.toFixed(1)}
-                </div>
-                <div className="text-white/50 text-xs">
-                  unidades/día
-                </div>
+        <div className="space-y-3">
+          {/* Primera fila - Info general */}
+          <div className="flex items-center justify-between text-sm flex-wrap gap-4">
+            <div className="flex items-center gap-4">
+              <div className="text-white/60">
+                📅 Período: {fechas[0]?.slice(8) + '-' + fechas[0]?.slice(5, 7)} - {fechas[fechas.length - 1]?.slice(8) + '-' + fechas[fechas.length - 1]?.slice(5, 7)}
               </div>
-            ))}
-        </div>
-      </div>
-
-      {/* Footer con información */}
-      <div className="px-6 py-4 bg-white/5 border-t border-white/10">
-        <div className="flex items-center justify-between text-sm flex-wrap gap-4">
-          <div className="flex items-center gap-4">
-            <div className="text-white/60">
-            📅 Período: {fechas[0]?.slice(8) + '-' + fechas[0]?.slice(5, 7)} - {fechas[fechas.length - 1]?.slice(8) + '-' + fechas[fechas.length - 1]?.slice(5, 7)}
+              <div className="text-white/60">
+                🏆 Mejor día: {tipoVista === 'cantidad' 
+                  ? `${maxVentaDiaria.toLocaleString()} unid.`
+                  : `$${maxVentaDiaria.toLocaleString()}`}
+              </div>
             </div>
-            <div className="text-white/60">
-              📊 Rango Y: 0 - {limiteEjeY} unidades
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <div className="text-white/60">
-              🎯 Mejor día: {
-                promediosPorSucursal.length > 0 
-                  ? promediosPorSucursal.sort((a, b) => b.promedio - a.promedio)[0].sucursal
-                  : "N/A"
-              }
-            </div>
+            
             <div className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-[#B695BF]" />
-              <span className="text-white/60">Vista diaria</span>
+              <TrendingDown className="w-4 h-4 text-[#B695BF]" />
+              <span className="text-white/60">
+                💡 Las líneas muestran {tipoVista === 'cantidad' ? 'unidades' : 'facturación'} diarias (sin acumular)
+              </span>
             </div>
           </div>
+
+          {/* Segunda fila - Promedios por sucursal */}
+          {promedioVentas.length > 0 && (
+            <div className="border-t border-white/10 pt-3">
+              <div className="text-white/70 text-xs mb-2">📊 Promedio diario por sucursal:</div>
+              <div className="flex flex-wrap gap-4 text-xs">
+                {promedioVentas
+                  .sort((a, b) => b.promedio - a.promedio)
+                  .map((item) => (
+                    <div key={item.sucursal} className="flex items-center gap-2">
+                      <div 
+                        className="w-2 h-2 rounded-full"
+                        style={{ 
+                          backgroundColor: sucursalesDiarias.find(s => s.sucursal === item.sucursal)?.color 
+                        }}
+                      />
+                      <span className="text-white/60">
+                        {item.sucursal}: {tipoVista === 'cantidad' 
+                          ? `${Math.round(item.promedio).toLocaleString()} unid.`
+                          : `$${Math.round(item.promedio).toLocaleString()}`}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

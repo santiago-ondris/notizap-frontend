@@ -1,5 +1,3 @@
-// src/components/Envios/EnviosTabla.tsx
-
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Calendar, 
@@ -180,6 +178,7 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
 
   /**
    * Maneja el guardado de una celda editada
+   * NUEVA LÓGICA: No necesitamos detectar CREATE vs UPDATE
    */
   const handleGuardarCelda = async (dia: number, campo: TipoEnvio, nuevoValor: number) => {
     const envio = envios[dia - 1];
@@ -189,7 +188,7 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
     
     try {
       // Crear objeto con todos los datos actualizados
-      const envioActualizado: CreateEnvioDiarioDto | UpdateEnvioDiarioDto = {
+      const envioActualizado: CreateEnvioDiarioDto = {
         fecha: envio.fecha,
         oca: campo === 'oca' ? nuevoValor : (envio.oca || 0),
         andreani: campo === 'andreani' ? nuevoValor : (envio.andreani || 0),
@@ -200,9 +199,8 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
         mercadoLibre: campo === 'mercadoLibre' ? nuevoValor : (envio.mercadoLibre || 0)
       };
 
-      // Determinar si es creación o actualización
-      const esNuevo = envio.id === 0;
-      const exito = await onGuardarEnvio(envioActualizado, esNuevo ? undefined : envio.id);
+      // Siempre pasar undefined como ID - el backend maneja CREATE/UPDATE automáticamente
+      const exito = await onGuardarEnvio(envioActualizado, undefined);
       
       if (exito) {
         setCeldaEditando(null);
@@ -453,7 +451,7 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-[#FFD700]" />
               <span className="text-[#FFD700]">
-                Haz clic en cualquier celda para editar
+                Clic en cualquier celda para editar
               </span>
             </div>
           )}

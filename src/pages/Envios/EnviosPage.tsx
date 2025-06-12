@@ -89,10 +89,11 @@ const EnviosPage: React.FC = () => {
 
   /**
    * Manejar guardado de un envío desde la tabla
+   * NUEVA LÓGICA: Siempre usar POST, el backend maneja CREATE/UPDATE automáticamente
    */
   const handleGuardarEnvio = async (
     envioData: CreateEnvioDiarioDto | UpdateEnvioDiarioDto, 
-    id?: number
+    _id?: number // Parámetro ignorado - mantenido por compatibilidad
   ): Promise<boolean> => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para editar registros');
@@ -107,14 +108,14 @@ const EnviosPage: React.FC = () => {
         return false;
       }
 
-      // Guardar en la API
-      await enviosService.guardarEnvio(envioData, id);
+      // SIEMPRE usar POST - el backend maneja CREATE/UPDATE por fecha
+      await enviosService.guardarEnvio(envioData as CreateEnvioDiarioDto);
       
       // Recargar datos completos para asegurar sincronización
       await cargarEnviosMensuales(añoActual, mesActual);
       await cargarResumenMensual(añoActual, mesActual);
       
-      toast.success(id ? 'Envío actualizado correctamente' : 'Envío creado correctamente');
+      toast.success('Envío guardado correctamente');
       return true;
       
     } catch (error) {
@@ -251,7 +252,6 @@ const EnviosPage: React.FC = () => {
               <div className="text-sm text-white/70 space-y-1">
                 <p>• <strong>Córdoba Capital:</strong> Incluye Roberto, Tino y Caddy</p>
                 <p>• <strong>Totales automáticos:</strong> Se calculan al guardar cada registro</p>
-                <p>• <strong>Edición:</strong> Haz clic en cualquier celda para editar el valor</p>
                 {puedeEditar && (
                   <p>• <strong>Eliminar:</strong> Botón disponible en cada fila con datos</p>
                 )}

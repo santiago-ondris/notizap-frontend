@@ -5,7 +5,7 @@ import {
   type UpdateEnvioDiarioDto, 
   type EnvioResumenMensual,
   type EnviosFiltros,
-  type EnviosFecha,
+  type EnviosFecha, 
 } from '@/types/envios/enviosTypes';
 
 /**
@@ -59,30 +59,31 @@ class EnviosService {
   }
 
   /**
-   * Crea un nuevo registro de envío diario
-   * @param envio - Datos del nuevo envío
-   * @returns Envío creado con ID asignado
+   * Guarda un envío (el backend maneja automáticamente CREATE o UPDATE por fecha)
+   * @param envio - Datos del envío
+   * @returns Mensaje de confirmación
    */
-  async crearEnvio(envio: CreateEnvioDiarioDto): Promise<EnvioDiario> {
+  async guardarEnvio(envio: CreateEnvioDiarioDto): Promise<string> {
     try {
-      const response = await api.post<EnvioDiario>(this.BASE_URL, envio);
-      return response.data;
+      const response = await api.post<string>(this.BASE_URL, envio);
+      return response.data || 'Registro guardado correctamente';
     } catch (error) {
-      console.error('Error al crear envío:', error);
-      throw new Error('No se pudo crear el registro de envío');
+      console.error('Error al guardar envío:', error);
+      throw new Error('No se pudo guardar el registro de envío');
     }
   }
 
   /**
-   * Actualiza un envío existente
+   * Actualiza un envío existente específicamente por ID
+   * (Solo usar si necesitas actualizar un registro específico)
    * @param id - ID del envío a actualizar
    * @param envio - Nuevos datos del envío
-   * @returns Envío actualizado
+   * @returns Mensaje de confirmación
    */
-  async actualizarEnvio(id: number, envio: UpdateEnvioDiarioDto): Promise<EnvioDiario> {
+  async actualizarEnvioPorId(id: number, envio: UpdateEnvioDiarioDto): Promise<string> {
     try {
-      const response = await api.put<EnvioDiario>(`${this.BASE_URL}/${id}`, envio);
-      return response.data;
+      const response = await api.put<string>(`${this.BASE_URL}/${id}`, envio);
+      return response.data || 'Registro actualizado correctamente';
     } catch (error) {
       console.error('Error al actualizar envío:', error);
       throw new Error('No se pudo actualizar el registro de envío');
@@ -122,21 +123,21 @@ class EnviosService {
     }
   }
 
+  // MÉTODOS LEGACY - ELIMINADOS porque el backend maneja automáticamente CREATE/UPDATE
+  // async crearEnvio() - No necesario, usar guardarEnvio()
+  // async actualizarEnvio() - No necesario, usar guardarEnvio()
+  
   /**
-   * Guarda o actualiza un envío (CREATE o UPDATE según si existe)
-   * Esta función decide automáticamente si crear o actualizar
-   * @param envio - Datos del envío
-   * @param id - ID del envío si existe, undefined si es nuevo
-   * @returns Envío guardado
+   * Método simplificado que SIEMPRE usa POST
+   * El backend decide automáticamente si crear o actualizar según la fecha
+   * @param envio - Datos del envío  
+   * @param _id - Parámetro ignorado (mantenido por compatibilidad)
+   * @returns Mensaje de confirmación
    */
-  async guardarEnvio(envio: CreateEnvioDiarioDto, id?: number): Promise<EnvioDiario> {
-    if (id) {
-      // Si tiene ID, actualizamos
-      return this.actualizarEnvio(id, envio);
-    } else {
-      // Si no tiene ID, creamos
-      return this.crearEnvio(envio);
-    }
+  async guardarEnvioLegacy(envio: CreateEnvioDiarioDto, _id?: number): Promise<string> {
+    // Ignoramos el ID y SIEMPRE usamos POST
+    // El backend maneja CREATE/UPDATE automáticamente por fecha
+    return this.guardarEnvio(envio);
   }
 
   /**

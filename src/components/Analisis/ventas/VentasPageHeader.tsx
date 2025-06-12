@@ -1,6 +1,5 @@
-// components/Analisis/ventas/VentasPageHeader.tsx
 import React from "react";
-import { TrendingUp, NotepadTextDashed, LineChart, FileArchive, Clock } from "lucide-react";
+import { TrendingUp, NotepadTextDashed, LineChart, FileArchive, Clock, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface VentasPageHeaderProps {
@@ -51,6 +50,14 @@ export const VentasPageHeader: React.FC<VentasPageHeaderProps> = ({
         >
           <NotepadTextDashed className="w-5 h-5 group-hover:scale-110 transition-transform" />
           <span>Volver a análisis de rotación</span>
+        </Button>
+        
+        <Button
+          onClick={() => navigate("/analisis/ventas/resumen")}
+          className="group flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-[#B695BF] to-[#51590E] hover:from-[#51590E] hover:to-[#B695BF] text-white font-semibold rounded-xl shadow-lg hover:shadow-[#B695BF]/25 transition-all transform hover:scale-105"
+        >
+          <Building2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
+          <span>Resumen por sucursal</span>
         </Button>
         
         <Button

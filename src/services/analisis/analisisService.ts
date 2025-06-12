@@ -41,3 +41,20 @@ export const fetchFechasCompra = async (
   });
   return response.data;
 };
+
+export const fetchEvolucionVentasResumen = async (archivoVentas: File) => {
+  const formData = new FormData();
+  formData.append("archivoVentas", archivoVentas);
+
+  const response = await api.post(
+    "/api/v1/analisis/rotacion/evolucion-ventas/resumen",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return response.data;
+};

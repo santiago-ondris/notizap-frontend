@@ -1,4 +1,3 @@
-// components/Analisis/ventas/VentasUploadForm.tsx
 import React from "react";
 import { Upload, FileText, Loader2, CheckCircle, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";

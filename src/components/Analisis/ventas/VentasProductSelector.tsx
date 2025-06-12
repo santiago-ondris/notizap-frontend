@@ -1,4 +1,3 @@
-// components/Analisis/ventas/VentasProductSelector.tsx
 import React, { useState } from "react";
 import { Search, Package, MapPin, ChevronDown, Check } from "lucide-react";
 

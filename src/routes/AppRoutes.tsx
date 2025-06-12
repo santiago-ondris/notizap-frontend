@@ -21,6 +21,7 @@ import ClientesPage from "@/pages/Clientes/ClientesPage";
 import ClientesRankingPage from "@/pages/Clientes/ClienteRankingPage";
 import ClientesImportPage from "@/pages/Clientes/ClientesImportPage";
 import ClienteDetallePage from "@/pages/Clientes/ClienteDetallePage";
+import VentasResumenPage from "@/pages/Analisis/VentasResumenPage";
 
 const AppRoutes: React.FC = () => (
   <Routes>
@@ -58,7 +59,7 @@ const AppRoutes: React.FC = () => (
         </RequireAuth>
       }
     />    
-
+    <Route path="/analisis/ventas/resumen" element={<VentasResumenPage />} />
     <Route path="/cambios" element={<CambiosPage />} />
     <Route path="/instagram" element={<InstagramPage />} />
     <Route path="/woocommerce" element={<WooCommercePage />} />

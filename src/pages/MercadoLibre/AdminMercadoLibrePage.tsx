@@ -3,37 +3,177 @@ import ReporteManualForm from "@/components/MercadoLibre/ReporteManualForm";
 import AdsReportForm from "@/components/MercadoLibre/AdsReportForm";
 import DisplayAdsForm from "@/components/MercadoLibre/DisplayAdsForm";
 import ExcelProcessor from "@/components/MercadoLibre/ExcelProcessor";
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
+import { 
+  FileText, 
+  Target, 
+  Monitor, 
+  FileSpreadsheet, 
+  BarChart3, 
+  ArrowRight,
+  Shield
+} from "lucide-react";
+import React from "react";
 
 export default function AdminMercadoLibrePage() {
   const [modo, setModo] = useState<"reportes" | "ads" | "display" | "excel">("reportes");
 
-  return (
-    <div className="max-w-4xl mx-auto py-8">
-      <div className="max-w-4xl mx-auto py-8 relative">
-        <h1 className="text-4xl font-extrabold tracking-tight mb-8 mt-2 text-[#D94854] text-center drop-shadow-sm">
-          Administración MercadoLibre
-        </h1>
-        <Link
-          to="/mercadolibre/"
-          className="absolute right-0 top-8 inline-block px-6 py-2 rounded-2xl bg-[#B695BF] text-white font-semibold shadow hover:bg-[#D94854] transition"
-        >
-          Ir a reportes
-        </Link>
-      </div>
+  const modos = [
+    {
+      key: "reportes",
+      label: "Informe Ventas",
+      icon: FileText,
+      description: "Cargar datos manuales de ventas",
+      emoji: "📋"
+    },
+    {
+      key: "ads",
+      label: "Product/Brand Ads",
+      icon: Target,
+      description: "Gestionar campañas publicitarias",
+      emoji: "🎯"
+    },
+    {
+      key: "display",
+      label: "Display Ads",
+      icon: Monitor,
+      description: "Administrar anuncios display",
+      emoji: "📺"
+    },
+    {
+      key: "excel",
+      label: "Procesar Excel",
+      icon: FileSpreadsheet,
+      description: "Analizar archivos de productos",
+      emoji: "📊"
+    }
+  ];
 
-      <div className="flex gap-2 mb-4 justify-center">
-        <Button onClick={() => setModo("reportes")} className="bg-[#D94854] hover:bg-[#F23D5E] text-white font-semibold flex items-center gap-2 px-6 py-3 rounded-xl shadow m-2">Informe ventas</Button>
-        <Button onClick={() => setModo("ads")} className="bg-[#D94854] hover:bg-[#F23D5E] text-white font-semibold flex items-center gap-2 px-6 py-3 rounded-xl shadow m-2">Product/Brand Ads</Button>
-        <Button onClick={() => setModo("display")} className="bg-[#D94854] hover:bg-[#F23D5E] text-white font-semibold flex items-center gap-2 px-6 py-3 rounded-xl shadow m-2">Display Ads</Button>
-        <Button onClick={() => setModo("excel")} className="bg-[#D94854] hover:bg-[#F23D5E] text-white font-semibold flex items-center gap-2 px-6 py-3 rounded-xl shadow m-2">Procesar Excel</Button>
-      </div>
-      <div className="flex justify-center">
-      {modo === "reportes" && <ReporteManualForm />}
-      {modo === "ads" && <AdsReportForm />}
-      {modo === "display" && <DisplayAdsForm />}
-      {modo === "excel" && <ExcelProcessor />}
+  const getModoActual = () => modos.find(m => m.key === modo);
+
+  return (
+    <div className="min-h-screen bg-[#1A1A20] py-8 px-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header de la página */}
+        <div className="relative mb-8">
+          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-[#D94854]/20 p-3 rounded-xl">
+                  <Shield className="w-6 h-6 text-[#D94854]" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-white mb-1">
+                    🛠️ Administración MercadoLibre
+                  </h1>
+                  <p className="text-white/60 text-sm">
+                    Panel de control para gestionar datos y reportes
+                  </p>
+                </div>
+              </div>
+              
+              <Link
+                to="/mercadolibre/"
+                className="flex items-center gap-2 bg-[#B695BF]/20 hover:bg-[#B695BF]/30 border border-[#B695BF]/30 text-[#B695BF] font-semibold px-4 py-2 rounded-xl transition-all"
+              >
+                <BarChart3 className="w-4 h-4" />
+                Ver Reportes
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Navegación por pestañas */}
+        <div className="mb-8">
+          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+              {modos.map((modoItem) => {
+                const IconComponent = modoItem.icon;
+                const isActive = modo === modoItem.key;
+                
+                return (
+                  <button
+                    key={modoItem.key}
+                    onClick={() => setModo(modoItem.key as any)}
+                    className={`
+                      group relative p-4 rounded-xl transition-all duration-200 text-left
+                      ${isActive 
+                        ? 'bg-[#D94854]/20 border border-[#D94854]/30' 
+                        : 'bg-white/5 hover:bg-white/10 border border-transparent'
+                      }
+                    `}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`
+                        p-2 rounded-lg transition-colors
+                        ${isActive 
+                          ? 'bg-[#D94854]/30 text-[#D94854]' 
+                          : 'bg-white/10 text-white/60 group-hover:text-white/80'
+                        }
+                      `}>
+                        <IconComponent className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm">{modoItem.emoji}</span>
+                          <h3 className={`
+                            font-semibold text-sm truncate
+                            ${isActive ? 'text-[#D94854]' : 'text-white group-hover:text-white'}
+                          `}>
+                            {modoItem.label}
+                          </h3>
+                        </div>
+                        <p className={`
+                          text-xs leading-tight
+                          ${isActive ? 'text-[#D94854]/80' : 'text-white/50 group-hover:text-white/70'}
+                        `}>
+                          {modoItem.description}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* Indicador activo */}
+                    {isActive && (
+                      <div className="absolute top-2 right-2">
+                        <div className="w-2 h-2 bg-[#D94854] rounded-full animate-pulse" />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Título de la sección activa */}
+        {getModoActual() && (
+          <div className="mb-6">
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-[#D94854]/20 p-2 rounded-lg">
+                  {React.createElement(getModoActual()!.icon, { 
+                    className: "w-5 h-5 text-[#D94854]" 
+                  })}
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-white">
+                    {getModoActual()!.emoji} {getModoActual()!.label}
+                  </h2>
+                  <p className="text-white/60 text-sm">{getModoActual()!.description}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Contenido del modo seleccionado */}
+        <div className="flex justify-center">
+          {modo === "reportes" && <ReporteManualForm />}
+          {modo === "ads" && <AdsReportForm />}
+          {modo === "display" && <DisplayAdsForm />}
+          {modo === "excel" && <ExcelProcessor />}
+        </div>
       </div>
     </div>
   );

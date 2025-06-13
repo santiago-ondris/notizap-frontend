@@ -35,11 +35,11 @@ const modules = [
     roles: ["viewer", "admin", "superadmin"]
   },
   {
-    title: "Instagram",
-    description: "Reels, posteos, historias y seguidores",
-    icon: Instagram,
+    title: "Clientes",
+    description: "Analisis de clientes de Montella",
+    icon: User,
     color: "#B695BF",
-    to: "/instagram",
+    to: "/clientes",
     roles: ["viewer", "admin", "superadmin"]
   },
   {
@@ -84,7 +84,7 @@ const modules = [
   },
   {
     title: "Procesador de Imágenes",
-    description: "Redimensiona, convierte y descarga imágenes en lote",
+    description: "Redimensiona, convierte y descarga imágenes",
     icon: Image,
     color: "#B695BF",
     to: "/procesador-imagenes",
@@ -106,13 +106,13 @@ const modules = [
     roles: ["viewer", "admin", "superadmin"]
   },
   {
-    title: "Clientes",
-    description: "Analisis de clientes de Montella",
-    icon: User,
+    title: "Instagram",
+    description: "Reels, posteos, historias y seguidores",
+    icon: Instagram,
     color: "#B695BF",
-    to: "/clientes",
+    to: "/instagram",
     roles: ["viewer", "admin", "superadmin"]
-  },
+  }
 ];
 
 export const ModulesGrid: React.FC = () => {

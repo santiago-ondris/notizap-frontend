@@ -134,16 +134,16 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
           {/* Stats or features preview */}
           <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
             <div className="text-center space-y-2">
-              <div className="text-3xl font-bold text-[#D94854]">12</div>
-              <div className="text-white/60 text-sm">Módulos integrados</div>
+              <div className="text-3xl font-bold text-[#D94854]">26</div>
+              <div className="text-white/60 text-sm">Yona, Carito, Viejito, Bianquita</div>
             </div>
             <div className="text-center space-y-2">
-              <div className="text-3xl font-bold text-[#B695BF]">Obligatorio</div>
-              <div className="text-white/60 text-sm">Sistema de login</div>
+              <div className="text-3xl font-bold text-[#B695BF]">03</div>
+              <div className="text-white/60 text-sm">Gringon, team redes</div>
             </div>
             <div className="text-center space-y-2">
-              <div className="text-3xl font-bold text-[#51590E]">100%</div>
-              <div className="text-white/60 text-sm">Deploy en Azure</div>
+              <div className="text-3xl font-bold text-[#51590E]">2001</div>
+              <div className="text-white/60 text-sm">Maria Pilar</div>
             </div>
           </div>
         </div>

@@ -139,3 +139,68 @@
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* Agregar a tu archivo CSS global (app.css, index.css, etc.) */
+
+/* Fix para dropdowns/selects en tema oscuro */
+select {
+  color-scheme: dark !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+}
+
+select option {
+  background-color: #212026 !important;
+  color: white !important;
+  padding: 8px 12px !important;
+  border: none !important;
+}
+
+select option:hover {
+  background-color: #2a2a30 !important;
+  color: #60a5fa !important;
+}
+
+select option:checked,
+select option:focus,
+select option[selected] {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+/* Para mejor apariencia visual */
+select::-webkit-scrollbar {
+  width: 8px;
+}
+
+select::-webkit-scrollbar-track {
+  background: #1a1a20;
+}
+
+select::-webkit-scrollbar-thumb {
+  background: #3b82f6;
+  border-radius: 4px;
+}
+
+select::-webkit-scrollbar-thumb:hover {
+  background: #2563eb;
+}
+
+/* Estilos específicos para los selects de los filtros */
+.filter-select {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  color-scheme: dark !important;
+}
+
+.filter-select option {
+  background-color: #212026 !important;
+  color: white !important;
+  padding: 8px 12px !important;
+}
+
+.filter-select option:hover {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}

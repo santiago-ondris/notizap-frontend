@@ -71,7 +71,6 @@ const modules = [
     description: "Gestión estructurada de cambios y devoluciones",
     icon: Repeat,
     color: "#F23D5E",
-    to: "/cambios",
     roles: ["admin", "superadmin"]
   },
   {
@@ -79,7 +78,6 @@ const modules = [
     description: "Métricas y campañas publicitarias",
     icon: Megaphone,
     color: "#51590E",
-    to: "/publicidad",
     roles: ["viewer", "admin", "superadmin"]
   },
   {
@@ -87,7 +85,6 @@ const modules = [
     description: "Redimensiona, convierte y descarga imágenes",
     icon: Image,
     color: "#B695BF",
-    to: "/procesador-imagenes",
     roles: ["viewer", "admin", "superadmin"]
   },
   {
@@ -95,7 +92,6 @@ const modules = [
     description: "Ventas, productos y reportes de tienda",
     icon: ShoppingCart,
     color: "#F23D5E",
-    to: "/woocommerce",
     roles: ["viewer", "admin", "superadmin"]
   },
   {
@@ -110,7 +106,6 @@ const modules = [
     description: "Reels, posteos, historias y seguidores",
     icon: Instagram,
     color: "#B695BF",
-    to: "/instagram",
     roles: ["viewer", "admin", "superadmin"]
   }
 ];

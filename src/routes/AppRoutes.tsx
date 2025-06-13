@@ -2,17 +2,12 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 
 import LandingPage from "@/pages/Landing/LandingPage";
-import CambiosPage from "@/pages/Cambios/CambiosPage";
-import InstagramPage from "@/pages/Instagram/InstagramPage";
-import WooCommercePage from "@/pages/WooCommerce/WooCommercePage";
 import MailingPage from "@/pages/Mailing/MailingPage";
-import GastosPage from "@/pages/Gastos/GastosPage";
+import { GastosPage } from "@/pages/Gastos/GastosPage";
 import EnviosPage from "@/pages/Envios/EnviosPage";
-import PublicidadPage from "@/pages/Publicidad/PublicidadPage";
 import AnalisisRotacionPage from "@/pages/Analisis/AnalisisRotacionPage"
 import VentasPage from "@/pages/Analisis/VentasPage";
 import GraficoEvolucionPage from "@/pages/Analisis/GraficoEvolucionPage";
-import ProcesadorImagenesPage from "@/pages/ProcesadorImagenes/ProcesadorImagenesPage";
 import { UsersPage } from "@/pages/Login/UsersPage";
 import { RequireAuth } from "./RequireAuth";
 import MercadoLibreReportsPage from "@/pages/MercadoLibre/MercadoLibreReportsPage";
@@ -22,6 +17,8 @@ import ClientesRankingPage from "@/pages/Clientes/ClienteRankingPage";
 import ClientesImportPage from "@/pages/Clientes/ClientesImportPage";
 import ClienteDetallePage from "@/pages/Clientes/ClienteDetallePage";
 import VentasResumenPage from "@/pages/Analisis/VentasResumenPage";
+import { GastosListPage } from "@/pages/Gastos/GastosListPage";
+import { GastosAnalysisPage } from "@/pages/Gastos/GastosAnalysisPage";
 
 const AppRoutes: React.FC = () => (
   <Routes>
@@ -60,9 +57,6 @@ const AppRoutes: React.FC = () => (
       }
     />    
     <Route path="/analisis/ventas/resumen" element={<VentasResumenPage />} />
-    <Route path="/cambios" element={<CambiosPage />} />
-    <Route path="/instagram" element={<InstagramPage />} />
-    <Route path="/woocommerce" element={<WooCommercePage />} />
     <Route
       path="/mercadolibre"
       element={<MercadoLibreReportsPage />}
@@ -81,9 +75,9 @@ const AppRoutes: React.FC = () => (
     <Route path="/clientes/ranking" element={<ClientesRankingPage />} />
     <Route path="/clientes/import" element={<ClientesImportPage />} />
     <Route path="/gastos" element={<GastosPage />} />
+    <Route path="/gastos/lista" element={<GastosListPage />} />
+    <Route path="/gastos/analisis" element={<GastosAnalysisPage />} />
     <Route path="/envios" element={<EnviosPage />} />
-    <Route path="/publicidad" element={<RequireAuth allowedRoles={["viewer"]}><PublicidadPage /></RequireAuth>} />
-    <Route path="/procesador-imagenes" element={<ProcesadorImagenesPage />} />
     {/* 404 simple */}
     <Route path="*" element={
       <div className="flex flex-col items-center justify-center min-h-[70vh]">

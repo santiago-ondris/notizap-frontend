@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import * as authService from "@/services/authService";
+import LoginForm from "@/components/Login/LoginForm";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -9,6 +10,7 @@ interface AuthContextType {
   login: (data: authService.LoginRequest) => Promise<void>;
   register: (data: authService.RegisterRequest) => Promise<void>;
   logout: () => void;
+  openLoginModal: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,6 +20,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [role, setRole] = useState<string | null>(() => localStorage.getItem("userRole"));
   const [username, setUsername] = useState<string | null>(() => localStorage.getItem("userName"));
   const [email, setEmail] = useState<string | null>(() => localStorage.getItem("userEmail"));
+
+  // Estado para controlar el LoginForm
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   useEffect(() => {
     setIsAuthenticated(!!localStorage.getItem("token"));
@@ -48,13 +53,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setRole(null);
     setUsername(null);
     setEmail(null);
+    localStorage.removeItem("token");
+    localStorage.removeItem("userRole");
     localStorage.removeItem("userName");
     localStorage.removeItem("userEmail");
   };
 
+  const openLoginModal = () => setLoginModalOpen(true);
+  const closeLoginModal = () => setLoginModalOpen(false);
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, role, username, email, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        role,
+        username,
+        email,
+        login,
+        register,
+        logout,
+        openLoginModal,
+      }}
+    >
       {children}
+
+      {/* Mostrar LoginForm cuando se requiera autenticación */}
+      {loginModalOpen && (
+        <LoginForm
+          onSuccess={closeLoginModal}
+          onClose={closeLoginModal}
+        />
+      )}
     </AuthContext.Provider>
   );
 };

@@ -286,7 +286,7 @@ const CambiosPage: React.FC = () => {
             {puedeEditar && (
               <button
                 onClick={handleNuevoCambio}
-                className="flex items-center gap-2 px-6 py-2 bg-[#51590E]/20 hover:bg-[#51590E]/30 border border-[#51590E]/30 rounded-lg text-[#51590E] transition-all"
+                className="flex items-center gap-2 px-6 py-2 bg-[#D94854]/20 hover:bg-[#51590E]/30 border border-[white]/30 rounded-lg text-[white] transition-all"
               >
                 <Plus className="w-4 h-4" />
                 <span>Nuevo Cambio</span>

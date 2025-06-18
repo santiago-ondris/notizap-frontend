@@ -1,16 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { Navbar } from "@/components/Landing/Navbar";
-import LoginForm from "@/components/Login/LoginForm";
-import RegisterForm from "@/components/Login/RegisterForm";
-import ForgotPasswordForm from "@/components/Login/ForgotPasswordForm";
 import { useAuth } from "@/contexts/AuthContext";
 import "@/store/useArchivosAnalisis";
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  const [showLogin, setShowLogin] = useState(false);
-  const [showRegister, setShowRegister] = useState(false);
-  const [showForgot, setShowForgot] = useState(false);
+  const { openLoginModal } = useAuth();
 
   return (
     <div className="relative min-h-screen w-full">
@@ -45,8 +39,8 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </div>
 
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Navbar onLoginClick={() => setShowLogin(true)} />
-        
+       <Navbar onLoginClick={openLoginModal} />
+         
         {/* Main content wrapper */}
         <main className="flex-1 pt-16">
           <div className="relative">
@@ -84,34 +78,6 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
         </footer>
       </div>
-
-      {/* Modal Forms */}
-      {showLogin && !isAuthenticated && (
-        <LoginForm
-          onSuccess={() => setShowLogin(false)}
-          onClose={() => setShowLogin(false)}
-          onShowRegister={() => {
-            setShowLogin(false);
-            setShowRegister(true);
-          }}
-          onShowForgot={() => {
-            setShowLogin(false);
-            setShowForgot(true);
-          }}
-        />
-      )}
-      {showRegister && (
-        <RegisterForm
-          onSuccess={() => {
-            setShowRegister(false);
-            setShowLogin(true);
-          }}
-          onClose={() => setShowRegister(false)}
-        />
-      )}
-      {showForgot && (
-        <ForgotPasswordForm onClose={() => setShowForgot(false)} />
-      )}
     </div>
   );
 };

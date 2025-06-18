@@ -12,7 +12,6 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
   const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Simple CSS animations instead of GSAP for better compatibility
     const leftRocket = rocketLeftRef.current;
     const rightRocket = rocketRightRef.current;
     

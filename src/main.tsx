@@ -8,7 +8,6 @@ import "./index.css";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import AppLayout from "@/layouts/AppLayout";
 import "@/store/useArchivosAnalisis";
 
 const queryClient = new QueryClient();
@@ -27,9 +26,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <LenisWrapper>
         <AuthProvider>
           <BrowserRouter>
-            <AppLayout>
               <AppRoutes />
-            </AppLayout>
             <ToastContainer position="top-center" autoClose={2500} />
           </BrowserRouter>
         </AuthProvider>

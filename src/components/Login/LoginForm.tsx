@@ -6,11 +6,9 @@ import { X } from "lucide-react";
 interface LoginFormProps {
   onSuccess: () => void;
   onClose: () => void;
-  onShowRegister: () => void;
-  onShowForgot: () => void;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onClose, onShowRegister, onShowForgot }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onClose }) => {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -66,14 +64,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onClose, onShowRegiste
         >
           {loading ? "Ingresando..." : "Ingresar"}
         </button>
-        <div className="flex justify-between mt-4 text-sm">
-          <button type="button" className="text-[#B695BF] hover:underline" onClick={onShowForgot}>
-            ¿Olvidaste tu contraseña?
-          </button>
-          <button type="button" className="text-[#D94854] hover:underline" onClick={onShowRegister}>
-            Registrarme
-          </button>
-        </div>
       </form>
     </div>
   );

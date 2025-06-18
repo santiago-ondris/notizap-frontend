@@ -26,9 +26,7 @@ const AppRoutes: React.FC = () => (
     <Route
       path="/"
       element={
-        <RequireAuth allowedRoles={["admin", "superadmin"]}>
           <LandingPage />
-        </RequireAuth>
       }
     />
 

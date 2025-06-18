@@ -14,7 +14,7 @@ export interface CreateCambioSimpleDto {
   parPedido: boolean;
   diferenciaAbonada?: number;
   diferenciaAFavor?: number;
-  responsable?: string;
+  envio?: string;
   observaciones?: string;
 }
 
@@ -35,6 +35,7 @@ export interface EstadosCambio {
   llegoAlDeposito: boolean;
   yaEnviado: boolean;
   cambioRegistradoSistema: boolean;
+  parPedido : boolean;
 }
 
 /**
@@ -48,7 +49,7 @@ export interface CambiosFiltros {
   nombre?: string;
   motivo?: string;
   estado?: EstadoCambioFiltro;
-  responsable?: string;
+  envio?: string;
 }
 
 /**
@@ -60,7 +61,8 @@ export type EstadoCambioFiltro =
   | 'listo_envio'          // llegoAlDeposito && !yaEnviado
   | 'enviado'              // yaEnviado
   | 'completado'           // llegoAlDeposito && yaEnviado && cambioRegistradoSistema
-  | 'sin_registrar';       // !cambioRegistradoSistema
+  | 'sin_registrar';  
+         // !cambioRegistradoSistema
 
 /**
  * Estadísticas del módulo de cambios
@@ -81,14 +83,12 @@ export interface CambiosEstadisticasData {
  * Motivos comunes de cambio (para dropdown)
  */
 export const MOTIVOS_CAMBIO = [
-  'Talle incorrecto',
-  'Modelo equivocado',
-  'Defecto de fábrica',
+  'Talle',
+  'Modelo',
+  'Falla de fábrica',
   'No le gustó',
-  'Color incorrecto',
+  'Color',
   'Diferente a la foto',
-  'Problema de calidad',
-  'Pedido duplicado',
   'Otro'
 ] as const;
 

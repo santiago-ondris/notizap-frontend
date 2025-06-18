@@ -77,7 +77,7 @@ export const CambioModal: React.FC<CambioModalProps> = ({
     diferenciaAFavor: undefined,
     email: '',
     observaciones: '',
-    responsable: ''
+    envio: ''
   });
   const [errores, setErrores] = useState<Record<string, string>>({});
   const [stepActual, setStepActual] = useState(1);

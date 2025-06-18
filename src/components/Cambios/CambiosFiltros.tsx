@@ -321,22 +321,6 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
                   />
                 </div>
               </div>
-
-              {/* Responsable */}
-              <div>
-                <label className="block text-xs font-medium text-white/60 mb-1">Responsable</label>
-                <div className="relative">
-                  <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
-                  <input
-                    type="text"
-                    value={filtrosLocales.responsable || ''}
-                    onChange={(e) => handleFiltroChange('responsable', e.target.value)}
-                    placeholder="Buscar por responsable..."
-                    className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#B695BF] transition-all text-sm"
-                    disabled={cargando}
-                  />
-                </div>
-              </div>
             </div>
 
             {/* Fila 2: Dropdowns */}

@@ -11,7 +11,10 @@ import {
   Loader2,
   AlertTriangle,
   DollarSign,
-  FileText
+  FileText,
+  Check,
+  X,
+  Edit
 } from 'lucide-react';
 import { 
   type CambioSimpleDto, 
@@ -22,6 +25,7 @@ import cambiosService from '@/services/cambios/cambiosService';
 interface CambiosTablaProps {
   cambios: CambioSimpleDto[];
   onActualizarEstados: (id: number, estados: EstadosCambio) => Promise<boolean>;
+  onActualizarEnvio: (id: number, envio: string) => Promise<boolean>;
   onEliminar: (id: number) => Promise<boolean>;
   onVerDetalle: (cambio: CambioSimpleDto) => void;
   onEditar: (cambio: CambioSimpleDto) => void;
@@ -80,11 +84,143 @@ const CheckboxInline: React.FC<{
 };
 
 /**
+ * Componente de campo de envío editable inline
+ */
+const CampoEnvioEditable: React.FC<{
+  valor: string;
+  onCambio: (nuevoValor: string) => Promise<boolean>;
+  deshabilitado?: boolean;
+}> = ({ valor, onCambio, deshabilitado = false }) => {
+  const [editando, setEditando] = useState(false);
+  const [valorTemporal, setValorTemporal] = useState(valor);
+  const [guardando, setGuardando] = useState(false);
+
+  // Resetear valor temporal cuando cambia el valor original
+  React.useEffect(() => {
+    setValorTemporal(valor || '');
+  }, [valor]);
+
+  const iniciarEdicion = () => {
+    if (deshabilitado) return;
+    setEditando(true);
+    setValorTemporal(valor || '');
+  };
+
+  const cancelarEdicion = () => {
+    setEditando(false);
+    setValorTemporal(valor || '');
+  };
+
+  const guardarCambio = async () => {
+    if (guardando) return;
+    
+    const nuevoValor = valorTemporal.trim();
+    
+    // Si no hay cambios, solo salir del modo edición
+    if (nuevoValor === (valor || '')) {
+      setEditando(false);
+      return;
+    }
+
+    setGuardando(true);
+    try {
+      const exito = await onCambio(nuevoValor);
+      if (exito) {
+        setEditando(false);
+      }
+    } finally {
+      setGuardando(false);
+    }
+  };
+
+  const manejarKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      guardarCambio();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelarEdicion();
+    }
+  };
+
+  if (!editando) {
+    return (
+      <div className="group relative">
+        <button
+          onClick={iniciarEdicion}
+          disabled={deshabilitado}
+          className={`
+            text-left w-full min-h-[32px] px-2 py-1 rounded text-sm
+            ${deshabilitado 
+              ? 'cursor-not-allowed opacity-50' 
+              : 'hover:bg-white/10 cursor-pointer'
+            }
+            ${valor ? 'text-white' : 'text-white/50'}
+          `}
+          title={deshabilitado ? 'No tienes permisos para editar' : 'Clic para editar envío'}
+        >
+          <div className="flex items-center gap-2">
+            <span className="flex-1">
+              {valor || 'Sin asignar'}
+            </span>
+            {!deshabilitado && (
+              <Edit className="w-3 h-3 text-white/40 opacity-0 group-hover:opacity-100 transition-opacity" />
+            )}
+          </div>
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1">
+      <input
+        type="text"
+        value={valorTemporal}
+        onChange={(e) => setValorTemporal(e.target.value)}
+        onKeyDown={manejarKeyDown}
+        placeholder="Ingresa envío..."
+        autoFocus
+        disabled={guardando}
+        className="
+          flex-1 px-2 py-1 text-sm bg-white/10 border border-white/20 rounded
+          focus:outline-none focus:border-[#B695BF] focus:bg-white/15
+          disabled:opacity-50 text-white placeholder-white/50
+        "
+      />
+      
+      <button
+        onClick={guardarCambio}
+        disabled={guardando}
+        className="p-1 text-[#51590E] hover:bg-[#51590E]/20 rounded transition-colors disabled:opacity-50"
+        title="Guardar (Enter)"
+      >
+        {guardando ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <Check className="w-4 h-4" />
+        )}
+      </button>
+      
+      <button
+        onClick={cancelarEdicion}
+        disabled={guardando}
+        className="p-1 text-[#D94854] hover:bg-[#D94854]/20 rounded transition-colors disabled:opacity-50"
+        title="Cancelar (Escape)"
+      >
+        <X className="w-4 h-4" />
+      </button>
+    </div>
+  );
+};
+
+/**
  * Componente de fila de cambio
  */
 const FilaCambio: React.FC<{
   cambio: CambioSimpleDto;
   onActualizarEstados: (id: number, estados: EstadosCambio) => Promise<boolean>;
+  onActualizarEnvio: (id: number, envio: string) => Promise<boolean>;
   onEliminar: (id: number) => Promise<boolean>;
   onVerDetalle: (cambio: CambioSimpleDto) => void;
   onEditar: (cambio: CambioSimpleDto) => void;
@@ -92,6 +228,7 @@ const FilaCambio: React.FC<{
 }> = ({ 
   cambio, 
   onActualizarEstados, 
+  onActualizarEnvio,
   onEliminar, 
   onVerDetalle, 
   onEditar, 
@@ -108,10 +245,16 @@ const FilaCambio: React.FC<{
       llegoAlDeposito: cambio.llegoAlDeposito,
       yaEnviado: cambio.yaEnviado,
       cambioRegistradoSistema: cambio.cambioRegistradoSistema,
+      parPedido: cambio.parPedido,
       [campo]: nuevoValor
     };
 
     return await onActualizarEstados(cambio.id, estadosActualizados);
+  };
+
+  // Manejar actualización de envío
+  const handleActualizarEnvio = async (nuevoEnvio: string) => {
+    return await onActualizarEnvio(cambio.id, nuevoEnvio);
   };
 
   // Manejar eliminación
@@ -237,6 +380,17 @@ const FilaCambio: React.FC<{
         </div>
       </td>
 
+      {/* Checkbox: Par pedido*/}
+      <td className="px-3 py-3 border-r border-white/10">
+        <CheckboxInline
+          valor={cambio.parPedido}
+          onCambio={(valor) => handleActualizarEstado('parPedido', valor)}
+          deshabilitado={!puedeEditar}
+          color="#FFD700"
+          label="Par pedido"
+        />
+      </td>      
+
       {/* Checkbox: Llegó al Depósito */}
       <td className="px-3 py-3 border-r border-white/10">
         <CheckboxInline
@@ -270,12 +424,14 @@ const FilaCambio: React.FC<{
         />
       </td>
 
-      {/* Responsable */}
-      <td className="px-3 py-3 border-r border-white/10">
-        <span className="text-xs text-white/70">
-          {cambio.responsable || '-'}
-        </span>
-      </td>
+      {/* Envío - Campo editable */}
+      <td className="px-3 py-3 border-r border-white/10 min-w-[150px]">
+        <CampoEnvioEditable
+          valor={cambio.envio || ''}
+          onCambio={handleActualizarEnvio}
+          deshabilitado={!puedeEditar}
+        />
+      </td>      
 
       {/* Acciones */}
       <td className="px-3 py-3">
@@ -328,6 +484,7 @@ const FilaCambio: React.FC<{
 export const CambiosTabla: React.FC<CambiosTablaProps> = ({
   cambios,
   onActualizarEstados,
+  onActualizarEnvio,
   onEliminar,
   onVerDetalle,
   onEditar,
@@ -395,7 +552,7 @@ export const CambiosTabla: React.FC<CambiosTablaProps> = ({
 
       {/* Tabla con scroll horizontal */}
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1200px]">
+        <table className="w-full min-w-[1400px]">
           
           {/* Header de columnas */}
           <thead className="bg-white/5">
@@ -421,6 +578,9 @@ export const CambiosTabla: React.FC<CambiosTablaProps> = ({
               <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
                 📊 Estado
               </th>
+              <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
+                🙉 Par Pedido
+              </th>              
               <th className="px-3 py-3 text-center text-sm font-medium text-[#FFD700] border-r border-white/10">
                 🏠 Llegó
               </th>
@@ -431,7 +591,7 @@ export const CambiosTabla: React.FC<CambiosTablaProps> = ({
                 ✅ Sistema
               </th>
               <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
-                👨‍💼 Responsable
+                📦 Envío
               </th>
               <th className="px-3 py-3 text-center text-sm font-medium text-white/80">
                 ⚙️ Acciones
@@ -446,6 +606,7 @@ export const CambiosTabla: React.FC<CambiosTablaProps> = ({
                 key={cambio.id}
                 cambio={cambio}
                 onActualizarEstados={onActualizarEstados}
+                onActualizarEnvio={onActualizarEnvio}
                 onEliminar={onEliminar}
                 onVerDetalle={onVerDetalle}
                 onEditar={onEditar}
@@ -467,7 +628,7 @@ export const CambiosTabla: React.FC<CambiosTablaProps> = ({
           {puedeEditar && (
             <div className="flex items-center gap-2">
               <span className="text-[#FFD700]">
-                💡 Haz clic en los checkboxes para actualizar estados
+                💡 Haz clic en los checkboxes para actualizar estados | Clic en Envío para editar
               </span>
             </div>
           )}

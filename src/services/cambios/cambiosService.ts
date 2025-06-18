@@ -90,6 +90,22 @@ class CambiosService {
     }
   }
 
+  async actualizarEnvio(id: number, envio: string): Promise<void> {
+    try {
+      const cambioCompleto = await this.obtenerPorId(id);
+      
+      const cambioActualizado: CambioSimpleDto = {
+        ...cambioCompleto,
+        envio: envio.trim() // Limpiamos espacios en blanco
+      };
+  
+      await this.actualizarSinValidacionCompleta(id, cambioActualizado);
+    } catch (error) {
+      console.error('Error al actualizar envío:', error);
+      throw new Error('Error al actualizar el envío del cambio');
+    }
+  }
+
   /**
    * Actualizar solo los estados de un cambio (para checkboxes inline)
    */
@@ -164,11 +180,6 @@ class CambiosService {
 
       // Filtro por motivo
       if (filtros.motivo && cambio.motivo !== filtros.motivo) {
-        return false;
-      }
-
-      // Filtro por responsable
-      if (filtros.responsable && cambio.responsable !== filtros.responsable) {
         return false;
       }
 

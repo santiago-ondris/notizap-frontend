@@ -262,10 +262,10 @@ export const CambioDetalle: React.FC<CambioDetalleProps> = ({
                     valor={cambio.parPedido ? 'Sí' : 'No'}
                     icono={<FileText className="w-4 h-4 text-white/40" />}
                   />
-                  {cambio.responsable && (
+                  {cambio.envio && (
                     <CampoInfo
-                      label="Responsable"
-                      valor={cambio.responsable}
+                      label="Envio"
+                      valor={cambio.envio}
                       icono={<User className="w-4 h-4 text-white/40" />}
                     />
                   )}

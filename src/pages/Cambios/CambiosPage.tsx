@@ -89,6 +89,24 @@ const CambiosPage: React.FC = () => {
     setFiltros(nuevosFiltros);
   };
 
+  const handleActualizarEnvio = async (id: number, envio: string): Promise<boolean> => {
+    if (!puedeEditar) {
+      toast.error('No tienes permisos para actualizar envío');
+      return false;
+    }
+  
+    try {
+      await cambiosService.actualizarEnvio(id, envio);
+      toast.success('Envío actualizado correctamente');
+      await cargarCambios(); // Recargar datos
+      return true;
+    } catch (error) {
+      const mensaje = error instanceof Error ? error.message : 'Error al actualizar envío';
+      toast.error(mensaje);
+      return false;
+    }
+  };
+
   const handleGuardarCambio = async (cambioData: CambioSimpleDto | CreateCambioSimpleDto): Promise<boolean> => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para modificar cambios');
@@ -348,6 +366,7 @@ const CambiosPage: React.FC = () => {
             onEditar={handleEditarModal}
             puedeEditar={puedeEditar}
             cargando={cargandoDatos}
+            onActualizarEnvio={handleActualizarEnvio}
           />
         )}
         {/* Cards de estadísticas */}

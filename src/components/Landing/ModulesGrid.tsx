@@ -71,6 +71,7 @@ const modules = [
     description: "Gestión estructurada de cambios y devoluciones",
     icon: Repeat,
     color: "#F23D5E",
+    to: "/cambios",
     roles: ["admin", "superadmin"]
   },
   {

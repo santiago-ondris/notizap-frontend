@@ -3,21 +3,21 @@ import {
   Package, 
   Clock, 
   CheckCircle, 
-  Truck, 
+  DollarSign, 
   AlertTriangle,
-  DollarSign,
   TrendingUp,
+  FileText,
+  CreditCard,
+  Calculator,
+  Calendar
 } from 'lucide-react';
-import { type CambiosEstadisticasData } from '@/types/cambios/cambiosTypes';
+import { type DevolucionesEstadisticasData } from '@/types/cambios/devolucionesTypes';
 
-interface CambiosEstadisticasProps {
-  estadisticas: CambiosEstadisticasData | null;
+interface DevolucionesEstadisticasProps {
+  estadisticas: DevolucionesEstadisticasData | null;
   cargando?: boolean;
 }
 
-/**
- * Componente de card individual para estadísticas
- */
 const StatCard: React.FC<{
   titulo: string;
   valor: string | number;
@@ -54,9 +54,9 @@ const StatCard: React.FC<{
 );
 
 /**
- * Componente principal de estadísticas de cambios
+ * Componente principal de estadísticas de devoluciones
  */
-export const CambiosEstadisticas: React.FC<CambiosEstadisticasProps> = ({
+export const DevolucionesEstadisticas: React.FC<DevolucionesEstadisticasProps> = ({
   estadisticas,
   cargando = false
 }) => {
@@ -94,7 +94,7 @@ export const CambiosEstadisticas: React.FC<CambiosEstadisticasProps> = ({
             No hay estadísticas disponibles
           </h3>
           <p className="text-white/60 text-sm">
-            Carga algunos cambios para ver las estadísticas
+            Carga algunas devoluciones para ver las estadísticas
           </p>
         </div>
       </div>
@@ -105,15 +105,15 @@ export const CambiosEstadisticas: React.FC<CambiosEstadisticasProps> = ({
     <div className="space-y-6">
       {/* Header de estadísticas */}
       <div className="flex items-center gap-3">
-        <div className="p-2 bg-[#B695BF]/20 border border-[#B695BF]/30 rounded-lg">
-          <TrendingUp className="w-5 h-5 text-[#B695BF]" />
+        <div className="p-2 bg-[#D94854]/20 border border-[#D94854]/30 rounded-lg">
+          <TrendingUp className="w-5 h-5 text-[#D94854]" />
         </div>
         <div>
           <h3 className="text-xl font-semibold text-white">
-            📊 Estadísticas de Cambios
+            📊 Estadísticas de Devoluciones
           </h3>
           <p className="text-white/60 text-sm">
-            Resumen general del estado de los cambios
+            Resumen general del estado de las devoluciones
           </p>
         </div>
       </div>
@@ -121,13 +121,13 @@ export const CambiosEstadisticas: React.FC<CambiosEstadisticasProps> = ({
       {/* Grid de estadísticas principales */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        {/* Total de cambios */}
+        {/* Total de devoluciones */}
         <StatCard
-          titulo="Total de Cambios"
-          valor={estadisticas.totalCambios}
-          descripcion="Cambios registrados en total"
+          titulo="Total de Devoluciones"
+          valor={estadisticas.totalDevoluciones}
+          descripcion="Devoluciones registradas en total"
           icono={<Package className="w-5 h-5" />}
-          color="#e327c4"
+          color="#D94854"
         />
 
         {/* Pendientes de llegada */}
@@ -139,29 +139,15 @@ export const CambiosEstadisticas: React.FC<CambiosEstadisticasProps> = ({
           color="#FFD700"
         />
 
-        {/* Listos para envío */}
+        {/* Llegados sin procesar */}
         <StatCard
-          titulo="Listos para Envío"
-          valor={estadisticas.listosParaEnvio}
-          descripcion="Llegaron y están listos para OCA"
-          icono={<Truck className="w-5 h-5" />}
-          color="#B695BF"
+          titulo="Sin Procesar"
+          valor={estadisticas.llegadosSinProcesar}
+          descripcion="Llegaron pero falta dinero/nota"
+          icono={<AlertTriangle className="w-5 h-5" />}
+          color="#e327c4"
         />
 
-        {/* Enviados */}
-        <StatCard
-          titulo="Enviados"
-          valor={estadisticas.enviados}
-          descripcion="Ya fueron despachados"
-          icono={<CheckCircle className="w-5 h-5" />}
-          color="#51590E"
-        />
-
-      </div>
-
-      {/* Grid de estadísticas secundarias */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        
         {/* Completados */}
         <StatCard
           titulo="Completados"
@@ -171,84 +157,110 @@ export const CambiosEstadisticas: React.FC<CambiosEstadisticasProps> = ({
           color="#51590E"
         />
 
-        {/* Sin registrar en sistema */}
-        <StatCard
-          titulo="Sin Registrar"
-          valor={estadisticas.sinRegistrar}
-          descripcion="Faltan registrar en el sistema"
-          icono={<AlertTriangle className="w-5 h-5" />}
-          color="#D94854"
-        />
+      </div>
 
-        {/* Diferencia abonada */}
+      {/* Grid de estadísticas de proceso */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        {/* Dinero devuelto */}
         <StatCard
-          titulo="Diferencia Abonada"
-          valor={`$${estadisticas.diferenciaAbonada.toLocaleString('es-AR')}`}
-          descripcion="Total cobrado por diferencias"
+          titulo="Dinero Devuelto"
+          valor={estadisticas.dineroDevuelto}
+          descripcion="Con reembolso procesado"
           icono={<DollarSign className="w-5 h-5" />}
           color="#51590E"
         />
 
-        {/* Diferencia a favor */}
+        {/* Notas de crédito */}
         <StatCard
-          titulo="Diferencia a Favor"
-          valor={`$${estadisticas.diferenciaAFavor.toLocaleString('es-AR')}`}
-          descripcion="Total devuelto a clientes"
-          icono={<DollarSign className="w-5 h-5" />}
+          titulo="Notas Emitidas"
+          valor={estadisticas.notasEmitidas}
+          descripcion="Con nota de crédito emitida"
+          icono={<FileText className="w-5 h-5" />}
+          color="#B695BF"
+        />
+
+        {/* Sin procesar */}
+        <StatCard
+          titulo="Sin Procesar"
+          valor={estadisticas.sinProcesar}
+          descripcion="Faltan acciones pendientes"
+          icono={<AlertTriangle className="w-5 h-5" />}
           color="#D94854"
+        />
+
+        {/* Mes actual */}
+        <StatCard
+          titulo="Este Mes"
+          valor={estadisticas.devolucionesMesActual}
+          descripcion="Devoluciones del mes actual"
+          icono={<Calendar className="w-5 h-5" />}
+          color="#B695BF"
         />
 
       </div>
 
-      {/* Card de diferencia neta */}
-      <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6">
+      {/* Grid de estadísticas monetarias */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        {/* Monto total devoluciones */}
+        <StatCard
+          titulo="Monto Total"
+          valor={`$${estadisticas.montoTotalDevoluciones.toLocaleString('es-AR')}`}
+          descripcion="Total en devoluciones procesadas"
+          icono={<DollarSign className="w-5 h-5" />}
+          color="#D94854"
+        />
+
+        {/* Pago envío total */}
+        <StatCard
+          titulo="Costos de Envío"
+          valor={`$${estadisticas.montoTotalPagosEnvio.toLocaleString('es-AR')}`}
+          descripcion="Total pagado en envíos"
+          icono={<CreditCard className="w-5 h-5" />}
+          color="#FFD700"
+        />
+
+        {/* Promedio por devolución */}
+        <StatCard
+          titulo="Promedio Devolución"
+          valor={`$${Math.round(estadisticas.montoPromedioDevolucion).toLocaleString('es-AR')}`}
+          descripcion="Monto promedio por devolución"
+          icono={<Calculator className="w-5 h-5" />}
+          color="#B695BF"
+        />
+
+      </div>
+
+      {/* Card resumen de costos */}
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div 
-              className="p-3 rounded-lg border"
-              style={{ 
-                backgroundColor: estadisticas.diferencianNeta >= 0 ? '#51590E20' : '#D9485420',
-                borderColor: estadisticas.diferencianNeta >= 0 ? '#51590E30' : '#D9485430'
-              }}
-            >
-              <DollarSign 
-                className="w-6 h-6"
-                style={{ 
-                  color: estadisticas.diferencianNeta >= 0 ? '#51590E' : '#D94854'
-                }}
-              />
+            <div className="p-3 bg-[#D94854]/20 border border-[#D94854]/30 rounded-lg">
+              <Calculator className="w-6 h-6 text-[#D94854]" />
             </div>
             <div>
               <h4 className="text-lg font-semibold text-white mb-1">
-                💰 Diferencia Neta
+                💰 Costo Total de Devoluciones
               </h4>
               <p className="text-white/60 text-sm">
-                {estadisticas.diferencianNeta >= 0 
-                  ? 'Ganancia total por diferencias de precio'
-                  : 'Pérdida total por diferencias de precio'
-                }
+                Suma de devoluciones + costos de envío
               </p>
             </div>
           </div>
           <div className="text-right">
-            <div 
-              className="text-3xl font-bold"
-              style={{ 
-                color: estadisticas.diferencianNeta >= 0 ? '#51590E' : '#D94854'
-              }}
-            >
-              {estadisticas.diferencianNeta >= 0 ? '+' : ''}$
-              {Math.abs(estadisticas.diferencianNeta).toLocaleString('es-AR')}
+            <div className="text-3xl font-bold text-[#D94854]">
+              $
+              {(estadisticas.montoTotalDevoluciones + estadisticas.montoTotalPagosEnvio).toLocaleString('es-AR')}
             </div>
             <div className="text-sm text-white/50 mt-1">
-              {estadisticas.diferencianNeta >= 0 ? '📈 Favorable' : '📉 Desfavorable'}
+              📊 Impacto total
             </div>
           </div>
         </div>
       </div>
-
     </div>
   );
 };
 
-export default CambiosEstadisticas;
+export default DevolucionesEstadisticas;

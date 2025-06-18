@@ -204,3 +204,7 @@ select::-webkit-scrollbar-thumb:hover {
   background-color: #3b82f6 !important;
   color: white !important;
 }
+
+.dropdown-portal {
+  box-sizing: border-box;
+}

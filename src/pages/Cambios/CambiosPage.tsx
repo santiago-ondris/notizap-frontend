@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowRightLeft, Plus, RefreshCw, AlertCircle, Eye } from 'lucide-react';
+import { ArrowRightLeft, Plus, RefreshCw, AlertCircle, Eye, Package } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useAuth } from '@/contexts/AuthContext';
 import CambiosEstadisticas from '@/components/Cambios/CambiosEstadisticas';
@@ -15,10 +15,12 @@ import {
   type CambiosEstadisticasData as EstadisticasType,
   type EstadosCambio
 } from '@/types/cambios/cambiosTypes';
+import { useNavigate } from 'react-router';
 
 const CambiosPage: React.FC = () => {
   // Context de autenticación
   const { role } = useAuth();
+  const navigate = useNavigate();
 
   // Estados principales
   const [cambios, setCambios] = useState<CambioSimpleDto[]>([]);
@@ -252,48 +254,58 @@ const CambiosPage: React.FC = () => {
     <div className="min-h-screen bg-[#1A1A20] p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#D94854]/20 border border-[#D94854]/30 rounded-lg">
-              <ArrowRightLeft className="w-6 h-6 text-[#D94854]" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-white">
-                🔄 Gestión de Cambios
-              </h1>
-              <p className="text-white/60 text-sm">
-                Control de cambios de productos y seguimiento de estados
-              </p>
-            </div>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-[#D94854]/20 border border-[#D94854]/30 rounded-lg">
+            <ArrowRightLeft className="w-6 h-6 text-[#D94854]" />
           </div>
-
-          {/* Controles del header */}
-          <div className="flex items-center gap-3">
-            
-            {/* Botón de recarga */}
-            <button
-              onClick={recargarDatos}
-              disabled={cargandoDatos}
-              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 border border-white/20 rounded-lg text-white/80 transition-all disabled:opacity-50"
-              title="Actualizar datos"
-            >
-              <RefreshCw className={`w-4 h-4 ${cargandoDatos ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Actualizar</span>
-            </button>
-
-            {/* Botón crear nuevo cambio */}
-            {puedeEditar && (
-              <button
-                onClick={handleNuevoCambio}
-                className="flex items-center gap-2 px-6 py-2 bg-[#D94854]/20 hover:bg-[#51590E]/30 border border-[white]/30 rounded-lg text-[white] transition-all"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Nuevo Cambio</span>
-              </button>
-            )}
+          <div>
+            <h1 className="text-3xl font-bold text-white">
+              🔄 Gestión de Cambios
+            </h1>
+            <p className="text-white/60 text-sm">
+              Control de cambios de productos y seguimiento de estados
+            </p>
           </div>
         </div>
+
+      {/* Controles del header */}
+      <div className="flex items-center gap-3">
+        
+        {/* Botón Ver Devoluciones */}
+        <button
+          onClick={() => navigate('/cambios/devoluciones')}
+          className="flex items-center gap-2 px-4 py-2 bg-[#B695BF]/20 hover:bg-[#B695BF]/30 border border-[#B695BF]/30 rounded-lg text-[#B695BF] transition-all"
+          title="Ver módulo de devoluciones"
+        >
+          <Package className="w-4 h-4" />
+          <span className="hidden sm:inline">Devoluciones</span>
+        </button>
+        
+        {/* Botón de recarga */}
+        <button
+          onClick={recargarDatos}
+          disabled={cargandoDatos}
+          className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 border border-white/20 rounded-lg text-white/80 transition-all disabled:opacity-50"
+          title="Actualizar datos"
+        >
+          <RefreshCw className={`w-4 h-4 ${cargandoDatos ? 'animate-spin' : ''}`} />
+          <span className="hidden sm:inline">Actualizar</span>
+        </button>
+
+        {/* Botón crear nuevo cambio */}
+        {puedeEditar && (
+          <button
+            onClick={handleNuevoCambio}
+            className="flex items-center gap-2 px-6 py-2 bg-[#D94854]/20 hover:bg-[#51590E]/30 border border-[white]/30 rounded-lg text-[white] transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Nuevo Cambio</span>
+          </button>
+        )}
+      </div>
+    </div>
 
         {/* Mensaje de permisos para viewers */}
         {!puedeEditar && (
@@ -304,12 +316,6 @@ const CambiosPage: React.FC = () => {
             </span>
           </div>
         )}
-
-        {/* Cards de estadísticas */}
-        <CambiosEstadisticas
-          estadisticas={estadisticas}
-          cargando={cargandoDatos}
-        />
 
         {/* Filtros */}
         <CambiosFiltros
@@ -344,6 +350,12 @@ const CambiosPage: React.FC = () => {
             cargando={cargandoDatos}
           />
         )}
+        {/* Cards de estadísticas */}
+        <CambiosEstadisticas
+          estadisticas={estadisticas}
+          cargando={cargandoDatos}
+        />
+
 
       </div>
 

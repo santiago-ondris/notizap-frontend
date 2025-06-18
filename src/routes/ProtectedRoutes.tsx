@@ -17,6 +17,7 @@ import { GastosListPage }            from "@/pages/Gastos/GastosListPage";
 import { GastosAnalysisPage }       from "@/pages/Gastos/GastosAnalysisPage";
 import EnviosPage                from "@/pages/Envios/EnviosPage";
 import CambiosPage               from "@/pages/Cambios/CambiosPage";
+import DevolucionesPage from "@/pages/Cambios/DevolucionesPage";
 
 export const ProtectedRoutes = (
   <>
@@ -44,6 +45,9 @@ export const ProtectedRoutes = (
       <Route path="analisis"         element={<GastosAnalysisPage />} />
     </Route>
     <Route path="envios"            element={<EnviosPage />} />
-    <Route path="cambios"           element={<CambiosPage />} />
+    <Route path="cambios">
+      <Route index                   element={<CambiosPage />} />
+      <Route path="devoluciones"            element={<DevolucionesPage />} />
+    </Route>
   </>
 );

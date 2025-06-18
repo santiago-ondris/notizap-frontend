@@ -4,31 +4,33 @@ import {
   Search, 
   Filter, 
   Calendar, 
-  User, 
   Phone, 
   FileText, 
   RotateCcw,
   ChevronDown,
-  X
+  X,
+  Package,
+  User,
+  DollarSign
 } from 'lucide-react';
 import { 
-  type CambiosFiltros as FiltrosType,
-  type EstadoCambioFiltro,
-  MOTIVOS_CAMBIO,
-  LABELS_ESTADO,
-  COLORES_ESTADO
-} from '@/types/cambios/cambiosTypes';
+  type DevolucionesFiltros as FiltrosType,
+  type EstadoDevolucionFiltro,
+  MOTIVOS_DEVOLUCION,
+  LABELS_ESTADO_DEVOLUCION,
+  COLORES_ESTADO_DEVOLUCION
+} from '@/types/cambios/devolucionesTypes';
 
-interface CambiosFiltrosProps {
+interface DevolucionesFiltrosProps {
   filtros: FiltrosType;
   onFiltrosChange: (filtros: FiltrosType) => void;
-  totalCambios: number;
-  cambiosFiltrados: number;
+  totalDevoluciones: number;
+  devolucionesFiltradas: number;
   cargando?: boolean;
 }
 
 /**
- * Componente de filtro desplegable con portal
+ * Componente de filtro desplegable
  */
 const FilterDropdown: React.FC<{
   label: string;
@@ -140,13 +142,13 @@ const FilterDropdown: React.FC<{
 };
 
 /**
- * Componente principal de filtros de cambios
+ * Componente principal de filtros de devoluciones
  */
-export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
+export const DevolucionesFiltros: React.FC<DevolucionesFiltrosProps> = ({
   filtros,
   onFiltrosChange,
-  totalCambios,
-  cambiosFiltrados,
+  totalDevoluciones,
+  devolucionesFiltradas,
   cargando = false
 }) => {
   const [mostrarFiltrosAvanzados, setMostrarFiltrosAvanzados] = useState(false);
@@ -188,19 +190,20 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
   );
 
   // Opciones para el dropdown de estados
-  const opcionesEstado: Array<{ value: EstadoCambioFiltro; label: string; color?: string }> = [
-    { value: 'todos', label: LABELS_ESTADO.todos },
-    { value: 'pendiente_llegada', label: LABELS_ESTADO.pendiente_llegada, color: COLORES_ESTADO.pendiente_llegada },
-    { value: 'listo_envio', label: LABELS_ESTADO.listo_envio, color: COLORES_ESTADO.listo_envio },
-    { value: 'enviado', label: LABELS_ESTADO.enviado, color: COLORES_ESTADO.enviado },
-    { value: 'completado', label: LABELS_ESTADO.completado, color: COLORES_ESTADO.completado },
-    { value: 'sin_registrar', label: LABELS_ESTADO.sin_registrar, color: COLORES_ESTADO.sin_registrar }
+  const opcionesEstado: Array<{ value: EstadoDevolucionFiltro; label: string; color?: string }> = [
+    { value: 'todos', label: LABELS_ESTADO_DEVOLUCION.todos },
+    { value: 'pendiente_llegada', label: LABELS_ESTADO_DEVOLUCION.pendiente_llegada, color: COLORES_ESTADO_DEVOLUCION.pendiente_llegada },
+    { value: 'llegado_sin_procesar', label: LABELS_ESTADO_DEVOLUCION.llegado_sin_procesar, color: COLORES_ESTADO_DEVOLUCION.llegado_sin_procesar },
+    { value: 'dinero_devuelto', label: LABELS_ESTADO_DEVOLUCION.dinero_devuelto, color: COLORES_ESTADO_DEVOLUCION.dinero_devuelto },
+    { value: 'nota_emitida', label: LABELS_ESTADO_DEVOLUCION.nota_emitida, color: COLORES_ESTADO_DEVOLUCION.nota_emitida },
+    { value: 'completado', label: LABELS_ESTADO_DEVOLUCION.completado, color: COLORES_ESTADO_DEVOLUCION.completado },
+    { value: 'sin_llegar', label: LABELS_ESTADO_DEVOLUCION.sin_llegar, color: COLORES_ESTADO_DEVOLUCION.sin_llegar }
   ];
 
   // Opciones para el dropdown de motivos
   const opcionesMotivo = [
     { value: '', label: 'Todos los motivos' },
-    ...MOTIVOS_CAMBIO.map(motivo => ({ value: motivo, label: motivo }))
+    ...MOTIVOS_DEVOLUCION.map(motivo => ({ value: motivo, label: motivo }))
   ];
 
   return (
@@ -219,7 +222,7 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
                 value={filtrosLocales.pedido || ''}
                 onChange={(e) => handleFiltroChange('pedido', e.target.value)}
                 placeholder="Buscar por número de pedido..."
-                className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#B695BF] transition-all"
+                className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#D94854] transition-all"
                 disabled={cargando}
               />
             </div>
@@ -234,7 +237,7 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
               className={`
                 flex items-center gap-2 px-4 py-2 border rounded-lg transition-all
                 ${mostrarFiltrosAvanzados || hayFiltrosActivos
-                  ? 'bg-[#B695BF]/20 border-[#B695BF]/30 text-[#B695BF]'
+                  ? 'bg-[#D94854]/20 border-[#D94854]/30 text-[#D94854]'
                   : 'bg-white/10 border-white/20 text-white/80 hover:bg-white/15'
                 }
               `}
@@ -242,7 +245,7 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
               <Filter className="w-4 h-4" />
               <span className="hidden sm:inline">Filtros</span>
               {hayFiltrosActivos && (
-                <span className="w-2 h-2 bg-[#B695BF] rounded-full"></span>
+                <span className="w-2 h-2 bg-[#D94854] rounded-full"></span>
               )}
             </button>
 
@@ -263,19 +266,19 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
           <div className="flex items-center gap-4 text-sm text-white/70">
             <span>
-              📋 Mostrando <strong className="text-white">{cambiosFiltrados}</strong> de{' '}
-              <strong className="text-white">{totalCambios}</strong> cambios
+              📋 Mostrando <strong className="text-white">{devolucionesFiltradas}</strong> de{' '}
+              <strong className="text-white">{totalDevoluciones}</strong> devoluciones
             </span>
             {hayFiltrosActivos && (
-              <span className="text-[#B695BF]">
+              <span className="text-[#D94854]">
                 🔍 Filtros activos
               </span>
             )}
           </div>
           
           {cargando && (
-            <div className="flex items-center gap-2 text-[#B695BF] text-sm">
-              <div className="w-4 h-4 border-2 border-[#B695BF]/30 border-t-[#B695BF] rounded-full animate-spin"></div>
+            <div className="flex items-center gap-2 text-[#D94854] text-sm">
+              <div className="w-4 h-4 border-2 border-[#D94854]/30 border-t-[#D94854] rounded-full animate-spin"></div>
               <span>Aplicando filtros...</span>
             </div>
           )}
@@ -290,22 +293,6 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
             {/* Fila 1: Búsquedas de texto */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               
-              {/* Cliente */}
-              <div>
-                <label className="block text-xs font-medium text-white/60 mb-1">Cliente</label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
-                  <input
-                    type="text"
-                    value={filtrosLocales.nombre || ''}
-                    onChange={(e) => handleFiltroChange('nombre', e.target.value)}
-                    placeholder="Buscar por nombre..."
-                    className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#B695BF] transition-all text-sm"
-                    disabled={cargando}
-                  />
-                </div>
-              </div>
-
               {/* Celular */}
               <div>
                 <label className="block text-xs font-medium text-white/60 mb-1">Celular</label>
@@ -316,7 +303,23 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
                     value={filtrosLocales.celular || ''}
                     onChange={(e) => handleFiltroChange('celular', e.target.value)}
                     placeholder="Buscar por celular..."
-                    className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#B695BF] transition-all text-sm"
+                    className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#D94854] transition-all text-sm"
+                    disabled={cargando}
+                  />
+                </div>
+              </div>
+
+              {/* Modelo */}
+              <div>
+                <label className="block text-xs font-medium text-white/60 mb-1">Modelo</label>
+                <div className="relative">
+                  <Package className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
+                  <input
+                    type="text"
+                    value={filtrosLocales.modelo || ''}
+                    onChange={(e) => handleFiltroChange('modelo', e.target.value)}
+                    placeholder="Buscar por modelo..."
+                    className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#D94854] transition-all text-sm"
                     disabled={cargando}
                   />
                 </div>
@@ -326,13 +329,13 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
               <div>
                 <label className="block text-xs font-medium text-white/60 mb-1">Responsable</label>
                 <div className="relative">
-                  <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
                   <input
                     type="text"
                     value={filtrosLocales.responsable || ''}
                     onChange={(e) => handleFiltroChange('responsable', e.target.value)}
                     placeholder="Buscar por responsable..."
-                    className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#B695BF] transition-all text-sm"
+                    className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#D94854] transition-all text-sm"
                     disabled={cargando}
                   />
                 </div>
@@ -344,7 +347,7 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
               
               {/* Estado */}
               <FilterDropdown
-                label="Estado del Cambio"
+                label="Estado de la Devolución"
                 value={filtrosLocales.estado || 'todos'}
                 onChange={(value) => handleFiltroChange('estado', value)}
                 options={opcionesEstado}
@@ -354,7 +357,7 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
 
               {/* Motivo */}
               <FilterDropdown
-                label="Motivo del Cambio"
+                label="Motivo de la Devolución"
                 value={filtrosLocales.motivo || ''}
                 onChange={(value) => handleFiltroChange('motivo', value)}
                 options={opcionesMotivo}
@@ -375,7 +378,7 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
                     type="date"
                     value={filtrosLocales.fechaDesde || ''}
                     onChange={(e) => handleFiltroChange('fechaDesde', e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-[#B695BF] transition-all text-sm"
+                    className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-[#D94854] transition-all text-sm"
                     disabled={cargando}
                   />
                 </div>
@@ -390,7 +393,47 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
                     type="date"
                     value={filtrosLocales.fechaHasta || ''}
                     onChange={(e) => handleFiltroChange('fechaHasta', e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-[#B695BF] transition-all text-sm"
+                    className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-[#D94854] transition-all text-sm"
+                    disabled={cargando}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Fila 4: Rango de montos */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              {/* Monto mínimo */}
+              <div>
+                <label className="block text-xs font-medium text-white/60 mb-1">Monto mínimo</label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
+                  <input
+                    type="number"
+                    min="0"
+                    step="100"
+                    value={filtrosLocales.montoMinimo || ''}
+                    onChange={(e) => handleFiltroChange('montoMinimo', e.target.value ? Number(e.target.value) : undefined)}
+                    placeholder="$ Mínimo"
+                    className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#D94854] transition-all text-sm"
+                    disabled={cargando}
+                  />
+                </div>
+              </div>
+
+              {/* Monto máximo */}
+              <div>
+                <label className="block text-xs font-medium text-white/60 mb-1">Monto máximo</label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
+                  <input
+                    type="number"
+                    min="0"
+                    step="100"
+                    value={filtrosLocales.montoMaximo || ''}
+                    onChange={(e) => handleFiltroChange('montoMaximo', e.target.value ? Number(e.target.value) : undefined)}
+                    placeholder="$ Máximo"
+                    className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#D94854] transition-all text-sm"
                     disabled={cargando}
                   />
                 </div>
@@ -415,12 +458,12 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
                         label = 'Pedido';
                         displayValue = value;
                         break;
-                      case 'nombre':
-                        label = 'Cliente';
-                        displayValue = value;
-                        break;
                       case 'celular':
                         label = 'Celular';
+                        displayValue = value;
+                        break;
+                      case 'modelo':
+                        label = 'Modelo';
                         displayValue = value;
                         break;
                       case 'responsable':
@@ -429,7 +472,7 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
                         break;
                       case 'estado':
                         label = 'Estado';
-                        displayValue = LABELS_ESTADO[value as EstadoCambioFiltro];
+                        displayValue = LABELS_ESTADO_DEVOLUCION[value as EstadoDevolucionFiltro];
                         break;
                       case 'motivo':
                         label = 'Motivo';
@@ -443,6 +486,14 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
                         label = 'Hasta';
                         displayValue = new Date(value).toLocaleDateString('es-AR');
                         break;
+                      case 'montoMinimo':
+                        label = 'Monto mín.';
+                        displayValue = `$${Number(value).toLocaleString('es-AR')}`;
+                        break;
+                      case 'montoMaximo':
+                        label = 'Monto máx.';
+                        displayValue = `$${Number(value).toLocaleString('es-AR')}`;
+                        break;
                       default:
                         return null;
                     }
@@ -450,14 +501,14 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
                     return (
                       <div
                         key={key}
-                        className="flex items-center gap-2 px-3 py-1 bg-[#B695BF]/20 border border-[#B695BF]/30 rounded-lg text-[#B695BF] text-xs"
+                        className="flex items-center gap-2 px-3 py-1 bg-[#D94854]/20 border border-[#D94854]/30 rounded-lg text-[#D94854] text-xs"
                       >
                         <span>
                           <strong>{label}:</strong> {displayValue}
                         </span>
                         <button
                           onClick={() => handleFiltroChange(key as keyof FiltrosType, undefined)}
-                          className="hover:bg-[#B695BF]/20 rounded p-0.5 transition-colors"
+                          className="hover:bg-[#D94854]/20 rounded p-0.5 transition-colors"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -474,4 +525,4 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
   );
 };
 
-export default CambiosFiltros;
+export default DevolucionesFiltros;

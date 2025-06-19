@@ -70,7 +70,7 @@ export const EnviosSelectorMes: React.FC<EnviosSelectorMesProps> = ({
           onValueChange={handleCambioMes}
           disabled={cargando}
         >
-          <SelectTrigger className="w-32 bg-white/10 border-white/20 text-white hover:bg-white/15 focus:border-[#B695BF] transition-all">
+          <SelectTrigger className="w-36 bg-white/10 border-white/20 text-white hover:bg-white/15 focus:border-[#B695BF] transition-all">
             <SelectValue placeholder="Mes" />
             <ChevronDown className="w-4 h-4 text-white/60" />
           </SelectTrigger>
@@ -98,7 +98,7 @@ export const EnviosSelectorMes: React.FC<EnviosSelectorMesProps> = ({
           onValueChange={handleCambioAño}
           disabled={cargando}
         >
-          <SelectTrigger className="w-20 bg-white/10 border-white/20 text-white hover:bg-white/15 focus:border-[#B695BF] transition-all">
+          <SelectTrigger className="w-29 bg-white/10 border-white/20 text-white hover:bg-white/15 focus:border-[#B695BF] transition-all">
             <SelectValue placeholder="Año" />
             <ChevronDown className="w-4 h-4 text-white/60" />
           </SelectTrigger>
@@ -117,7 +117,7 @@ export const EnviosSelectorMes: React.FC<EnviosSelectorMesProps> = ({
       </div>
 
       {/* Indicador de mes/año actual */}
-      <div className="flex items-center gap-2 ml-4 px-3 py-1 bg-[#B695BF]/20 border border-[#B695BF]/30 rounded-lg">
+      <div className="flex items-center gap-2 ml-4 px-4 py-1 bg-[#B695BF]/20 border border-[#B695BF]/30 rounded-lg">
         <span className="text-sm font-medium text-[#B695BF]">
           {mesActual?.nombre} {año}
         </span>

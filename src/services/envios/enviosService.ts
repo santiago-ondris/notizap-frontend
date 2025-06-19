@@ -196,13 +196,13 @@ class EnviosService {
         diasCompletos.push({
           id: 0, // ID temporal para días sin registro
           fecha: `${fechaString}T00:00:00.000Z`,
-          oca: 0,
-          andreani: 0,
-          retirosSucursal: 0,
-          roberto: 0,
-          tino: 0,
-          caddy: 0,
-          mercadoLibre: 0,
+          oca: null as any,
+          andreani: null as any,
+          retirosSucursal: null as any,
+          roberto: null as any,
+          tino: null as any,
+          caddy: null as any,
+          mercadoLibre: null as any,
           totalCordobaCapital: 0,
           totalEnvios: 0
         });

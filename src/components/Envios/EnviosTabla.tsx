@@ -1,24 +1,28 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Calendar, 
-  Trash2, 
-  X, 
-  Loader2, 
+import {
+  Calendar,
+  Trash2,
+  X,
+  Loader2,
   Edit3,
   Check,
   AlertTriangle
 } from 'lucide-react';
-import { 
-  type EnvioDiario, 
-  type CreateEnvioDiarioDto, 
-  type UpdateEnvioDiarioDto, 
+import {
+  type EnvioDiario,
+  type CreateEnvioDiarioDto,
+  type UpdateEnvioDiarioDto,
   type TipoEnvio,
-  TIPOS_ENVIO 
+  TIPOS_ENVIO
 } from '@/types/envios/enviosTypes';
+import { formatearFechaConDia } from '@/utils/envios/fechaHelpers';
 
 interface EnviosTablaProps {
   envios: EnvioDiario[];
-  onGuardarEnvio: (envio: CreateEnvioDiarioDto | UpdateEnvioDiarioDto, id?: number) => Promise<boolean>;
+  onGuardarEnvio: (
+    envio: CreateEnvioDiarioDto | UpdateEnvioDiarioDto,
+    id?: number
+  ) => Promise<boolean>;
   onEliminarEnvio: (id: number) => Promise<boolean>;
   puedeEditar: boolean;
   cargando?: boolean;
@@ -27,32 +31,36 @@ interface EnviosTablaProps {
 interface CeldaEditando {
   dia: number;
   campo: TipoEnvio;
-  valor: string;
+  valorTemporal: string;
 }
 
 /**
  * Componente de celda editable
  */
 const CeldaEditable: React.FC<{
-  valor: number;
+  valor: number | null;
   esEditable: boolean;
   estaEditando: boolean;
   onIniciarEdicion: () => void;
-  onGuardar: (nuevoValor: number) => void;
+  onGuardar: (nuevoValor: number | null) => void;
   onCancelar: () => void;
   color: string;
-}> = ({ 
-  valor = 0, 
-  esEditable, 
-  estaEditando, 
-  onIniciarEdicion, 
-  onGuardar, 
+}> = ({
+  valor,
+  esEditable,
+  estaEditando,
+  onIniciarEdicion,
+  onGuardar,
   onCancelar,
-  color 
+  color
 }) => {
-  const [valorTemporal, setValorTemporal] = useState((valor || 0).toString());
+  // Inicializamos con string vacío si es null, o con su valor de texto
+  const [valorTemporal, setValorTemporal] = useState(
+    valor !== null ? valor.toString() : ''
+  );
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Auto-focus cuando entra en edición
   useEffect(() => {
     if (estaEditando && inputRef.current) {
       inputRef.current.focus();
@@ -60,8 +68,9 @@ const CeldaEditable: React.FC<{
     }
   }, [estaEditando]);
 
+  // Si cambia el valor externo, lo reflejamos
   useEffect(() => {
-    setValorTemporal((valor || 0).toString());
+    setValorTemporal(valor !== null ? valor.toString() : '');
   }, [valor]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -73,9 +82,14 @@ const CeldaEditable: React.FC<{
   };
 
   const handleGuardar = () => {
-    const nuevoValor = parseInt(valorTemporal) || 0;
-    if (nuevoValor >= 0 && Number.isInteger(nuevoValor)) {
-      onGuardar(nuevoValor);
+    // Si dejó el campo vacío, interpretamos como borrar valor
+    if (valorTemporal.trim() === '') {
+      onGuardar(null);
+      return;
+    }
+    const num = parseInt(valorTemporal, 10);
+    if (Number.isInteger(num) && num >= 0) {
+      onGuardar(num);
     } else {
       onCancelar();
     }
@@ -98,12 +112,14 @@ const CeldaEditable: React.FC<{
           <button
             onClick={handleGuardar}
             className="p-1 bg-[#51590E]/80 hover:bg-[#51590E] rounded text-white"
+            title="Guardar (o borrar si vacío)"
           >
             <Check className="w-3 h-3" />
           </button>
           <button
             onClick={onCancelar}
             className="p-1 bg-[#D94854]/80 hover:bg-[#D94854] rounded text-white"
+            title="Cancelar"
           >
             <X className="w-3 h-3" />
           </button>
@@ -118,15 +134,15 @@ const CeldaEditable: React.FC<{
       className={`
         px-3 py-2 text-center text-sm font-medium rounded transition-all
         ${esEditable ? 'cursor-pointer hover:bg-white/10' : 'cursor-default'}
-        ${(valor || 0) > 0 ? 'text-white' : 'text-white/50'}
+        ${valor !== null ? 'text-white' : 'text-white/50'}
       `}
-      style={{ 
-        backgroundColor: (valor || 0) > 0 ? `${color}20` : 'transparent',
-        borderColor: (valor || 0) > 0 ? `${color}30` : 'transparent'
+      style={{
+        backgroundColor: valor !== null ? `${color}20` : 'transparent',
+        borderColor: valor !== null ? `${color}30` : 'transparent'
       }}
     >
-      {(valor || 0) > 0 ? (valor || 0) : '-'}
-      {esEditable && (valor || 0) === 0 && (
+      {valor !== null ? valor : '-'}
+      {esEditable && valor === null && (
         <Edit3 className="w-3 h-3 inline ml-1 text-white/40" />
       )}
     </div>
@@ -147,61 +163,42 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
   const [guardando, setGuardando] = useState<boolean>(false);
   const [eliminando, setEliminando] = useState<number | null>(null);
 
-  // Calcular totales por columna con valores seguros
+  // Totales para footer
   const totales = {
-    oca: envios.reduce((sum, e) => sum + (e.oca || 0), 0),
-    andreani: envios.reduce((sum, e) => sum + (e.andreani || 0), 0),
-    retirosSucursal: envios.reduce((sum, e) => sum + (e.retirosSucursal || 0), 0),
-    roberto: envios.reduce((sum, e) => sum + (e.roberto || 0), 0),
-    tino: envios.reduce((sum, e) => sum + (e.tino || 0), 0),
-    caddy: envios.reduce((sum, e) => sum + (e.caddy || 0), 0),
-    mercadoLibre: envios.reduce((sum, e) => sum + (e.mercadoLibre || 0), 0),
-    total: envios.reduce((sum, e) => sum + (e.totalEnvios || 0), 0)
+    oca: envios.reduce((sum, e) => sum + (e.oca ?? 0), 0),
+    andreani: envios.reduce((sum, e) => sum + (e.andreani ?? 0), 0),
+    retirosSucursal: envios.reduce((sum, e) => sum + (e.retirosSucursal ?? 0), 0),
+    roberto: envios.reduce((sum, e) => sum + (e.roberto ?? 0), 0),
+    tino: envios.reduce((sum, e) => sum + (e.tino ?? 0), 0),
+    caddy: envios.reduce((sum, e) => sum + (e.caddy ?? 0), 0),
+    mercadoLibre: envios.reduce((sum, e) => sum + (e.mercadoLibre ?? 0), 0),
+    total: envios.reduce((sum, e) => sum + (e.totalEnvios ?? 0), 0)
   };
 
-  /**
-   * Maneja el inicio de edición de una celda
-   */
   const handleIniciarEdicion = (dia: number, campo: TipoEnvio) => {
     if (!puedeEditar) return;
-    
     const envio = envios[dia - 1];
-    if (!envio) return;
-
-    const valorActual = envio[campo] || 0;
-    setCeldaEditando({
-      dia,
-      campo,
-      valor: valorActual.toString()
-    });
+    const val = envio[campo] ?? null;
+    setCeldaEditando({ dia, campo, valorTemporal: val !== null ? val.toString() : '' });
   };
 
-  /**
-   * Maneja el guardado de una celda editada
-   * NUEVA LÓGICA: No necesitamos detectar CREATE vs UPDATE
-   */
-  const handleGuardarCelda = async (dia: number, campo: TipoEnvio, nuevoValor: number) => {
+  const handleGuardarCelda = async (
+    dia: number,
+    campo: TipoEnvio,
+    nuevoValor: number | null
+  ) => {
     const envio = envios[dia - 1];
     if (!envio) return;
-
     setGuardando(true);
-    
     try {
-      // Crear objeto con todos los datos actualizados
-      const envioActualizado: CreateEnvioDiarioDto = {
-        fecha: envio.fecha,
-        oca: campo === 'oca' ? nuevoValor : (envio.oca || 0),
-        andreani: campo === 'andreani' ? nuevoValor : (envio.andreani || 0),
-        retirosSucursal: campo === 'retirosSucursal' ? nuevoValor : (envio.retirosSucursal || 0),
-        roberto: campo === 'roberto' ? nuevoValor : (envio.roberto || 0),
-        tino: campo === 'tino' ? nuevoValor : (envio.tino || 0),
-        caddy: campo === 'caddy' ? nuevoValor : (envio.caddy || 0),
-        mercadoLibre: campo === 'mercadoLibre' ? nuevoValor : (envio.mercadoLibre || 0)
-      };
+      // Preparamos solo el campo modificado
+      const updateDto: UpdateEnvioDiarioDto = {
+        // asignamos null o número según corresponda
+        [campo]: nuevoValor
+      } as unknown as UpdateEnvioDiarioDto;
 
-      // Siempre pasar undefined como ID - el backend maneja CREATE/UPDATE automáticamente
-      const exito = await onGuardarEnvio(envioActualizado, undefined);
-      
+      // Usamos el id para actualizar
+      const exito = await onGuardarEnvio(updateDto, envio.id);
       if (exito) {
         setCeldaEditando(null);
       }
@@ -212,21 +209,13 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
     }
   };
 
-  /**
-   * Maneja la cancelación de edición
-   */
   const handleCancelarEdicion = () => {
     setCeldaEditando(null);
   };
 
-  /**
-   * Maneja la eliminación de un envío
-   */
   const handleEliminar = async (envio: EnvioDiario) => {
     if (!puedeEditar || envio.id === 0) return;
-    
     setEliminando(envio.id);
-    
     try {
       await onEliminarEnvio(envio.id);
     } catch (error) {
@@ -236,38 +225,17 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
     }
   };
 
-  /**
-   * Formatea la fecha para mostrar
-   */
-  const formatearFecha = (fecha: string) => {
-    try {
-      const date = new Date(fecha);
-      if (isNaN(date.getTime())) {
-        return '--/--';
-      }
-      const dia = date.getDate().toString().padStart(2, '0');
-      const mes = (date.getMonth() + 1).toString().padStart(2, '0');
-      return `${dia}/${mes}`;
-    } catch (error) {
-      console.error('Error al formatear fecha:', error);
-      return '--/--';
-    }
-  };
-
-  /**
-   * Verifica si una fila tiene datos
-   */
-  const filaConDatos = (envio: EnvioDiario) => {
-    return envio.totalEnvios > 0;
-  };
+  const filaConDatos = (envio: EnvioDiario) => envio.totalEnvios > 0;
 
   if (cargando) {
     return (
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-12">
         <div className="flex flex-col items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-[#B695BF] mb-4" />
-          <h3 className="text-lg font-semibold text-white mb-2">Cargando envíos...</h3>
-          <p className="text-white/60 text-sm">Obteniendo datos del período seleccionado</p>
+          <h3 className="text-lg font-semibold text-white mb-2">Cargando envíos.</h3>
+          <p className="text-white/60 text-sm">
+            Obteniendo datos del período seleccionado
+          </p>
         </div>
       </div>
     );
@@ -275,7 +243,7 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
 
   return (
     <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden">
-      {/* Header de la tabla */}
+      {/* Header */}
       <div className="bg-white/10 border-b border-white/10 p-4">
         <div className="flex items-center gap-2">
           <Calendar className="w-5 h-5 text-[#B695BF]" />
@@ -285,28 +253,32 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
           {guardando && (
             <div className="flex items-center gap-2 ml-4">
               <Loader2 className="w-4 h-4 animate-spin text-[#51590E]" />
-              <span className="text-sm text-[#51590E]">Guardando...</span>
+              <span className="text-sm text-[#51590E]">Guardando.</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Tabla con scroll horizontal */}
-      <div className="overflow-x-auto">
+      {/* Tabla */}
+      <div 
+        className="overflow-x-auto max-h-[600px] overflow-y-auto custom-scrollbar"
+        onWheel={(e) => {
+          e.stopPropagation();
+        }}
+      >
         <table className="w-full">
-          {/* Header de columnas */}
-          <thead className="bg-white/5">
+          <thead className="bg-white/5 sticky top-0 z-10">
             <tr>
               <th className="px-4 py-3 text-left text-sm font-medium text-white/80 border-r border-white/10">
                 Fecha
               </th>
-              {Object.entries(TIPOS_ENVIO).map(([key, config]) => (
-                <th 
+              {Object.entries(TIPOS_ENVIO).map(([key, cfg]) => (
+                <th
                   key={key}
                   className="px-3 py-3 text-center text-sm font-medium border-r border-white/10"
-                  style={{ color: config.color }}
+                  style={{ color: cfg.color }}
                 >
-                  {config.label}
+                  {cfg.label}
                 </th>
               ))}
               <th className="px-3 py-3 text-center text-sm font-medium text-[#e327c4] border-r border-white/10">
@@ -319,66 +291,53 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
               )}
             </tr>
           </thead>
-
-          {/* Cuerpo de la tabla */}
           <tbody>
-            {envios.map((envio, index) => {
-              const dia = index + 1;
+            {envios.map((envio, i) => {
+              const dia = i + 1;
               const conDatos = filaConDatos(envio);
-              
               return (
-                <tr 
+                <tr
                   key={`${dia}-${envio.fecha}`}
                   className={`
                     border-b border-white/5 hover:bg-white/5 transition-colors
                     ${conDatos ? 'bg-white/2' : ''}
                   `}
                 >
-                  {/* Columna de fecha */}
-                  <td className="px-4 py-3 border-r border-white/10">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-white">
-                        {dia.toString().padStart(2, '0')}
-                      </span>
-                      <span className="text-xs text-white/60">
-                        ({formatearFecha(envio.fecha)})
-                      </span>
-                    </div>
-                  </td>
-
-                  {/* Columnas de tipos de envío */}
-                  {Object.entries(TIPOS_ENVIO).map(([key, config]) => {
-                    const tipoEnvio = key as TipoEnvio;
-                    const estaEditando = celdaEditando?.dia === dia && celdaEditando?.campo === tipoEnvio;
-                    
+                <td className="px-4 py-3 border-r border-white/10">
+                  <span className="text-sm font-medium text-white">
+                    {formatearFechaConDia(envio.fecha)}
+                  </span>
+                </td>
+                  {Object.entries(TIPOS_ENVIO).map(([key, cfg]) => {
+                    const t = key as TipoEnvio;
+                    const editando =
+                      celdaEditando?.dia === dia && celdaEditando.campo === t;
                     return (
                       <td key={key} className="border-r border-white/10">
                         <CeldaEditable
-                          valor={envio[tipoEnvio] || 0}
+                          valor={envio[t]}
                           esEditable={puedeEditar}
-                          estaEditando={estaEditando}
-                          onIniciarEdicion={() => handleIniciarEdicion(dia, tipoEnvio)}
-                          onGuardar={(nuevoValor) => handleGuardarCelda(dia, tipoEnvio, nuevoValor)}
+                          estaEditando={!!editando}
+                          onIniciarEdicion={() => handleIniciarEdicion(dia, t)}
+                          onGuardar={(v) => handleGuardarCelda(dia, t, v)}
                           onCancelar={handleCancelarEdicion}
-                          color={config.color}
+                          color={cfg.color}
                         />
                       </td>
                     );
                   })}
-
-                  {/* Columna de total */}
                   <td className="px-3 py-2 text-center border-r border-white/10">
-                    <span 
+                    <span
                       className={`
                         text-sm font-bold px-2 py-1 rounded
-                        ${envio.totalEnvios > 0 ? 'text-[#e327c4] bg-[#e327c4]/20' : 'text-white/50'}
+                        ${envio.totalEnvios > 0
+                          ? 'text-[#e327c4] bg-[#e327c4]/20'
+                          : 'text-white/50'}
                       `}
                     >
                       {envio.totalEnvios > 0 ? envio.totalEnvios : '-'}
                     </span>
                   </td>
-
-                  {/* Columna de acciones */}
                   {puedeEditar && (
                     <td className="px-3 py-2 text-center">
                       {conDatos && envio.id > 0 && (
@@ -401,46 +360,39 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
               );
             })}
           </tbody>
-
-          {/* Fila de totales */}
           <tfoot className="bg-white/10 border-t-2 border-white/20">
             <tr>
               <th className="px-4 py-4 text-left text-sm font-bold text-white border-r border-white/10">
                 TOTALES
               </th>
-              {Object.entries(TIPOS_ENVIO).map(([key, config]) => {
-                const total = totales[key as keyof typeof totales];
-                return (
-                  <th 
-                    key={key}
-                    className="px-3 py-4 text-center text-sm font-bold border-r border-white/10"
+              {Object.entries(TIPOS_ENVIO).map(([key, cfg]) => (
+                <th
+                  key={key}
+                  className="px-3 py-4 text-center text-sm font-bold border-r border-white/10"
+                >
+                  <span
+                    className="px-2 py-1 rounded"
+                    style={{
+                      color: cfg.color,
+                      backgroundColor: `${cfg.color}20`
+                    }}
                   >
-                    <span 
-                      className="px-2 py-1 rounded"
-                      style={{ 
-                        color: config.color,
-                        backgroundColor: `${config.color}20`
-                      }}
-                    >
-                      {total.toLocaleString()}
-                    </span>
-                  </th>
-                );
-              })}
+                    {totales[key as keyof typeof totales].toLocaleString()}
+                  </span>
+                </th>
+              ))}
               <th className="px-3 py-4 text-center text-sm font-bold text-[#e327c4] border-r border-white/10">
                 <span className="px-2 py-1 rounded bg-[#e327c4]/20">
                   {totales.total.toLocaleString()}
                 </span>
               </th>
-              {puedeEditar && (
-                <th className="px-3 py-4"></th>
-              )}
+              {puedeEditar && <th className="px-3 py-4"></th>}
             </tr>
           </tfoot>
         </table>
       </div>
 
-      {/* Footer con información */}
+      {/* Footer */}
       <div className="bg-white/5 border-t border-white/10 p-4">
         <div className="flex items-center justify-between text-sm text-white/70">
           <div className="flex items-center gap-4">
@@ -450,9 +402,7 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
           {puedeEditar && (
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-[#FFD700]" />
-              <span className="text-[#FFD700]">
-                Clic en cualquier celda para editar
-              </span>
+              <span className="text-[#FFD700]">Clic en cualquier celda para editar</span>
             </div>
           )}
         </div>

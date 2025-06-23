@@ -232,3 +232,76 @@ select::-webkit-scrollbar-thumb:hover {
 .custom-scrollbar::-webkit-scrollbar-corner {
   background: rgba(255, 255, 255, 0.05);
 }
+body.overflow-hidden {
+  overflow: hidden !important;
+}
+
+/* ===== MODAL SCROLL FIXES ===== */
+
+/* Evita scroll del body cuando modal está abierto */
+body:has([data-state="open"]) {
+  overflow: hidden !important;
+}
+
+/* Estilos para scroll interno del modal */
+.modal-scroll-content {
+  /* Scroll suave nativo */
+  overflow-y: auto;
+  overflow-x: hidden;
+  
+  /* Mejor scroll en móviles */
+  -webkit-overflow-scrolling: touch;
+  
+  /* Evita bounce scroll */
+  overscroll-behavior: contain;
+  
+  /* Scrollbar personalizado para desktop */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.modal-scroll-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-scroll-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-scroll-content::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.modal-scroll-content::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Asegurar que el modal tenga el z-index correcto */
+[data-radix-portal] {
+  z-index: 9999 !important;
+}
+
+/* Fix para el overlay de Radix */
+[data-radix-dialog-overlay] {
+  position: fixed !important;
+  inset: 0 !important;
+}
+
+/* Responsive para modales en móviles */
+@media (max-width: 768px) {
+  [data-radix-dialog-content] {
+    max-width: calc(100vw - 2rem) !important;
+    max-height: 90vh !important;
+  }
+  
+  .modal-scroll-content {
+    /* Más espacio para scroll en móviles */
+    padding-bottom: 1rem;
+  }
+}
+
+/* Fix específico para textarea dentro de modales */
+.modal-scroll-content textarea {
+  overscroll-behavior: auto;
+}

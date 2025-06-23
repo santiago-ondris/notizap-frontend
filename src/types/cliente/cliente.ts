@@ -10,6 +10,7 @@ export interface ClienteResumenDto {
   canales: string;
   sucursales: string;
   observaciones?: string;
+  telefono: string;
 }
 
 export interface ClienteDetalleDto extends ClienteResumenDto {

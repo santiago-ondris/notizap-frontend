@@ -31,7 +31,7 @@ export default function ClientesPage() {
       }}
     />
     
-    <div className="relative z-10 max-w-4xl mx-auto p-6 pt-8">
+    <div className="relative z-10 max-w-7xl mx-auto p-6 pt-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-[#D94854] flex items-center gap-2">
           <Users className="text-[#B695BF]" size={28} /> Clientes

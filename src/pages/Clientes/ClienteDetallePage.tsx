@@ -88,7 +88,7 @@ export default function ClienteDetallePage() {
       }}
     />
     
-    <div className="relative z-10 max-w-4xl mx-auto p-6 pt-8">
+    <div className="relative z-10 max-w-7xl mx-auto p-4 pt-8 lg:p-12">
       {/* Header con navegación */}
       <div className="mb-8">
         <div className="flex flex-wrap gap-3 mb-4">

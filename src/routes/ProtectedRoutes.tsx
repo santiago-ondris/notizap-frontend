@@ -18,6 +18,7 @@ import { GastosAnalysisPage }       from "@/pages/Gastos/GastosAnalysisPage";
 import EnviosPage                from "@/pages/Envios/EnviosPage";
 import CambiosPage               from "@/pages/Cambios/CambiosPage";
 import DevolucionesPage from "@/pages/Cambios/DevolucionesPage";
+import MercadoLibreAnalysisPage from "@/pages/MercadoLibre/MercadoLibreAnalysisPage";
 
 export const ProtectedRoutes = (
   <>
@@ -32,6 +33,7 @@ export const ProtectedRoutes = (
     <Route path="mercadolibre">
       <Route index                   element={<MercadoLibreReportsPage />} />
       <Route path="admin"            element={<AdminMercadoLibrePage />} />
+      <Route path="analysisML"            element={<MercadoLibreAnalysisPage />} />
     </Route>
     <Route path="clientes">
       <Route index                   element={<ClientesPage />} />

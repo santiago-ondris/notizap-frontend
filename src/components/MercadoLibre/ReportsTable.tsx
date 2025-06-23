@@ -118,7 +118,7 @@ export default function ReportsTable({ adminView = false }: { adminView?: boolea
         <div className="flex items-center gap-2">
           <FileText className="w-5 h-5 text-[#51590E]" />
           <h3 className="text-lg font-semibold text-white">📋 Informes Manuales de Ventas</h3>
-          <span className="ml-auto bg-[#51590E]/20 text-[#51590E] px-3 py-1 rounded-lg text-sm font-medium">
+          <span className="ml-auto bg-[#51590E]/20 text-[white] px-3 py-1 rounded-lg text-sm font-medium">
             {sortedReports.length} informes
           </span>
         </div>

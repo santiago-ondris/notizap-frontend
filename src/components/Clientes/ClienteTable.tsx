@@ -12,26 +12,24 @@ import {
 
 interface Props {
   clientes?: PagedResult<ClienteResumenDto> | null;
-  activeFilters?: any; // Los filtros que están aplicados
+  activeFilters?: any;
 }
 
 export default function ClienteTable({ clientes, activeFilters }: Props) {
   const [data, setData] = useState<PagedResult<ClienteResumenDto> | null>(clientes ?? null);
   const [loading, setLoading] = useState(!clientes);
   const [page, setPage] = useState(1);
-  const pageSize = 12; // Reducido para mejor UX con cards
+  const pageSize = 15;
 
   const navigate = useNavigate();
 
-  // Resetear página cuando cambien los clientes filtrados
   useEffect(() => {
     if (clientes && !activeFilters) {
-      setPage(1); // Solo resetear si es el primer filtro aplicado
+      setPage(1);
     }
   }, [clientes, activeFilters]);
 
   useEffect(() => {
-    // Si hay filtros activos, cargar datos filtrados paginados
     if (activeFilters) {
       setLoading(true);
       filtrarClientes(activeFilters, page, pageSize)
@@ -44,14 +42,12 @@ export default function ClienteTable({ clientes, activeFilters }: Props) {
       return;
     }
 
-    // Si ya tenemos clientes desde el filtro inicial, usarlos
     if (clientes) {
       setData(clientes);
       setLoading(false);
       return;
     }
 
-    // Solo cargar datos por defecto si no hay filtros aplicados
     setLoading(true);
     getAllClientes(page, pageSize)
       .then(setData)
@@ -60,12 +56,12 @@ export default function ClienteTable({ clientes, activeFilters }: Props) {
         toast.error("Error al cargar los clientes");
       })
       .finally(() => setLoading(false));
-  }, [page, pageSize, clientes, activeFilters]); // Agregar activeFilters como dependencia
+  }, [page, pageSize, clientes, activeFilters]);
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-        {[...Array(6)].map((_, i) => (
+      <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center mt-6">
+        {[...Array(10)].map((_, i) => (
           <div key={i} className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
             <Skeleton className="h-6 w-3/4 mb-4" />
             <Skeleton className="h-4 w-full mb-2" />
@@ -87,14 +83,29 @@ export default function ClienteTable({ clientes, activeFilters }: Props) {
     );
   }
 
+  const handleClienteUpdated = (clienteActualizado: ClienteResumenDto) => {
+    setData(prevData => {
+      if (!prevData) return prevData;
+      return {
+        ...prevData,
+        items: prevData.items.map(cliente => 
+          cliente.id === clienteActualizado.id ? clienteActualizado : cliente
+        )
+      };
+    });
+  };
+
   return (
     <div className="mt-6">
-      {/* Grid de Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Grid optimizado de Cards */}
+      <div className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
         {data.items.map((cliente) => (
-          <div key={cliente.id} onClick={() => navigate(`/clientes/${cliente.id}`)}>
-            <ClienteCard cliente={cliente} />
-          </div>
+          <ClienteCard
+            key={cliente.id}
+            cliente={cliente}
+            onClienteUpdated={handleClienteUpdated}
+            onVerDetalles={() => navigate(`/clientes/${cliente.id}`)} // ✅ CAMBIO: onCardClick → onVerDetalles
+          />
         ))}
       </div>
 

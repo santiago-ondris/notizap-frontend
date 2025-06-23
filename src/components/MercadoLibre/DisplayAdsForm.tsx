@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createDisplayAd } from "@/services/mercadolibre/mercadolibreService";
 import { toast } from "react-toastify";
 import { Button } from "../ui/button";
+import DecimalInput from "../ui/DecimalInput";
 import { 
   Calendar, 
   Target, 
@@ -35,6 +36,16 @@ function AnuncioForm({
   setAnuncio: (anuncio: DisplayAnuncio) => void; 
   onAdd: () => void; 
 }) {
+  const [ctrDisplay, setCtrDisplay] = useState("");
+
+  const handleCtrChange = (value: string) => {
+    setCtrDisplay(value);
+    const numValue = parseFloat(value) || 0;
+    setAnuncio({ ...anuncio, ctr: numValue });
+  };
+
+  const inputClass = "w-full bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:border-[#B695BF]/50 focus:outline-none transition-all text-sm";
+
   return (
     <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 space-y-4">
       <div className="flex items-center gap-2 mb-4">
@@ -50,7 +61,7 @@ function AnuncioForm({
             placeholder="Nombre del anuncio"
             value={anuncio.nombre}
             onChange={e => setAnuncio({ ...anuncio, nombre: e.target.value })}
-            className="w-full bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:border-[#B695BF]/50 focus:outline-none transition-all text-sm"
+            className={inputClass}
           />
         </div>
         <div>
@@ -58,9 +69,9 @@ function AnuncioForm({
           <input
             type="number"
             placeholder="0"
-            value={anuncio.impresiones}
-            onChange={e => setAnuncio({ ...anuncio, impresiones: Number(e.target.value) })}
-            className="w-full bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:border-[#B695BF]/50 focus:outline-none transition-all text-sm"
+            value={anuncio.impresiones || ""}
+            onChange={e => setAnuncio({ ...anuncio, impresiones: Number(e.target.value) || 0 })}
+            className={inputClass}
             min={0}
           />
         </div>
@@ -69,9 +80,9 @@ function AnuncioForm({
           <input
             type="number"
             placeholder="0"
-            value={anuncio.clics}
-            onChange={e => setAnuncio({ ...anuncio, clics: Number(e.target.value) })}
-            className="w-full bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:border-[#B695BF]/50 focus:outline-none transition-all text-sm"
+            value={anuncio.clics || ""}
+            onChange={e => setAnuncio({ ...anuncio, clics: Number(e.target.value) || 0 })}
+            className={inputClass}
             min={0}
           />
         </div>
@@ -80,23 +91,23 @@ function AnuncioForm({
           <input
             type="number"
             placeholder="0"
-            value={anuncio.visitas}
-            onChange={e => setAnuncio({ ...anuncio, visitas: Number(e.target.value) })}
-            className="w-full bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:border-[#B695BF]/50 focus:outline-none transition-all text-sm"
+            value={anuncio.visitas || ""}
+            onChange={e => setAnuncio({ ...anuncio, visitas: Number(e.target.value) || 0 })}
+            className={inputClass}
             min={0}
           />
         </div>
         <div>
           <label className="block text-xs font-medium text-white/80 mb-1">CTR (%)</label>
-          <input
-            type="number"
-            placeholder="0"
-            value={anuncio.ctr}
-            onChange={e => setAnuncio({ ...anuncio, ctr: Number(e.target.value) })}
-            className="w-full bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:border-[#B695BF]/50 focus:outline-none transition-all text-sm"
+          <DecimalInput
+            value={ctrDisplay}
+            onChange={handleCtrChange}
+            placeholder="0,00"
+            className={inputClass}
             min={0}
-            step="0.01"
+            max={100}
           />
+          <p className="text-xs text-white/40 mt-1">💡 Usar coma (,)</p>
         </div>
       </div>
       
@@ -152,7 +163,7 @@ function AnunciosTable({
                 <td className="px-4 py-3 text-center text-white/80">{a.impresiones.toLocaleString()}</td>
                 <td className="px-4 py-3 text-center text-white/80">{a.clics.toLocaleString()}</td>
                 <td className="px-4 py-3 text-center text-white/80">{a.visitas.toLocaleString()}</td>
-                <td className="px-4 py-3 text-center text-[#51590E] font-medium">{a.ctr}%</td>
+                <td className="px-4 py-3 text-center text-[#51590E] font-medium">{a.ctr.toLocaleString('es-AR', { minimumFractionDigits: 2 })}%</td>
                 <td className="px-4 py-3 text-center">
                   <button
                     type="button"
@@ -195,50 +206,59 @@ export default function DisplayAdsForm() {
   });
   const [loading, setLoading] = useState(false);
 
+  // Helper para convertir string a número seguro
+  const toNumber = (value: string): number => {
+    if (!value || value === "") return 0;
+    const num = parseFloat(value);
+    return isNaN(num) ? 0 : num;
+  };
+
   // Handlers para los anuncios
   const handleAddAnuncio = () => {
     if (!anuncio.nombre) return toast.error("El anuncio debe tener nombre");
     setAnuncios(prev => [...prev, anuncio]);
     setAnuncio({ nombre: "", impresiones: 0, clics: 0, visitas: 0, ctr: 0 });
-    toast.success("Anuncio agregado a la campaña");
+    toast.success("✅ Anuncio agregado a la campaña");
   };
 
   const handleRemoveAnuncio = (idx: number) => {
     setAnuncios(prev => prev.filter((_, i) => i !== idx));
-    toast.info("Anuncio eliminado");
+    toast.info("ℹ️ Anuncio eliminado");
   };
 
   // Enviar formulario principal
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (anuncios.length === 0) return toast.error("Agregá al menos un anuncio a la campaña");
+    if (anuncios.length === 0) return toast.error("❌ Agregá al menos un anuncio a la campaña");
     setLoading(true);
     try {
       await createDisplayAd({
         year,
         month,
         nombreCampania,
-        inversion: Number(inversion),
-        visitasConDisplay: Number(visitasConDisplay),
-        visitasSinDisplay: Number(visitasSinDisplay),
-        clics: Number(clics),
-        impresiones: Number(impresiones),
-        alcance: Number(alcance),
-        costoPorVisita: Number(costoPorVisita),
+        inversion: toNumber(inversion),
+        visitasConDisplay: toNumber(visitasConDisplay),
+        visitasSinDisplay: toNumber(visitasSinDisplay),
+        clics: toNumber(clics),
+        impresiones: toNumber(impresiones),
+        alcance: toNumber(alcance),
+        costoPorVisita: toNumber(costoPorVisita),
         anuncios
       });
-      toast.success("Reporte Display Ads guardado");
+      toast.success("✅ Reporte Display Ads guardado correctamente");
       // Limpiar
       setNombreCampania("");
       setInversion(""); setVisitasConDisplay(""); setVisitasSinDisplay("");
       setClics(""); setImpresiones(""); setAlcance(""); setCostoPorVisita("");
       setAnuncios([]);
     } catch {
-      toast.error("Error al guardar el reporte");
+      toast.error("❌ Error al guardar el reporte");
     } finally {
       setLoading(false);
     }
   };
+
+  const inputClass = "w-full bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:border-[#B695BF]/50 focus:outline-none transition-all";
 
   return (
     <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 max-w-4xl mx-auto space-y-6">
@@ -249,167 +269,189 @@ export default function DisplayAdsForm() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Información básica de la campaña */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
-              <Calendar className="w-4 h-4" />
-              Año
-            </label>
-            <input 
-              type="number" 
-              value={year} 
-              onChange={e => setYear(Number(e.target.value))} 
-              min={2022} 
-              max={2100} 
-              required
-              className="w-full bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:border-[#B695BF]/50 focus:outline-none transition-all"
-            />
-          </div>
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
-              <Calendar className="w-4 h-4" />
-              Mes
-            </label>
-            <input 
-              type="number" 
-              value={month} 
-              onChange={e => setMonth(Number(e.target.value))} 
-              min={1} 
-              max={12} 
-              required
-              className="w-full bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:border-[#B695BF]/50 focus:outline-none transition-all"
-            />
-          </div>
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
-              <Target className="w-4 h-4" />
-              Nombre Campaña
-            </label>
-            <input 
-              type="text" 
-              value={nombreCampania} 
-              onChange={e => setNombreCampania(e.target.value)} 
-              required
-              placeholder="Nombre de la campaña"
-              className="w-full bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:border-[#B695BF]/50 focus:outline-none transition-all"
-            />
+        <div className="bg-[#B695BF]/10 border border-[#B695BF]/20 rounded-xl p-4">
+          <h3 className="text-white font-medium mb-4 flex items-center gap-2">
+            <Monitor className="w-4 h-4 text-[#B695BF]" />
+            📺 Información de la Campaña
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
+                <Calendar className="w-4 h-4" />
+                Año
+              </label>
+              <input 
+                type="number" 
+                value={year} 
+                onChange={e => setYear(Number(e.target.value))} 
+                min={2022} 
+                max={2100} 
+                required
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
+                <Calendar className="w-4 h-4" />
+                Mes
+              </label>
+              <input 
+                type="number" 
+                value={month} 
+                onChange={e => setMonth(Number(e.target.value))} 
+                min={1} 
+                max={12} 
+                required
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
+                <Target className="w-4 h-4" />
+                Nombre Campaña
+              </label>
+              <input 
+                type="text" 
+                value={nombreCampania} 
+                onChange={e => setNombreCampania(e.target.value)} 
+                required
+                placeholder="Nombre de la campaña"
+                className={inputClass}
+              />
+            </div>
           </div>
         </div>
 
         {/* Métricas de inversión y visitas */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
-              <DollarSign className="w-4 h-4" />
-              Inversión ($)
-            </label>
-            <input 
-              type="number" 
-              value={inversion} 
-              onChange={e => setInversion(e.target.value)} 
-              min={0} 
-              step="0.01"
-              placeholder="0.00"
-              className="w-full bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:border-[#B695BF]/50 focus:outline-none transition-all"
-            />
-          </div>
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
-              <Eye className="w-4 h-4" />
-              Visitas c/Display
-            </label>
-            <input 
-              type="number" 
-              value={visitasConDisplay} 
-              onChange={e => setVisitasConDisplay(e.target.value)} 
-              min={0}
-              placeholder="0"
-              className="w-full bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:border-[#B695BF]/50 focus:outline-none transition-all"
-            />
-          </div>
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
-              <Eye className="w-4 h-4" />
-              Visitas s/Display
-            </label>
-            <input 
-              type="number" 
-              value={visitasSinDisplay} 
-              onChange={e => setVisitasSinDisplay(e.target.value)} 
-              min={0}
-              placeholder="0"
-              className="w-full bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:border-[#B695BF]/50 focus:outline-none transition-all"
-            />
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+          <h3 className="text-white font-medium mb-4 flex items-center gap-2">
+            <DollarSign className="w-4 h-4 text-[#51590E]" />
+            💰 Métricas de Inversión y Visitas
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
+                <DollarSign className="w-4 h-4" />
+                Inversión ($)
+              </label>
+              <DecimalInput
+                value={inversion}
+                onChange={setInversion}
+                placeholder="0,00"
+                className={inputClass}
+                min={0}
+              />
+              <p className="text-xs text-white/50 mt-1">💡 Puedes usar coma (,) como separador decimal</p>
+            </div>
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
+                <Eye className="w-4 h-4" />
+                Visitas c/Display
+              </label>
+              <input 
+                type="number" 
+                value={visitasConDisplay} 
+                onChange={e => setVisitasConDisplay(e.target.value)} 
+                min={0}
+                placeholder="0"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
+                <Eye className="w-4 h-4" />
+                Visitas s/Display
+              </label>
+              <input 
+                type="number" 
+                value={visitasSinDisplay} 
+                onChange={e => setVisitasSinDisplay(e.target.value)} 
+                min={0}
+                placeholder="0"
+                className={inputClass}
+              />
+            </div>
           </div>
         </div>
 
         {/* Métricas de engagement */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
-              <MousePointer className="w-4 h-4" />
-              Clics
-            </label>
-            <input 
-              type="number" 
-              value={clics} 
-              onChange={e => setClics(e.target.value)} 
-              min={0}
-              placeholder="0"
-              className="w-full bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:border-[#B695BF]/50 focus:outline-none transition-all"
-            />
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+          <h3 className="text-white font-medium mb-4 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-[#D94854]" />
+            📊 Métricas de Engagement
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
+                <MousePointer className="w-4 h-4" />
+                Clics
+              </label>
+              <input 
+                type="number" 
+                value={clics} 
+                onChange={e => setClics(e.target.value)} 
+                min={0}
+                placeholder="0"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
+                <TrendingUp className="w-4 h-4" />
+                Impresiones
+              </label>
+              <input 
+                type="number" 
+                value={impresiones} 
+                onChange={e => setImpresiones(e.target.value)} 
+                min={0}
+                placeholder="0"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
+                <Users className="w-4 h-4" />
+                Alcance
+              </label>
+              <input 
+                type="number" 
+                value={alcance} 
+                onChange={e => setAlcance(e.target.value)} 
+                min={0}
+                placeholder="0"
+                className={inputClass}
+              />
+            </div>
           </div>
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
-              <TrendingUp className="w-4 h-4" />
-              Impresiones
-            </label>
-            <input 
-              type="number" 
-              value={impresiones} 
-              onChange={e => setImpresiones(e.target.value)} 
-              min={0}
-              placeholder="0"
-              className="w-full bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:border-[#B695BF]/50 focus:outline-none transition-all"
-            />
-          </div>
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
-              <Users className="w-4 h-4" />
-              Alcance
-            </label>
-            <input 
-              type="number" 
-              value={alcance} 
-              onChange={e => setAlcance(e.target.value)} 
-              min={0}
-              placeholder="0"
-              className="w-full bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:border-[#B695BF]/50 focus:outline-none transition-all"
-            />
-          </div>
-        </div>
-
-        {/* Costo por visita */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
-              <DollarSign className="w-4 h-4" />
-              Costo por Visita ($)
-            </label>
-            <input 
-              type="number" 
-              value={costoPorVisita} 
-              onChange={e => setCostoPorVisita(e.target.value)} 
-              min={0} 
-              step="0.01"
-              placeholder="0.00"
-              className="w-full bg-white/5 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:border-[#B695BF]/50 focus:outline-none transition-all"
-            />
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
+                <DollarSign className="w-4 h-4" />
+                Costo por Visita ($)
+              </label>
+              <DecimalInput
+                value={costoPorVisita}
+                onChange={setCostoPorVisita}
+                placeholder="0,00"
+                className={inputClass}
+                min={0}
+              />
+            </div>
           </div>
         </div>
 
         {/* Sección de anuncios */}
         <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Monitor className="w-5 h-5 text-[#B695BF]" />
+            <h3 className="text-lg font-medium text-white">📺 Anuncios de la Campaña</h3>
+          </div>
+          
           <AnuncioForm 
             anuncio={anuncio}
             setAnuncio={setAnuncio}

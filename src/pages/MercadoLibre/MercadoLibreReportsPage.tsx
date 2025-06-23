@@ -13,11 +13,10 @@ import {
   Settings, 
   ArrowRight, 
   Loader2,
-  Activity
 } from "lucide-react";
 
 export default function MercadoLibreReportsPage() {
-  const [adsReports, setAdsReports] = useState([]);
+  const [, setAdsReports] = useState([]);
   const [excelTop, setExcelTop] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -77,46 +76,17 @@ export default function MercadoLibreReportsPage() {
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               )}
-            </div>
-          </div>
-        </div>
 
-        {/* Tarjetas de resumen */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="bg-[#51590E]/20 p-2 rounded-lg">
-                <FileText className="w-5 h-5 text-[#51590E]" />
-              </div>
-              <h3 className="font-semibold text-white">📋 Informes Manuales</h3>
+                <Link
+                  to="/mercadolibre/analysisML"
+                  className="flex items-center gap-2 bg-[#B695BF]/20 hover:bg-[#B695BF]/30 border border-[#B695BF]/30 text-[#B695BF] font-semibold px-4 py-2 rounded-xl transition-all"
+                >
+                  <Settings className="w-4 h-4" />
+                  Analisis
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+        
             </div>
-            <p className="text-white/60 text-sm">
-              Datos de ventas cargados manualmente con análisis de variaciones mensuales
-            </p>
-          </div>
-
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="bg-[#D94854]/20 p-2 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-[#D94854]" />
-              </div>
-              <h3 className="font-semibold text-white">🎯 Campañas Publicitarias</h3>
-            </div>
-            <p className="text-white/60 text-sm">
-              Product Ads, Brand Ads y Display Ads con métricas de performance
-            </p>
-          </div>
-
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="bg-[#B695BF]/20 p-2 rounded-lg">
-                <Palette className="w-5 h-5 text-[#B695BF]" />
-              </div>
-              <h3 className="font-semibold text-white">🎨 Top Productos</h3>
-            </div>
-            <p className="text-white/60 text-sm">
-              Análisis de productos más vendidos por modelo y color desde Excel
-            </p>
           </div>
         </div>
 
@@ -153,7 +123,7 @@ export default function MercadoLibreReportsPage() {
               </div>
             </div>
           </div>
-          <AdsReportsTable data={adsReports} />
+          <AdsReportsTable />
         </section>
 
         {/* Sección de Top Productos */}
@@ -174,31 +144,6 @@ export default function MercadoLibreReportsPage() {
           <TopProductosTable data={excelTop} />
         </section>
 
-        {/* Footer informativo */}
-        <div className="mt-12">
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <Activity className="w-5 h-5 text-[#51590E]" />
-              <h3 className="font-semibold text-white">💡 Información del Dashboard</h3>
-            </div>
-            <div className="text-white/60 text-sm space-y-2">
-              <p>
-                • <strong className="text-white">Informes Manuales:</strong> Datos de ventas cargados manualmente con análisis de variaciones
-              </p>
-              <p>
-                • <strong className="text-white">Reportes Publicitarios:</strong> Métricas de campañas Product Ads, Brand Ads y Display Ads
-              </p>
-              <p>
-                • <strong className="text-white">Top Productos:</strong> Ranking de productos más vendidos procesados desde archivos Excel
-              </p>
-              {(role === "admin" || role === "superadmin") && (
-                <p className="pt-2 border-t border-white/10">
-                  • <strong className="text-[#B695BF]">Panel de Administración:</strong> Acceso completo para cargar y gestionar todos los datos
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

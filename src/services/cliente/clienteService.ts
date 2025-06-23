@@ -218,3 +218,9 @@ export const getFilterOptionsHybrid = async () => {
 
   return options;
 };
+
+export const actualizarTelefonoCliente = async (clienteId: number, telefono: string): Promise<void> => {
+  await api.patch(`/api/v1/clientes/${clienteId}/telefono`, {
+    telefono: telefono
+  });
+};

@@ -7,15 +7,28 @@ import {
   TrendingUp,
   Eye,
   Store,
-  AlertTriangle
+  AlertTriangle,
+  MessageCircle,
+  Phone
 } from "lucide-react";
+import { useState } from "react";
+import { Button } from "../ui/button";
+import AgregarTelefonoModal from "./AgregarTelefonoModal";
+import PlantillaWhatsAppModal from "../WhatsApp/PlantillaWhatsAppModal";
+import { actualizarTelefonoCliente } from "@/services/cliente/clienteService";
 
 interface Props {
   cliente: ClienteResumenDto;
   children?: React.ReactNode;
+  onClienteUpdated?: (clienteActualizado: ClienteResumenDto) => void;
+  onVerDetalles?: () => void; // <- CAMBIO: onCardClick → onVerDetalles
 }
 
-export default function ClienteCard({ cliente, children }: Props) {
+export default function ClienteCard({ cliente, children, onClienteUpdated, onVerDetalles }: Props) {
+  const [showAgregarTelefonoModal, setShowAgregarTelefonoModal] = useState(false);
+  const [showPlantillaWhatsAppModal, setShowPlantillaWhatsAppModal] = useState(false);
+  const [clienteLocal, setClienteLocal] = useState(cliente);
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -58,21 +71,61 @@ export default function ClienteCard({ cliente, children }: Props) {
     return colors[channel.toUpperCase()] || 'bg-gray-100 text-[#212026]';
   };
 
-  const diasSinComprar = calcularDiasSinComprar(cliente.fechaUltimaCompra);
+  const handleWhatsAppClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // evita cualquier propagación
+    if (clienteLocal.telefono && clienteLocal.telefono.trim()) {
+      setShowPlantillaWhatsAppModal(true);
+    } else {
+      setShowAgregarTelefonoModal(true);
+    }
+  };
+
+  const handleVerDetalles = (e: React.MouseEvent) => {
+    e.stopPropagation(); // evita cualquier propagación
+    onVerDetalles?.();
+  };
+
+  const handleTelefonoGuardado = async (telefono: string) => {
+    try {
+      await actualizarTelefonoCliente(clienteLocal.id, telefono);
+      const clienteActualizado = { ...clienteLocal, telefono };
+      setClienteLocal(clienteActualizado);
+      if (onClienteUpdated) {
+        onClienteUpdated(clienteActualizado);
+      }
+      setShowPlantillaWhatsAppModal(true);
+      console.log("Teléfono guardado exitosamente");
+    } catch (error) {
+      console.error("Error al guardar teléfono:", error);
+      throw error;
+    }
+  };
+
+  const diasSinComprar = calcularDiasSinComprar(clienteLocal.fechaUltimaCompra);
 
   return (
-    <div className="group bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:border-[#B695BF]/30 transition-all duration-300 cursor-pointer overflow-hidden w-full max-w-md mx-auto">
+    <div
+      className="group bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:border-[#B695BF]/30 transition-all duration-300 overflow-hidden w-full min-w-[320px]"
+      // ❌ REMOVIDO: onClick={onCardClick} - Ya no toda la card es clickeable
+      // ❌ REMOVIDO: cursor-pointer - Ya no hay cursor pointer en toda la card
+    >
       {/* Header con gradiente */}
       <div className="bg-gradient-to-r from-[#B695BF] to-[#D94854] p-4">
         <div className="flex justify-between items-start">
           <div className="flex-1">
             <h3 className="font-bold text-white text-lg leading-tight mb-1">
-              {cliente.nombre}
+              {clienteLocal.nombre}
             </h3>
-            <div className="flex items-center gap-2 text-white/80">
-              <Eye size={14} />
-              <span className="text-sm">Ver detalles</span>
-            </div>
+            {/* ✅ NUEVO: Botón específico para ver detalles */}
+            <Button
+              onClick={handleVerDetalles}
+              variant="ghost"
+              size="sm"
+              className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto font-normal"
+            >
+              <Eye size={14} className="mr-1" />
+              Ver detalles
+            </Button>
           </div>
           <div className="bg-white/20 rounded-full p-2">
             <TrendingUp className="text-white" size={20} />
@@ -90,7 +143,7 @@ export default function ClienteCard({ cliente, children }: Props) {
               <span className="text-[#D94854] text-sm font-medium">Compras</span>
             </div>
             <div className="text-2xl font-bold text-[#212026]">
-              {cliente.cantidadCompras}
+              {clienteLocal.cantidadCompras}
             </div>
           </div>
 
@@ -100,7 +153,7 @@ export default function ClienteCard({ cliente, children }: Props) {
               <span className="text-[#51590E] text-sm font-medium">Gastado</span>
             </div>
             <div className="text-sm font-bold text-[#212026] leading-tight">
-              {formatCurrency(cliente.montoTotalGastado)}
+              {formatCurrency(clienteLocal.montoTotalGastado)}
             </div>
           </div>
         </div>
@@ -111,14 +164,14 @@ export default function ClienteCard({ cliente, children }: Props) {
             <Calendar className="text-gray-400" size={16} />
             <span className="text-gray-600">Primera:</span>
             <span className="font-medium text-[#212026]">
-              {formatDate(cliente.fechaPrimeraCompra)}
+              {formatDate(clienteLocal.fechaPrimeraCompra)}
             </span>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <Calendar className="text-gray-400" size={16} />
             <span className="text-gray-600">Última:</span>
             <span className="font-medium text-[#212026]">
-              {formatDate(cliente.fechaUltimaCompra)}
+              {formatDate(clienteLocal.fechaUltimaCompra)}
             </span>
           </div>
           
@@ -136,7 +189,7 @@ export default function ClienteCard({ cliente, children }: Props) {
             <span className="text-gray-600 text-sm">Canales:</span>
           </div>
           <div className="flex flex-wrap gap-1">
-            {cliente.canales.split(',').map((canal, index) => (
+            {clienteLocal.canales.split(',').map((canal, index) => (
               <span
                 key={index}
                 className={`px-2 py-1 rounded-full text-xs font-medium ${getChannelColor(canal.trim())}`}
@@ -147,6 +200,41 @@ export default function ClienteCard({ cliente, children }: Props) {
           </div>
         </div>
 
+        {/* Botones de acción */}
+        <div className="pt-2 border-t border-gray-100 space-y-3">
+          {/* Botón WhatsApp */}
+          <Button
+            onClick={handleWhatsAppClick}
+            className={`w-full flex items-center gap-2 h-9 text-white ${
+              clienteLocal.telefono && clienteLocal.telefono.trim()
+                ? 'bg-[#25D366] hover:bg-[#128C7E]'
+                : 'bg-[#B695BF] hover:bg-[#9A7BA8]'
+            }`}
+          >
+            {clienteLocal.telefono && clienteLocal.telefono.trim() ? (
+              <>
+                <MessageCircle size={16} />
+                Enviar WhatsApp
+              </>
+            ) : (
+              <>
+                <Phone size={16} />
+                Agregar teléfono
+              </>
+            )}
+          </Button>
+
+          {/* ✅ NUEVO: Botón secundario "Ver detalles completos" */}
+          <Button
+            onClick={handleVerDetalles}
+            variant="outline"
+            className="w-full flex items-center gap-2 h-9 bg-[#B695BF]/10 border-[#B695BF]/30 text-[#B695BF] hover:bg-[#B695BF]/20 hover:text-[#B695BF]"
+          >
+            <Eye size={16} />
+            Ver detalles completos
+          </Button>
+        </div>
+
         {/* Sucursales */}
         <div className="pt-2 border-t border-gray-100">
           <div className="flex items-center gap-2 mb-1">
@@ -154,18 +242,18 @@ export default function ClienteCard({ cliente, children }: Props) {
             <span className="text-gray-600 text-sm">Sucursales:</span>
           </div>
           <div className="text-sm text-[#212026] font-medium leading-tight">
-            {cliente.sucursales && cliente.sucursales.length > 50 
-              ? `${cliente.sucursales.substring(0, 50)}...` 
-              : cliente.sucursales || "—"
+            {clienteLocal.sucursales && clienteLocal.sucursales.length > 50 
+              ? `${clienteLocal.sucursales.substring(0, 50)}...` 
+              : clienteLocal.sucursales || "—"
             }
           </div>
         </div>
 
         {/* Observaciones si existen */}
-        {cliente.observaciones && (
+        {clienteLocal.observaciones && (
           <div className="bg-[#51590E]/10 border border-[#51590E]/20 rounded-xl p-3">
             <div className="text-[#51590E] text-sm font-medium mb-1">Observaciones:</div>
-            <div className="text-[#212026] text-sm">{cliente.observaciones}</div>
+            <div className="text-[#212026] text-sm">{clienteLocal.observaciones}</div>
           </div>
         )}
 
@@ -177,8 +265,21 @@ export default function ClienteCard({ cliente, children }: Props) {
         )}
       </div>
 
-      {/* Hover effect overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#B695BF]/5 to-[#D94854]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+      {/* ❌ REMOVIDO: Hover effect overlay - Ya no es necesario */}
+
+      {/* Modales */}
+      <AgregarTelefonoModal
+        isOpen={showAgregarTelefonoModal}
+        onClose={() => setShowAgregarTelefonoModal(false)}
+        clienteNombre={clienteLocal.nombre}
+        onTelefonoGuardado={handleTelefonoGuardado}
+      />
+
+      <PlantillaWhatsAppModal
+        isOpen={showPlantillaWhatsAppModal}
+        onClose={() => setShowPlantillaWhatsAppModal(false)}
+        cliente={clienteLocal}
+      />
     </div>
   );
 }

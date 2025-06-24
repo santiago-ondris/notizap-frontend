@@ -300,6 +300,16 @@ const CambiosPage: React.FC = () => {
           <Package className="w-4 h-4" />
           <span className="hidden sm:inline">Devoluciones</span>
         </button>
+
+        {/* Botón Ver DevolucionesML */}
+        <button
+          onClick={() => navigate('/cambios/devolucionesML')}
+          className="flex items-center gap-2 px-4 py-2 bg-[#B695BF]/20 hover:bg-[#B695BF]/30 border border-[#B695BF]/30 rounded-lg text-[#B695BF] transition-all"
+          title="Ver devoluciones ML"
+        >
+          <Package className="w-4 h-4" />
+          <span className="hidden sm:inline">Devoluciones ML</span>
+        </button>
         
         {/* Botón de recarga */}
         <button

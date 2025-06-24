@@ -19,6 +19,7 @@ import EnviosPage                from "@/pages/Envios/EnviosPage";
 import CambiosPage               from "@/pages/Cambios/CambiosPage";
 import DevolucionesPage from "@/pages/Cambios/DevolucionesPage";
 import MercadoLibreAnalysisPage from "@/pages/MercadoLibre/MercadoLibreAnalysisPage";
+import DevolucionesMercadoLibrePage from "@/pages/Cambios/DevolucionesMercadoLibrePage";
 
 export const ProtectedRoutes = (
   <>
@@ -50,6 +51,7 @@ export const ProtectedRoutes = (
     <Route path="cambios">
       <Route index                   element={<CambiosPage />} />
       <Route path="devoluciones"            element={<DevolucionesPage />} />
+      <Route path="devolucionesML"            element={<DevolucionesMercadoLibrePage />} />
     </Route>
   </>
 );

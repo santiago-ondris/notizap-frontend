@@ -551,7 +551,7 @@ export const CambiosTabla: React.FC<CambiosTablaProps> = ({
       </div>
 
       {/* Tabla con scroll horizontal */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full min-w-[1400px]">
           
           {/* Header de columnas */}

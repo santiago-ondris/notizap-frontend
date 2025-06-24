@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useState } from 'react';
+import * as Select from '@radix-ui/react-select';
 import { 
   Search, 
   Filter, 
@@ -9,7 +9,8 @@ import {
   FileText, 
   RotateCcw,
   ChevronDown,
-  X
+  X,
+  Check
 } from 'lucide-react';
 import { 
   type CambiosFiltros as FiltrosType,
@@ -28,9 +29,9 @@ interface CambiosFiltrosProps {
 }
 
 /**
- * Componente de filtro desplegable con portal
+ * Dropdown con Radix UI - Sin problemas de recorte
  */
-const FilterDropdown: React.FC<{
+const RadixDropdown: React.FC<{
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -38,109 +39,69 @@ const FilterDropdown: React.FC<{
   placeholder: string;
   icon: React.ReactNode;
 }> = ({ label, value, onChange, options, placeholder, icon }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number; openUp: boolean } | null>(null);
-  const buttonRef = React.useRef<HTMLButtonElement>(null);
-
-  const selectedOption = options.find(opt => opt.value === value);
-
-  const handleToggle = () => {
-    if (!isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const spaceAbove = rect.top;
-      const openUp = spaceBelow < 250 && spaceAbove > 200;
-      
-      setDropdownPosition({
-        top: openUp ? rect.top - 10 : rect.bottom + 10,
-        left: rect.left,
-        width: rect.width,
-        openUp
-      });
-    } else {
-      setDropdownPosition(null);
-    }
-    setIsOpen(!isOpen);
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-        setDropdownPosition(null);
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [isOpen]);
+  
+  const safeValue = value || options[0]?.value || 'todos';
 
   return (
-    <div className="relative">
-      <label className="block text-xs font-medium text-white/60 mb-1">{label}</label>
-      <button
-        ref={buttonRef}
-        onClick={handleToggle}
-        className="w-full flex items-center justify-between px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm hover:bg-white/15 transition-all"
-      >
-        <div className="flex items-center gap-2">
-          {icon}
-          <span className={selectedOption ? 'text-white' : 'text-white/50'}>
-            {selectedOption ? selectedOption.label : placeholder}
-          </span>
-        </div>
-        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
+    <div className="space-y-1">
+      <label className="block text-xs font-medium text-white/60">{label}</label>
+      
+      <Select.Root value={safeValue} onValueChange={onChange}>
+        <Select.Trigger className="w-full flex items-center justify-between px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm hover:bg-white/15 transition-all focus:outline-none focus:border-[#B695BF] data-[state=open]:border-[#B695BF]">
+          <div className="flex items-center gap-2">
+            {icon}
+            <Select.Value placeholder={placeholder} />
+          </div>
+          <Select.Icon>
+            <ChevronDown className="w-4 h-4" />
+          </Select.Icon>
+        </Select.Trigger>
 
-      {isOpen && dropdownPosition && createPortal(
-        <div 
-          className={`
-            fixed bg-[#212026] border border-white/20 rounded-lg shadow-2xl z-[9999] overflow-y-auto
-          `}
-          style={{ 
-            top: dropdownPosition.openUp ? 'auto' : dropdownPosition.top,
-            bottom: dropdownPosition.openUp ? window.innerHeight - dropdownPosition.top : 'auto',
-            left: dropdownPosition.left,
-            width: Math.max(dropdownPosition.width, 200),
-            maxHeight: '240px'
-          }}
-          onWheel={(e) => e.stopPropagation()}
-        >
-          {options.map((option) => (
-            <button
-              key={option.value}
-              onClick={() => {
-                onChange(option.value);
-                setIsOpen(false);
-                setDropdownPosition(null);
-              }}
-              className={`
-                w-full text-left px-3 py-2 text-sm transition-colors
-                ${value === option.value ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10'}
-              `}
-            >
-              <div className="flex items-center gap-2">
-                {option.color && (
-                  <div 
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: option.color }}
-                  />
-                )}
-                {option.label}
-              </div>
-            </button>
-          ))}
-        </div>,
-        document.body
-      )}
+        <Select.Portal>
+          <Select.Content 
+            className="bg-[#212026] border border-white/20 rounded-lg shadow-2xl z-[9999] overflow-hidden"
+            position="popper"
+            sideOffset={4}
+          >
+            <Select.ScrollUpButton className="flex items-center justify-center h-6 bg-[#212026] text-white cursor-default">
+              <ChevronDown className="w-4 h-4 rotate-180" />
+            </Select.ScrollUpButton>
+            
+            <Select.Viewport className="p-1 max-h-60">
+              {options.map((option) => (
+                <Select.Item
+                  key={option.value}
+                  value={option.value}
+                  className="relative flex items-center px-3 py-2 text-sm text-white/80 cursor-pointer hover:bg-white/10 focus:bg-white/15 focus:outline-none rounded data-[state=checked]:bg-white/20 data-[state=checked]:text-white"
+                >
+                  <div className="flex items-center gap-2 flex-1">
+                    {option.color && (
+                      <div 
+                        className="w-2 h-2 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: option.color }}
+                      />
+                    )}
+                    <Select.ItemText>{option.label}</Select.ItemText>
+                  </div>
+                  <Select.ItemIndicator className="ml-2">
+                    <Check className="w-4 h-4 text-[#B695BF]" />
+                  </Select.ItemIndicator>
+                </Select.Item>
+              ))}
+            </Select.Viewport>
+            
+            <Select.ScrollDownButton className="flex items-center justify-center h-6 bg-[#212026] text-white cursor-default">
+              <ChevronDown className="w-4 h-4" />
+            </Select.ScrollDownButton>
+          </Select.Content>
+        </Select.Portal>
+      </Select.Root>
     </div>
   );
 };
 
 /**
- * Componente principal de filtros de cambios
+ * Componente principal de filtros con Radix UI
  */
 export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
   filtros,
@@ -150,45 +111,34 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
   cargando = false
 }) => {
   const [mostrarFiltrosAvanzados, setMostrarFiltrosAvanzados] = useState(false);
-  const [filtrosLocales, setFiltrosLocales] = useState<FiltrosType>(filtros);
-
-  // Sincronizar con props
-  useEffect(() => {
-    setFiltrosLocales(filtros);
-  }, [filtros]);
-
-  // Actualizar filtros con debounce para campos de texto
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      onFiltrosChange(filtrosLocales);
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [filtrosLocales, onFiltrosChange]);
 
   // Manejar cambio de filtro
   const handleFiltroChange = (campo: keyof FiltrosType, valor: any) => {
-    setFiltrosLocales(prev => ({
-      ...prev,
-      [campo]: valor === '' ? undefined : valor
-    }));
+    console.log(`🚀 Cambiando filtro ${campo}:`, valor);
+    
+    const nuevosFiltros = {
+      ...filtros,
+      [campo]: valor === '' || valor === 'todos' || valor === 'todos_motivos' ? undefined : valor
+    };
+    
+    console.log('📊 Nuevos filtros:', nuevosFiltros);
+    onFiltrosChange(nuevosFiltros);
   };
 
   // Limpiar todos los filtros
   const limpiarFiltros = () => {
-    const filtrosVacios: FiltrosType = {};
-    setFiltrosLocales(filtrosVacios);
-    onFiltrosChange(filtrosVacios);
+    console.log('🧹 Limpiando todos los filtros');
+    onFiltrosChange({});
     setMostrarFiltrosAvanzados(false);
   };
 
   // Verificar si hay filtros activos
-  const hayFiltrosActivos = Object.values(filtrosLocales).some(valor => 
+  const hayFiltrosActivos = Object.values(filtros).some(valor => 
     valor !== undefined && valor !== '' && valor !== 'todos'
   );
 
-  // Opciones para el dropdown de estados
-  const opcionesEstado: Array<{ value: EstadoCambioFiltro; label: string; color?: string }> = [
+  // Opciones para dropdowns - ASEGURAR VALORES NO VACÍOS
+  const opcionesEstado: Array<{ value: string; label: string; color?: string }> = [
     { value: 'todos', label: LABELS_ESTADO.todos },
     { value: 'pendiente_llegada', label: LABELS_ESTADO.pendiente_llegada, color: COLORES_ESTADO.pendiente_llegada },
     { value: 'listo_envio', label: LABELS_ESTADO.listo_envio, color: COLORES_ESTADO.listo_envio },
@@ -197,9 +147,8 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
     { value: 'sin_registrar', label: LABELS_ESTADO.sin_registrar, color: COLORES_ESTADO.sin_registrar }
   ];
 
-  // Opciones para el dropdown de motivos
   const opcionesMotivo = [
-    { value: '', label: 'Todos los motivos' },
+    { value: 'todos_motivos', label: 'Todos los motivos' }, // Cambié de '' a 'todos_motivos'
     ...MOTIVOS_CAMBIO.map(motivo => ({ value: motivo, label: motivo }))
   ];
 
@@ -216,7 +165,7 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
               <input
                 type="text"
-                value={filtrosLocales.pedido || ''}
+                value={filtros.pedido || ''}
                 onChange={(e) => handleFiltroChange('pedido', e.target.value)}
                 placeholder="Buscar por número de pedido..."
                 className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#B695BF] transition-all"
@@ -288,7 +237,7 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
           <div className="space-y-4">
             
             {/* Fila 1: Búsquedas de texto */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               
               {/* Cliente */}
               <div>
@@ -297,7 +246,7 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
                   <input
                     type="text"
-                    value={filtrosLocales.nombre || ''}
+                    value={filtros.nombre || ''}
                     onChange={(e) => handleFiltroChange('nombre', e.target.value)}
                     placeholder="Buscar por nombre..."
                     className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#B695BF] transition-all text-sm"
@@ -313,7 +262,7 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
                   <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
                   <input
                     type="text"
-                    value={filtrosLocales.celular || ''}
+                    value={filtros.celular || ''}
                     onChange={(e) => handleFiltroChange('celular', e.target.value)}
                     placeholder="Buscar por celular..."
                     className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#B695BF] transition-all text-sm"
@@ -323,24 +272,24 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
               </div>
             </div>
 
-            {/* Fila 2: Dropdowns */}
+            {/* Fila 2: Dropdowns con Radix UI */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               
-              {/* Estado */}
-              <FilterDropdown
+              {/* Estado del Cambio */}
+              <RadixDropdown
                 label="Estado del Cambio"
-                value={filtrosLocales.estado || 'todos'}
+                value={filtros.estado || 'todos'}
                 onChange={(value) => handleFiltroChange('estado', value)}
                 options={opcionesEstado}
                 placeholder="Seleccionar estado"
                 icon={<Filter className="w-4 h-4 text-white/40" />}
               />
 
-              {/* Motivo */}
-              <FilterDropdown
+              {/* Motivo del Cambio */}
+              <RadixDropdown
                 label="Motivo del Cambio"
-                value={filtrosLocales.motivo || ''}
-                onChange={(value) => handleFiltroChange('motivo', value)}
+                value={filtros.motivo || 'todos_motivos'}
+                onChange={(value) => handleFiltroChange('motivo', value === 'todos_motivos' ? '' : value)}
                 options={opcionesMotivo}
                 placeholder="Seleccionar motivo"
                 icon={<FileText className="w-4 h-4 text-white/40" />}
@@ -357,7 +306,7 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
                   <input
                     type="date"
-                    value={filtrosLocales.fechaDesde || ''}
+                    value={filtros.fechaDesde || ''}
                     onChange={(e) => handleFiltroChange('fechaDesde', e.target.value)}
                     className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-[#B695BF] transition-all text-sm"
                     disabled={cargando}
@@ -372,7 +321,7 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
                   <input
                     type="date"
-                    value={filtrosLocales.fechaHasta || ''}
+                    value={filtros.fechaHasta || ''}
                     onChange={(e) => handleFiltroChange('fechaHasta', e.target.value)}
                     className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-[#B695BF] transition-all text-sm"
                     disabled={cargando}
@@ -388,7 +337,7 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
                   <span className="text-xs font-medium text-white/60">Filtros activos:</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {Object.entries(filtrosLocales).map(([key, value]) => {
+                  {Object.entries(filtros).map(([key, value]) => {
                     if (!value || value === 'todos' || value === '') return null;
                     
                     let label = '';
@@ -405,10 +354,6 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
                         break;
                       case 'celular':
                         label = 'Celular';
-                        displayValue = value;
-                        break;
-                      case 'responsable':
-                        label = 'Responsable';
                         displayValue = value;
                         break;
                       case 'estado':

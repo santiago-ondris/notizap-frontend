@@ -304,7 +304,7 @@ const CambiosPage: React.FC = () => {
         {/* Botón Ver DevolucionesML */}
         <button
           onClick={() => navigate('/cambios/devolucionesML')}
-          className="flex items-center gap-2 px-4 py-2 bg-[#B695BF]/20 hover:bg-[#B695BF]/30 border border-[#B695BF]/30 rounded-lg text-[#B695BF] transition-all"
+          className="flex items-center gap-2 px-4 py-2 bg-[#000000]/10 hover:bg-[#0033A0]/20 border border-[#0033A0]/30 rounded-lg text-[#FFE600] transition-all"
           title="Ver devoluciones ML"
         >
           <Package className="w-4 h-4" />

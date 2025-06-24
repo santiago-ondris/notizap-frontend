@@ -87,8 +87,6 @@ export const MOTIVOS_CAMBIO = [
   'Modelo',
   'Falla de fábrica',
   'No le gustó',
-  'Color',
-  'Diferente a la foto',
   'Otro'
 ] as const;
 

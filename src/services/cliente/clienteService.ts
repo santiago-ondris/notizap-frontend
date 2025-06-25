@@ -224,3 +224,42 @@ export const actualizarTelefonoCliente = async (clienteId: number, telefono: str
     telefono: telefono
   });
 };
+
+export async function exportarClientesExcel(filtros: any): Promise<void> {
+  try {
+    const params = new URLSearchParams();
+    
+    if (filtros?.desde) params.append('desde', filtros.desde);
+    if (filtros?.hasta) params.append('hasta', filtros.hasta);
+    if (filtros?.canal) params.append('canal', filtros.canal);
+    if (filtros?.sucursal) params.append('sucursal', filtros.sucursal);
+    if (filtros?.marca) params.append('marca', filtros.marca);
+    if (filtros?.categoria) params.append('categoria', filtros.categoria);
+
+    const response = await api.get(`/api/v1/clientes/export/excel?${params.toString()}`, {
+      responseType: 'blob'
+    });
+
+    // Crear el archivo y descargarlo
+    const blob = new Blob([response.data], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    });
+    
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    
+    const fecha = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    link.download = `clientes_${fecha}.xlsx`;
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    
+    console.log('Excel exportado exitosamente');
+  } catch (error) {
+    console.error('Error al exportar Excel:', error);
+    throw error;
+  }
+}

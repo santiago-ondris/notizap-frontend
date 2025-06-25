@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { filtrarClientes, getFilterOptionsHybrid } from "@/services/cliente/clienteService";
+import { filtrarClientes, getFilterOptionsHybrid, exportarClientesExcel } from "@/services/cliente/clienteService";
 import { type ClienteResumenDto, type PagedResult } from "@/types/cliente/cliente";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
-import { Calendar, MapPin, Tag, Store, Filter, X, ChevronDown, Check } from "lucide-react";
+import { Calendar, MapPin, Tag, Store, Filter, X, ChevronDown, Check, Download } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -42,6 +42,7 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
   const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingOptions, setLoadingOptions] = useState(true);
+  const [exportLoading, setExportLoading] = useState(false);
 
   // Estados para los popover
   const [openCanales, setOpenCanales] = useState(false);
@@ -141,6 +142,27 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleExport = async () => {
+    setExportLoading(true);
+    try {
+      const filtrosParaExport = {
+        desde: desde || undefined,
+        hasta: hasta || undefined,
+        canal: canalesSeleccionados.length > 0 ? canalesSeleccionados.join(',') : undefined,
+        sucursal: sucursalesSeleccionadas.length > 0 ? sucursalesSeleccionadas.join(',') : undefined,
+        marca: marcasSeleccionadas.length > 0 ? marcasSeleccionadas.join(',') : undefined,
+        categoria: categoriasSeleccionadas.length > 0 ? categoriasSeleccionadas.join(',') : undefined,
+      };
+  
+      await exportarClientesExcel(filtrosParaExport);
+      toast.success("Excel exportado exitosamente");
+    } catch (error) {
+      toast.error("Error al exportar Excel");
+    } finally {
+      setExportLoading(false);
     }
   };
 
@@ -414,6 +436,26 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
               </div>
             )}
           </Button>
+
+          <Button 
+            type="button"
+            onClick={handleExport}
+            disabled={exportLoading || !hasActiveFilters}
+            className="bg-[#51590E] hover:bg-[#465005] text-white h-11 px-6 font-medium transition-all duration-200"
+          >
+            {exportLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Exportando...
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Download size={16} />
+                Exportar Excel
+              </div>
+            )}
+          </Button>
+
           <Button 
             type="button" 
             variant="outline" 

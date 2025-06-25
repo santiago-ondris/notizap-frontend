@@ -79,6 +79,7 @@ const modules = [
     description: "Métricas y campañas publicitarias",
     icon: Megaphone,
     color: "#51590E",
+    to: "/publicidad",
     roles: ["viewer", "admin", "superadmin"]
   },
   {

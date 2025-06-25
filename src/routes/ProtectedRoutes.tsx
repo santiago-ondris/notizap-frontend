@@ -20,6 +20,13 @@ import CambiosPage               from "@/pages/Cambios/CambiosPage";
 import DevolucionesPage from "@/pages/Cambios/DevolucionesPage";
 import MercadoLibreAnalysisPage from "@/pages/MercadoLibre/MercadoLibreAnalysisPage";
 import DevolucionesMercadoLibrePage from "@/pages/Cambios/DevolucionesMercadoLibrePage";
+import DashboardPage from "@/pages/Publicidad/DashboardPage";
+import PublicidadPage from "@/pages/Publicidad/PublicidadPage";
+import SyncPage from "@/pages/Publicidad/SyncPage";
+import CrearReportePage from "@/pages/Publicidad/CrearReportePage";
+import ReportesPage from "@/pages/Publicidad/ReportesPage";
+import CampaignsPage from "@/pages/Publicidad/CampaignsPage";
+import CampaignEditPage from "@/pages/Publicidad/CampaignEditPage";
 
 export const ProtectedRoutes = (
   <>
@@ -31,6 +38,15 @@ export const ProtectedRoutes = (
       <Route path="ventas/resumen"   element={<VentasResumenPage />} />
     </Route>
     <Route path="mailing"           element={<MailingPage />} />
+    <Route path="publicidad">
+      <Route index                   element={<PublicidadPage />} />
+      <Route path="dashboard"           element={<DashboardPage />} />
+      <Route path="sync"          element={<SyncPage />} />
+      <Route path="reportes/nuevo"   element={<CrearReportePage />} />
+      <Route path="reportes"   element={<ReportesPage />} />
+      <Route path="campanas"   element={<CampaignsPage />} />
+      <Route path="campanas/editar/:id"   element={<CampaignEditPage />} />
+    </Route>
     <Route path="mercadolibre">
       <Route index                   element={<MercadoLibreReportsPage />} />
       <Route path="admin"            element={<AdminMercadoLibrePage />} />

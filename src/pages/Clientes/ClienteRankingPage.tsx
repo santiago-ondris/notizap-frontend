@@ -192,7 +192,7 @@ export default function ClientesRankingPage() {
 
         {/* Tabla de ranking */}
         <ClienteRankingTable 
-          initialOrdenarPor="monto" 
+          initialOrdenarPor="montoTotal" 
           initialTop={10}
           filtros={filtrosAplicados} // Pasamos los filtros al componente
         />

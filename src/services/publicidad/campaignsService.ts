@@ -114,7 +114,7 @@ class CampaignsService {
       if (typeof formData.impressions === 'number') dto.impressions = formData.impressions;
       if (typeof formData.ctr === 'number') dto.ctr = formData.ctr;
       if (typeof formData.reach === 'number') dto.reach = formData.reach;
-      if (typeof formData.valorResultado === 'number') dto.valorResultado = formData.valorResultado;
+      if (typeof formData.valorResultado === 'number') dto.valorResultado = formData.valorResultado.toString();
     }
 
     return dto;
@@ -143,7 +143,7 @@ class CampaignsService {
       impressions: hasMetrics ? campaign.impressions : '',
       ctr: hasMetrics ? campaign.ctr : '',
       reach: hasMetrics ? campaign.reach : '',
-      valorResultado: hasMetrics ? campaign.valorResultado : ''
+      valorResultado: hasMetrics ? Number(campaign.valorResultado) || '' : ''
     };
   }
 

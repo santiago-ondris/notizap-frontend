@@ -4,6 +4,7 @@ import { type ClienteResumenDto, type PagedResult } from "@/types/cliente/client
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
+import ClienteOrdenamiento from "./ClienteOrdenamiento";
 import { Calendar, MapPin, Tag, Store, Filter, X, ChevronDown, Check, Download } from "lucide-react";
 import {
   Command,
@@ -43,12 +44,18 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
   const [loading, setLoading] = useState(false);
   const [loadingOptions, setLoadingOptions] = useState(true);
   const [exportLoading, setExportLoading] = useState(false);
+  const [ordenarPor, setOrdenarPor] = useState("montoTotal");
 
   // Estados para los popover
   const [openCanales, setOpenCanales] = useState(false);
   const [openSucursales, setOpenSucursales] = useState(false);
   const [openMarcas, setOpenMarcas] = useState(false);
   const [openCategorias, setOpenCategorias] = useState(false);
+
+  const [modoExclusivoCanal, setModoExclusivoCanal] = useState(false);
+  const [modoExclusivoSucursal, setModoExclusivoSucursal] = useState(false);
+  const [modoExclusivoMarca, setModoExclusivoMarca] = useState(false);
+  const [modoExclusivoCategoria, setModoExclusivoCategoria] = useState(false);
 
   // Opciones disponibles
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
@@ -96,19 +103,18 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
     setLoading(true);
     
     try {
-      // Verificar que al menos un filtro esté seleccionado
       const hasFilters = desde || hasta || 
         canalesSeleccionados.length > 0 || 
         sucursalesSeleccionadas.length > 0 || 
         marcasSeleccionadas.length > 0 || 
         categoriasSeleccionadas.length > 0;
-
+  
       if (!hasFilters) {
         toast.warning("Selecciona al menos un filtro para buscar");
         setLoading(false);
         return;
       }
-
+  
       const filtrosAplicados = {
         desde: desde || undefined,
         hasta: hasta || undefined,
@@ -116,14 +122,18 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
         sucursal: sucursalesSeleccionadas.length > 0 ? sucursalesSeleccionadas.join(',') : undefined,
         marca: marcasSeleccionadas.length > 0 ? marcasSeleccionadas.join(',') : undefined,
         categoria: categoriasSeleccionadas.length > 0 ? categoriasSeleccionadas.join(',') : undefined,
+        modoExclusivoCanal,
+        modoExclusivoSucursal, 
+        modoExclusivoMarca,
+        modoExclusivoCategoria,
+        ordenarPor,
       };
-
-      // Usar la nueva función con paginación
+  
       const resultadoPaginado = await filtrarClientes(filtrosAplicados, 1, 12);
       
       onResult(resultadoPaginado);
-      onFiltersApplied(filtrosAplicados); // Comunicar los filtros aplicados
-
+      onFiltersApplied(filtrosAplicados);
+  
       if (resultadoPaginado.items.length === 0) {
         toast.info("No se encontraron clientes con esos filtros");
       } else {
@@ -132,7 +142,6 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
     } catch (error: any) {
       console.error("Error al filtrar clientes:", error);
       
-      // Mostrar mensaje de error más específico
       if (error.response?.status === 400) {
         toast.error("Error en los filtros aplicados. Verifica los valores seleccionados.");
       } else if (error.response?.status === 500) {
@@ -155,6 +164,11 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
         sucursal: sucursalesSeleccionadas.length > 0 ? sucursalesSeleccionadas.join(',') : undefined,
         marca: marcasSeleccionadas.length > 0 ? marcasSeleccionadas.join(',') : undefined,
         categoria: categoriasSeleccionadas.length > 0 ? categoriasSeleccionadas.join(',') : undefined,
+        modoExclusivoCanal,
+        modoExclusivoSucursal,
+        modoExclusivoMarca,
+        modoExclusivoCategoria,
+        ordenarPor,
       };
   
       await exportarClientesExcel(filtrosParaExport);
@@ -173,10 +187,17 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
     setSucursalesSeleccionadas([]);
     setMarcasSeleccionadas([]);
     setCategoriasSeleccionadas([]);
+    setOrdenarPor("montoTotal");
+    setModoExclusivoCanal(false);
+    setModoExclusivoSucursal(false);
+    setModoExclusivoMarca(false);
+    setModoExclusivoCategoria(false);
     onResult(null);
-    onFiltersApplied(null); // Limpiar filtros aplicados
+    onFiltersApplied(null);
     toast.info("Filtros limpiados");
   };
+
+  const tieneCategoriasSeleccionadas = categoriasSeleccionadas.length > 0 || marcasSeleccionadas.length > 0;
 
   const hasActiveFilters = desde || hasta || 
     canalesSeleccionados.length > 0 || 
@@ -184,119 +205,152 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
     marcasSeleccionadas.length > 0 || 
     categoriasSeleccionadas.length > 0;
 
-  // Componente reutilizable para multi-select
-  const MultiSelectFilter = ({ 
-    title, 
-    icon, 
-    selectedValues, 
-    onSelectionChange, 
-    options, 
-    placeholder,
-    open,
-    onOpenChange,
-    color = "#B695BF"
-  }: {
-    title: string;
-    icon: React.ReactNode;
-    selectedValues: string[];
-    onSelectionChange: (values: string[]) => void;
-    options: string[];
-    placeholder: string;
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    color?: string;
-  }) => {
-    const toggleSelection = (value: string) => {
-      if (selectedValues.includes(value)) {
+    const MultiSelectFilter = ({ 
+      title, 
+      icon, 
+      selectedValues, 
+      onSelectionChange, 
+      options, 
+      placeholder,
+      open,
+      onOpenChange,
+      color = "#B695BF",
+      modoExclusivo,
+      onModoExclusivoChange
+    }: {
+      title: string;
+      icon: React.ReactNode;
+      selectedValues: string[];
+      onSelectionChange: (values: string[]) => void;
+      options: string[];
+      placeholder: string;
+      open: boolean;
+      onOpenChange: (open: boolean) => void;
+      color?: string;
+      modoExclusivo?: boolean;
+      onModoExclusivoChange?: (exclusivo: boolean) => void;
+    }) => {
+      const toggleSelection = (value: string) => {
+        if (selectedValues.includes(value)) {
+          onSelectionChange(selectedValues.filter(v => v !== value));
+        } else {
+          onSelectionChange([...selectedValues, value]);
+        }
+      };
+    
+      const removeSelection = (value: string) => {
         onSelectionChange(selectedValues.filter(v => v !== value));
-      } else {
-        onSelectionChange([...selectedValues, value]);
-      }
-    };
-
-    const removeSelection = (value: string) => {
-      onSelectionChange(selectedValues.filter(v => v !== value));
-    };
-
-    return (
-      <div className="space-y-2">
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-          {icon}
-          {title}
-        </label>
-        <Popover open={open} onOpenChange={onOpenChange}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={open}
-              className={cn(
-                "w-full justify-between h-11 border-gray-200",
-                `focus:border-[${color}] focus:ring-[${color}]/20`
-              )}
-            >
-              {selectedValues.length === 0 ? (
-                <span className="text-gray-500">{placeholder}</span>
-              ) : (
-                <span className="text-sm">
-                  {selectedValues.length} seleccionado{selectedValues.length > 1 ? 's' : ''}
-                </span>
-              )}
-              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-full p-0" align="start">
-            <Command>
-              <CommandInput placeholder={`Buscar ${title.toLowerCase()}...`} />
-              <CommandEmpty>No se encontraron opciones.</CommandEmpty>
-              <CommandGroup className="max-h-64 overflow-auto">
-                {options.map((option) => (
-                  <CommandItem
-                    key={option}
-                    onSelect={() => toggleSelection(option)}
-                    className="cursor-pointer"
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        selectedValues.includes(option) ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    {option}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </Command>
-          </PopoverContent>
-        </Popover>
-        
-        {/* Badges de seleccionados */}
-        {selectedValues.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {selectedValues.map((value) => (
-              <Badge 
-                key={value} 
-                variant="secondary" 
-                className="text-xs"
-                style={{ backgroundColor: `${color}15`, color: color }}
+      };
+    
+      return (
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            {icon}
+            {title}
+          </label>
+          <Popover open={open} onOpenChange={onOpenChange}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={open}
+                className={cn(
+                  "w-full justify-between h-11 border-gray-200",
+                  `focus:border-[${color}] focus:ring-[${color}]/20`
+                )}
               >
-                {value}
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    removeSelection(value);
+                {selectedValues.length === 0 ? (
+                  <span className="text-gray-500">{placeholder}</span>
+                ) : (
+                  <span className="text-sm">
+                    {selectedValues.length} seleccionado{selectedValues.length > 1 ? 's' : ''}
+                    {modoExclusivo && <span className="ml-1 text-xs">(exclusivo)</span>}
+                  </span>
+                )}
+                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0" align="start">
+              <Command>
+                <CommandInput placeholder={`Buscar ${title.toLowerCase()}...`} />
+                <CommandEmpty>No se encontraron opciones.</CommandEmpty>
+                <CommandGroup className="max-h-64 overflow-auto">
+                  {options.map((option) => (
+                    <CommandItem
+                      key={option}
+                      onSelect={() => toggleSelection(option)}
+                      className="cursor-pointer"
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          selectedValues.includes(option) ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {option}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </Command>
+            </PopoverContent>
+          </Popover>
+          
+          {onModoExclusivoChange && (
+            <div className="flex items-center gap-2 mt-2">
+              <input 
+                type="checkbox" 
+                id={`exclusivo-${title}`}
+                checked={modoExclusivo || false}
+                onChange={(e) => onModoExclusivoChange(e.target.checked)}
+                disabled={selectedValues.length === 0}
+                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label 
+                htmlFor={`exclusivo-${title}`}
+                className={cn(
+                  "text-xs cursor-pointer",
+                  selectedValues.length === 0 ? "text-gray-400" : "text-gray-600"
+                )}
+              >
+                Solo estas opciones (exclusivo)
+              </label>
+            </div>
+          )}
+          
+          {/* Badges de seleccionados */}
+          {selectedValues.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {selectedValues.map((value) => (
+                <Badge 
+                  key={value} 
+                  variant="secondary" 
+                  className={cn(
+                    "text-xs",
+                    modoExclusivo && "ring-2 ring-offset-1"
+                  )}
+                  style={{ 
+                    backgroundColor: `${color}15`, 
+                    color: color,
+                    ...(modoExclusivo && { ringColor: color })
                   }}
-                  className="ml-1 hover:bg-gray-200 rounded-full w-4 h-4 flex items-center justify-center"
                 >
-                  <X size={10} />
-                </button>
-              </Badge>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
+                  {value}
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      removeSelection(value);
+                    }}
+                    className="ml-1 hover:bg-gray-200 rounded-full w-4 h-4 flex items-center justify-center"
+                  >
+                    <X size={10} />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    };
 
   if (loadingOptions) {
     return (
@@ -364,7 +418,7 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
           </div>
         </div>
 
-        {/* Multi-selects */}
+        {/* Multi-selects con modo exclusivo */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <MultiSelectFilter
             title="Canales de venta"
@@ -376,6 +430,8 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
             open={openCanales}
             onOpenChange={setOpenCanales}
             color="#D94854"
+            modoExclusivo={modoExclusivoCanal}
+            onModoExclusivoChange={setModoExclusivoCanal}
           />
           
           <MultiSelectFilter
@@ -388,6 +444,8 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
             open={openSucursales}
             onOpenChange={setOpenSucursales}
             color="#D94854"
+            modoExclusivo={modoExclusivoSucursal}
+            onModoExclusivoChange={setModoExclusivoSucursal}
           />
         </div>
 
@@ -402,6 +460,8 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
             open={openMarcas}
             onOpenChange={setOpenMarcas}
             color="#B695BF"
+            modoExclusivo={modoExclusivoMarca}
+            onModoExclusivoChange={setModoExclusivoMarca}
           />
           
           <MultiSelectFilter
@@ -414,6 +474,17 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
             open={openCategorias}
             onOpenChange={setOpenCategorias}
             color="#B695BF"
+            modoExclusivo={modoExclusivoCategoria}
+            onModoExclusivoChange={setModoExclusivoCategoria}
+          />
+        </div>
+
+        {/* Ordenamiento */}
+        <div className="pt-4 border-t border-gray-200">
+          <ClienteOrdenamiento
+            ordenarPor={ordenarPor}
+            onOrdenarPorChange={setOrdenarPor}
+            tieneCategoriasSeleccionadas={tieneCategoriasSeleccionadas}
           />
         </div>
 

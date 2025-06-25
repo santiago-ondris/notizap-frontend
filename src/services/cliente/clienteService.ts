@@ -22,20 +22,17 @@ export const getClienteDetalle = async (id: number): Promise<ClienteDetalleDto> 
   return res.data;
 };
 
-// Obtener ranking de clientes (por monto o cantidad)
 export const getRankingClientes = async (
-  ordenarPor: "monto" | "cantidad" = "monto",
+  ordenarPor: "montoTotal" | "cantidadTotal" | "montoCategoria" | "cantidadCategoria" | "fechaReciente" | "fechaAntigua" = "montoTotal",
   top: number = 10,
-  filtros?: any // Parámetro opcional para filtros
+  filtros?: any
 ): Promise<ClienteResumenDto[]> => {
   try {
-    // Construir parámetros de query
     const params = new URLSearchParams({
       ordenarPor,
       top: top.toString()
     });
 
-    // Agregar filtros si existen
     if (filtros) {
       if (filtros.desde) params.append('desde', filtros.desde);
       if (filtros.hasta) params.append('hasta', filtros.hasta);
@@ -43,9 +40,13 @@ export const getRankingClientes = async (
       if (filtros.sucursal) params.append('sucursal', filtros.sucursal);
       if (filtros.marca) params.append('marca', filtros.marca);
       if (filtros.categoria) params.append('categoria', filtros.categoria);
+      
+      if (filtros.modoExclusivoCanal) params.append('modoExclusivoCanal', 'true');
+      if (filtros.modoExclusivoSucursal) params.append('modoExclusivoSucursal', 'true');
+      if (filtros.modoExclusivoMarca) params.append('modoExclusivoMarca', 'true');
+      if (filtros.modoExclusivoCategoria) params.append('modoExclusivoCategoria', 'true');
     }
 
-    // ⚠️ AQUÍ ESTABA EL ERROR: Faltaba la ruta completa
     const response = await api.get(`/api/v1/clientes/ranking?${params.toString()}`);
     return response.data;
   } catch (error) {
@@ -53,8 +54,6 @@ export const getRankingClientes = async (
     throw error;
   }
 };
-
-// Buscar clientes por nombre
 export const buscarClientesPorNombre = async (
   nombre: string
 ): Promise<ClienteResumenDto[]> => {
@@ -62,7 +61,6 @@ export const buscarClientesPorNombre = async (
   return res.data;
 };
 
-// Filtrar clientes por criterios avanzados - AHORA CON PAGINACIÓN
 export const filtrarClientes = async (
   params: {
     desde?: string;
@@ -71,12 +69,19 @@ export const filtrarClientes = async (
     sucursal?: string;
     marca?: string;
     categoria?: string;
+    modoExclusivoCanal?: boolean;
+    modoExclusivoSucursal?: boolean;
+    modoExclusivoMarca?: boolean;
+    modoExclusivoCategoria?: boolean;
+    ordenarPor?: string;
   },
   pageNumber: number = 1,
   pageSize: number = 12
 ): Promise<PagedResult<ClienteResumenDto>> => {
 
   const query = new URLSearchParams();
+  
+  // Parámetros existentes
   if (params.desde) query.append("desde", params.desde);
   if (params.hasta) query.append("hasta", params.hasta);
   if (params.canal) query.append("canal", params.canal);
@@ -84,7 +89,13 @@ export const filtrarClientes = async (
   if (params.marca) query.append("marca", params.marca);
   if (params.categoria) query.append("categoria", params.categoria);
   
-  // Agregar parámetros de paginación
+  if (params.modoExclusivoCanal) query.append("modoExclusivoCanal", "true");
+  if (params.modoExclusivoSucursal) query.append("modoExclusivoSucursal", "true");
+  if (params.modoExclusivoMarca) query.append("modoExclusivoMarca", "true");
+  if (params.modoExclusivoCategoria) query.append("modoExclusivoCategoria", "true");
+
+  if (params.ordenarPor) query.append("ordenarPor", params.ordenarPor);
+  
   query.append("pageNumber", pageNumber.toString());
   query.append("pageSize", pageSize.toString());
 
@@ -236,11 +247,17 @@ export async function exportarClientesExcel(filtros: any): Promise<void> {
     if (filtros?.marca) params.append('marca', filtros.marca);
     if (filtros?.categoria) params.append('categoria', filtros.categoria);
 
+    if (filtros?.modoExclusivoCanal) params.append('modoExclusivoCanal', 'true');
+    if (filtros?.modoExclusivoSucursal) params.append('modoExclusivoSucursal', 'true');
+    if (filtros?.modoExclusivoMarca) params.append('modoExclusivoMarca', 'true');
+    if (filtros?.modoExclusivoCategoria) params.append('modoExclusivoCategoria', 'true');
+
+    if (filtros?.ordenarPor) params.append('ordenarPor', filtros.ordenarPor);
+
     const response = await api.get(`/api/v1/clientes/export/excel?${params.toString()}`, {
       responseType: 'blob'
     });
 
-    // Crear el archivo y descargarlo
     const blob = new Blob([response.data], { 
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
     });

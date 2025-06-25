@@ -25,17 +25,17 @@ import {
 } from "@/components/ui/select";
 
 interface Props {
-  initialOrdenarPor?: "monto" | "cantidad";
+  initialOrdenarPor?: "montoTotal" | "cantidadTotal"; // 🔧 CORREGIDO
   initialTop?: number;
   filtros?: any;
 }
 
 export default function ClienteRankingTable({ 
-  initialOrdenarPor = "monto", 
+  initialOrdenarPor = "montoTotal", // 🔧 CORREGIDO
   initialTop = 10, 
   filtros 
 }: Props) {
-  const [ordenarPor, setOrdenarPor] = useState<"monto" | "cantidad">(initialOrdenarPor);
+  const [ordenarPor, setOrdenarPor] = useState<"montoTotal" | "cantidadTotal">(initialOrdenarPor); // 🔧 CORREGIDO
   const [top, setTop] = useState(initialTop);
   const [clientes, setClientes] = useState<ClienteResumenDto[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +44,6 @@ export default function ClienteRankingTable({
   useEffect(() => {
     setLoading(true);
     
-    // Llamar a la función de ranking con filtros opcionales
     getRankingClientes(ordenarPor, top, filtros)
       .then(setClientes)
       .finally(() => setLoading(false));
@@ -123,13 +122,13 @@ export default function ClienteRankingTable({
             <div className="flex items-center gap-3">
               <TrendingUp className="text-[#B695BF]" size={20} />
               <span className="font-medium text-gray-700">Ordenar por:</span>
-              <Select value={ordenarPor} onValueChange={(value: "monto" | "cantidad") => setOrdenarPor(value)}>
+              <Select value={ordenarPor} onValueChange={(value: "montoTotal" | "cantidadTotal") => setOrdenarPor(value)}> {/* 🔧 CORREGIDO */}
                 <SelectTrigger className="w-48 border-gray-200 focus:border-[#B695BF]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="monto">💰 Monto gastado</SelectItem>
-                  <SelectItem value="cantidad">🛒 Cantidad de compras</SelectItem>
+                  <SelectItem value="montoTotal">💰 Monto gastado</SelectItem> {/* 🔧 CORREGIDO */}
+                  <SelectItem value="cantidadTotal">🛒 Cantidad de compras</SelectItem> {/* 🔧 CORREGIDO */}
                 </SelectContent>
               </Select>
             </div>

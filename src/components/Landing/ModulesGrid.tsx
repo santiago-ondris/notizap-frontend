@@ -8,12 +8,12 @@ import {
   Repeat,
   Send,
   Megaphone,
-  Image,
   BarChart3,
   Receipt,
   User,
   Grid3X3,
-  Lock
+  Lock,
+  Fish
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -83,11 +83,12 @@ const modules = [
     roles: ["viewer", "admin", "superadmin"]
   },
   {
-    title: "Procesador de Imágenes",
-    description: "Redimensiona, convierte y descarga imágenes",
-    icon: Image,
+    title: "Vendedoras",
+    description: "Rendimiento por sucursal",
+    icon: Fish,
     color: "#B695BF",
-    roles: ["viewer", "admin", "superadmin"]
+    to: "/vendedoras",
+    roles: ["superadmin"]
   },
   {
     title: "WooCommerce",

@@ -28,6 +28,7 @@ import ReportesPage from "@/pages/Publicidad/ReportesPage";
 import CampaignsPage from "@/pages/Publicidad/CampaignsPage";
 import CampaignEditPage from "@/pages/Publicidad/CampaignEditPage";
 import { VentasVendedorasPage } from "@/pages/Vendedoras/VentasVendedorasPage";
+import LocalesStatsPage from "@/pages/Vendedoras/LocalesStatsPage";
 
 export const ProtectedRoutes = (
   <>
@@ -70,6 +71,9 @@ export const ProtectedRoutes = (
       <Route path="devoluciones"            element={<DevolucionesPage />} />
       <Route path="devolucionesML"            element={<DevolucionesMercadoLibrePage />} />
     </Route>
-    <Route path="vendedoras"            element={<VentasVendedorasPage />} />
+    <Route path="vendedoras">
+      <Route index                   element={<VentasVendedorasPage />} />
+      <Route path="rendimiento"            element={<LocalesStatsPage />} />
+    </Route>
   </>
 );

@@ -18,11 +18,13 @@ export const dateHelpers = {
     },
   
     formatearFechaConDia(fechaISO: string): string {
-      const fecha = new Date(fechaISO);
+      const [datePart] = fechaISO.split('T');
+      const [year, month, day] = datePart.split('-').map(n => parseInt(n, 10));
+      const fecha = new Date(year, month - 1, day, 12, 0, 0);
       return fecha.toLocaleDateString('es-AR', {
         weekday: 'short',
-        day: '2-digit',
-        month: '2-digit'
+        day:     '2-digit',
+        month:   '2-digit'
       });
     },
   

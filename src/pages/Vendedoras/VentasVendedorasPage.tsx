@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { 
   BarChart3, 
@@ -8,7 +9,8 @@ import {
   CheckCircle2,
   TrendingUp,
   Eye,
-  Settings
+  Settings,
+  Building2
 } from 'lucide-react';
 import { VentasVendedorasUpload } from '@/components/Vendedoras/VentasVendedorasUpload';
 import { VentasVendedorasFilters } from '@/components/Vendedoras/VentasVendedorasFilters';
@@ -30,6 +32,8 @@ import { dateHelpers } from '@/utils/vendedoras/dateHelpers';
 type VistaActual = 'dashboard' | 'upload' | 'tabla' | 'graficos';
 
 export const VentasVendedorasPage: React.FC = () => {
+  const navigate = useNavigate();
+  
   // Estados principales
   const [vistaActual, setVistaActual] = useState<VistaActual>('dashboard');
   const [modoAdmin, setModoAdmin] = useState(false);
@@ -192,6 +196,14 @@ export const VentasVendedorasPage: React.FC = () => {
       label: '📈 Gráficos',
       icono: TrendingUp,
       descripcion: 'Análisis visual de tendencias'
+    },
+    {
+      id: 'locales',
+      label: '🏢 Rendimiento por Locales',
+      icono: Building2,
+      descripcion: 'Análisis diario por sucursal',
+      esNavegacion: true,
+      ruta: '/vendedoras/rendimiento'
     }
   ];
 
@@ -265,7 +277,13 @@ export const VentasVendedorasPage: React.FC = () => {
               .map(opcion => (
                 <button
                   key={opcion.id}
-                  onClick={() => setVistaActual(opcion.id as VistaActual)}
+                  onClick={() => {
+                    if (opcion.esNavegacion && opcion.ruta) {
+                      navigate(opcion.ruta);
+                    } else {
+                      setVistaActual(opcion.id as VistaActual);
+                    }
+                  }}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all group ${
                     vistaActual === opcion.id
                       ? 'bg-violet-500/20 border-violet-500/30 text-violet-400'

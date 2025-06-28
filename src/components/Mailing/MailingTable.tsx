@@ -1,7 +1,9 @@
 import React from "react";
 import { Loader2, Mail, AlertCircle, Calendar, Users, MousePointer, Target } from "lucide-react";
+import { EditableTitle } from "@/components/Mailing/EditableTitle";
 
 interface Campaign {
+  id: number;
   campaignId: string;
   title: string;
   sendTime: string;
@@ -9,6 +11,7 @@ interface Campaign {
   openRate: number;
   clickRate: number;
   conversions: number;
+  cuenta: "Montella" | "Alenka";
 }
 
 interface MailingTableProps {
@@ -18,6 +21,7 @@ interface MailingTableProps {
   totalCampaigns?: number;
   currentPage?: number;
   itemsPerPage?: number;
+  canEditTitles?: boolean; // Nuevo prop para permisos
 }
 
 export const MailingTable: React.FC<MailingTableProps> = ({
@@ -26,7 +30,8 @@ export const MailingTable: React.FC<MailingTableProps> = ({
   error,
   totalCampaigns = 0,
   currentPage = 1,
-  itemsPerPage = 15
+  itemsPerPage = 15,
+  canEditTitles = false
 }) => {
   if (isLoading) {
     return (
@@ -134,16 +139,19 @@ export const MailingTable: React.FC<MailingTableProps> = ({
           <tbody>
             {campañas.map((campaña, index) => (
               <tr 
-                key={campaña.campaignId} 
+                key={campaña.id} 
                 className={`
                   border-b border-white/5 hover:bg-white/5 transition-colors
                   ${index % 2 === 0 ? 'bg-white/[0.02]' : 'bg-transparent'}
                 `}
               >
                 <td className="px-6 py-4">
-                  <div className="font-medium text-white">
-                    {campaña.title}
-                  </div>
+                  <EditableTitle
+                    campaignId={campaña.id}
+                    currentTitle={campaña.title}
+                    cuenta={campaña.cuenta}
+                    canEdit={canEditTitles}
+                  />
                 </td>
                 <td className="px-6 py-4">
                   <div className="text-white/70 text-sm">

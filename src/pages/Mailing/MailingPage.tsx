@@ -62,13 +62,29 @@ const MailingPage: React.FC = () => {
   const { data: highlights, isLoading: loadingHighlights } = useMailingHighlights(cuenta);
   const { role } = useAuth();
   const puedeSincronizar = role === "admin" || role === "superadmin";
+  const puedeEditarTitulos = role === "admin" || role === "superadmin";
   const syncMutation = useSyncMailingCampaigns();
 
   const handleSync = () => {
     syncMutation.mutate(cuenta, {
-      onSuccess: (msg) => toast.success(msg),
-      onError: (err) =>
-        toast.error(err instanceof Error ? err.message : "Error al sincronizar campañas"),
+      onSuccess: (resultado) => {
+        // Toast con información detallada
+        if (resultado.nuevasCampañas > 0 || resultado.campañasActualizadas > 0) {
+          toast.success(
+            `✅ Sincronización completada: ${resultado.mensaje}`,
+            { 
+              autoClose: 4000,
+              hideProgressBar: false 
+            }
+          );
+        } else {
+          toast.info(resultado.mensaje, { autoClose: 3000 });
+        }
+      },
+      onError: (err) => {
+        const errorMessage = err instanceof Error ? err.message : "Error al sincronizar campañas";
+        toast.error(`❌ ${errorMessage}`, { autoClose: 5000 });
+      },
     });
   };
 
@@ -202,6 +218,7 @@ const MailingPage: React.FC = () => {
               totalCampaigns={campañasFiltradas.length}
               currentPage={currentPage}
               itemsPerPage={ITEMS_PER_PAGE}
+              canEditTitles={puedeEditarTitulos}
             />
 
             {/* Paginación */}

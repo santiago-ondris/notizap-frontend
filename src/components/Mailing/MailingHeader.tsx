@@ -69,16 +69,19 @@ export const MailingHeader: React.FC<MailingHeaderProps> = ({
             <button
               onClick={onSync}
               disabled={isSyncing}
-              className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-[#D94854] to-[#F23D5E] hover:from-[#F23D5E] hover:to-[#D94854] text-white rounded-xl shadow-lg hover:shadow-[#D94854]/25 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-[#D94854] to-[#F23D5E] hover:from-[#F23D5E] hover:to-[#D94854] text-white rounded-xl shadow-lg hover:shadow-[#D94854]/25 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px] justify-center"
             >
               {isSyncing ? (
-                <Loader2 className="animate-spin w-5 h-5" />
+                <>
+                  <Loader2 className="animate-spin w-5 h-5" />
+                  <span className="hidden sm:inline">Sincronizando...</span>
+                </>
               ) : (
-                <RefreshCw className="w-5 h-5" />
+                <>
+                  <RefreshCw className="w-5 h-5" />
+                  <span className="hidden sm:inline">Sincronizar</span>
+                </>
               )}
-              <span className="hidden sm:inline">
-                {isSyncing ? "Sincronizando..." : "Sincronizar"}
-              </span>
             </button>
           )}
         </div>

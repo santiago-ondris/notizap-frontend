@@ -2,7 +2,8 @@ import api from "@/api/api";
 import {
   type CampaignMailchimp,
   type CampaignHighlights,
-  type CampaignStats
+  type CampaignStats,
+  type MailchimpSyncResult
 } from "@/types/mailing/mailingTypes";
 
 // Trae todas las campañas para una cuenta (Montella o Alenka)
@@ -23,9 +24,14 @@ export async function getCampaignStats(campaignId: string): Promise<CampaignStat
   return res.data;
 }
 
-// Sincroniza nuevas campañas desde Mailchimp (solo admin/superadmin)
-export async function syncCampaigns(cuenta: "Montella" | "Alenka"): Promise<string> {
+// Sincroniza campañas desde Mailchimp (solo admin/superadmin)
+export async function syncCampaigns(cuenta: "Montella" | "Alenka"): Promise<MailchimpSyncResult> {
   const res = await api.post(`/api/v1/mailchimp/sync?cuenta=${cuenta}`);
-  // El backend responde con string tipo: "3 campaña(s) nueva(s) añadida(s) a la base de datos."
+  return res.data;
+}
+
+// Actualiza el título de una campaña (solo admin/superadmin)
+export async function updateCampaignTitle(campaignId: number, title: string): Promise<{ message: string; title: string }> {
+  const res = await api.patch(`/api/v1/mailchimp/${campaignId}/title`, { title });
   return res.data;
 }

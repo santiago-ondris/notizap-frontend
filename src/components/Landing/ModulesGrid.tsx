@@ -91,8 +91,8 @@ const modules = [
     roles: ["superadmin"]
   },
   {
-    title: "WooCommerce",
-    description: "Ventas, productos y reportes de tienda",
+    title: "....",
+    description: "....",
     icon: ShoppingCart,
     color: "#F23D5E",
     roles: ["viewer", "admin", "superadmin"]

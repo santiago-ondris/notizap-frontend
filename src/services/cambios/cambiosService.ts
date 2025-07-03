@@ -119,7 +119,8 @@ class CambiosService {
         ...cambioCompleto,
         llegoAlDeposito: estados.llegoAlDeposito,
         yaEnviado: estados.yaEnviado,
-        cambioRegistradoSistema: estados.cambioRegistradoSistema
+        cambioRegistradoSistema: estados.cambioRegistradoSistema,
+        parPedido: estados.parPedido
       };
 
       // Para actualización de estados, usamos una validación más permisiva

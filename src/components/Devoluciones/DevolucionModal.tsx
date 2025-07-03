@@ -43,7 +43,10 @@ const MotivoDropdown: React.FC<{
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number; openUp: boolean } | null>(null);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
 
-  const handleToggle = () => {
+  const handleToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (disabled) return;
     
     if (!isOpen && buttonRef.current) {
@@ -64,9 +67,24 @@ const MotivoDropdown: React.FC<{
     setIsOpen(!isOpen);
   };
 
+  const handleOptionClick = (motivo: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    onChange(motivo);
+    setIsOpen(false);
+    setDropdownPosition(null);
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
+        // Verificar si el clic fue en el dropdown portal
+        const dropdownElement = document.querySelector('[data-dropdown-portal="motivo-dropdown"]');
+        if (dropdownElement && dropdownElement.contains(event.target as Node)) {
+          return; // No cerrar si el clic fue dentro del dropdown
+        }
+        
         setIsOpen(false);
         setDropdownPosition(null);
       }
@@ -102,6 +120,7 @@ const MotivoDropdown: React.FC<{
 
       {isOpen && dropdownPosition && !disabled && createPortal(
         <div 
+          data-dropdown-portal="motivo-dropdown"
           className={`
             fixed bg-[#212026] border border-white/20 rounded-lg shadow-2xl z-[9999] overflow-y-auto
           `}
@@ -113,16 +132,13 @@ const MotivoDropdown: React.FC<{
             maxHeight: '280px'
           }}
           onWheel={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()} // Evitar que el clic cierre el modal
         >
           {MOTIVOS_DEVOLUCION.map((motivo) => (
             <button
               key={motivo}
               type="button"
-              onClick={() => {
-                onChange(motivo);
-                setIsOpen(false);
-                setDropdownPosition(null);
-              }}
+              onClick={(e) => handleOptionClick(motivo, e)}
               className={`
                 w-full text-left px-3 py-2 text-sm transition-colors
                 ${value === motivo ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10'}

@@ -91,10 +91,11 @@ const modules = [
     roles: ["superadmin"]
   },
   {
-    title: "....",
-    description: "....",
+    title: "Ventas",
+    description: "Ventas mensuales online",
     icon: ShoppingCart,
     color: "#F23D5E",
+    to: "/ventastienda",
     roles: ["viewer", "admin", "superadmin"]
   },
   {

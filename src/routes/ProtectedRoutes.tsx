@@ -30,6 +30,7 @@ import CampaignEditPage from "@/pages/Publicidad/CampaignEditPage";
 import { VentasVendedorasPage } from "@/pages/Vendedoras/VentasVendedorasPage";
 import LocalesStatsPage from "@/pages/Vendedoras/LocalesStatsPage";
 import InstagramPage from "@/pages/Instagram/InstagramPage";
+import VentasOnlinePage from "@/pages/Ventas/VentasOnlinePage";
 
 export const ProtectedRoutes = (
   <>
@@ -41,6 +42,7 @@ export const ProtectedRoutes = (
       <Route path="ventas/resumen"   element={<VentasResumenPage />} />
     </Route>
     <Route path="mailing"           element={<MailingPage />} />
+    <Route path="ventastienda"           element={<VentasOnlinePage />} />
     <Route path="publicidad">
       <Route index                   element={<PublicidadPage />} />
       <Route path="dashboard"           element={<DashboardPage />} />

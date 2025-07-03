@@ -2,8 +2,6 @@ import React from 'react';
 import { 
   X, 
   User, 
-  Phone, 
-  Mail, 
   Package, 
   FileText,
   DollarSign,
@@ -208,30 +206,64 @@ export const CambioDetalle: React.FC<CambioDetalleProps> = ({
               
               {/* Información del cliente */}
               <SeccionInfo
-                titulo="Información del Cliente"
-                icono={<User className="w-5 h-5" />}
-                color="#B695BF"
+                titulo="Detalles del Cambio"
+                icono={<Package className="w-5 h-5" />}
+                color="#D94854"
               >
-                <div className="space-y-0">
-                  <CampoInfo
-                    label="Nombre completo"
-                    valor={`${cambio.nombre} ${cambio.apellido || ''}`.trim()}
-                    icono={<User className="w-4 h-4 text-white/40" />}
-                  />
-                  <CampoInfo
-                    label="Celular"
-                    valor={cambio.celular}
-                    icono={<Phone className="w-4 h-4 text-white/40" />}
-                    copiable
-                    enlace={`tel:${cambio.celular}`}
-                  />
-                  <CampoInfo
-                    label="Email"
-                    valor={cambio.email}
-                    icono={<Mail className="w-4 h-4 text-white/40" />}
-                    copiable
-                    enlace={`mailto:${cambio.email}`}
-                  />
+                <div className="space-y-4">
+                  
+                  {/* Productos originales */}
+                  <div>
+                    <h5 className="text-sm font-medium text-white/80 mb-2 flex items-center gap-2">
+                      <Package className="w-4 h-4 text-[#D94854]" />
+                      Productos Originales (devueltos):
+                    </h5>
+                    <div className="space-y-1">
+                      {cambio.modeloOriginal.split(' | ').map((producto, index) => (
+                        <div key={index} className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-lg">
+                          <div className="w-2 h-2 bg-[#D94854] rounded-full"></div>
+                          <span className="text-sm text-white/90">{producto}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Productos de cambio */}
+                  <div>
+                    <h5 className="text-sm font-medium text-white/80 mb-2 flex items-center gap-2">
+                      <Package className="w-4 h-4 text-[#51590E]" />
+                      Productos de Cambio (entregados):
+                    </h5>
+                    <div className="space-y-1">
+                      {cambio.modeloCambio.split(' | ').map((producto, index) => (
+                        <div key={index} className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-lg">
+                          <div className="w-2 h-2 bg-[#51590E] rounded-full"></div>
+                          <span className="text-sm text-white/90">{producto}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Resto de la información */}
+                  <div className="pt-3 border-t border-white/10">
+                    <CampoInfo
+                      label="Motivo"
+                      valor={cambio.motivo}
+                      icono={<AlertTriangle className="w-4 h-4 text-white/40" />}
+                    />
+                    <CampoInfo
+                      label="Es par del pedido"
+                      valor={cambio.parPedido ? 'Sí' : 'No'}
+                      icono={<FileText className="w-4 h-4 text-white/40" />}
+                    />
+                    {cambio.envio && (
+                      <CampoInfo
+                        label="Envío"
+                        valor={cambio.envio}
+                        icono={<User className="w-4 h-4 text-white/40" />}
+                      />
+                    )}
+                  </div>
                 </div>
               </SeccionInfo>
 

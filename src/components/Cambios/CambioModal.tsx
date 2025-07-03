@@ -14,6 +14,7 @@ import {
   MOTIVOS_CAMBIO,
 } from '@/types/cambios/cambiosTypes';
 import { MultiProductInput } from './MultiProductInput';
+import { fechaInputAISO, fechaISOAInput } from '@/utils/envios/fechaHelpers';
 
 interface CambioModalProps {
   isOpen: boolean;
@@ -93,7 +94,7 @@ export const CambioModal: React.FC<CambioModalProps> = ({
       if (cambio) {
         setFormData({
           ...cambio,
-          fecha: cambio.fecha.split('T')[0]
+          fecha: fechaISOAInput(cambio.fecha)
         });
       } else {
         const hoy = new Date().toISOString().split('T')[0];
@@ -149,7 +150,7 @@ export const CambioModal: React.FC<CambioModalProps> = ({
     try {
       const datosParaEnvio: CreateCambioSimpleDto | CambioSimpleDto = {
         ...formData,
-        fecha: new Date(formData.fecha).toISOString(),
+        fecha: fechaInputAISO(formData.fecha),
         ...(cambio && { id: cambio.id, llegoAlDeposito: cambio.llegoAlDeposito, yaEnviado: cambio.yaEnviado, cambioRegistradoSistema: cambio.cambioRegistradoSistema })
       };
       const exito = await onSave(datosParaEnvio);

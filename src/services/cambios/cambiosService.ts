@@ -7,6 +7,7 @@ import {
   type EstadosCambio,
   type EstadoCambioFiltro,
 } from '@/types/cambios/cambiosTypes';
+import { formatearFechaCambios } from '@/utils/envios/fechaHelpers';
 
 /**
  * Servicio para gestión de cambios
@@ -319,19 +320,7 @@ class CambiosService {
    * Formatear fecha para mostrar
    */
   formatearFecha(fecha: string): string {
-    try {
-      const date = new Date(fecha);
-      if (isNaN(date.getTime())) return '--/--/----';
-      
-      const dia = date.getDate().toString().padStart(2, '0');
-      const mes = (date.getMonth() + 1).toString().padStart(2, '0');
-      const año = date.getFullYear();
-      
-      return `${dia}/${mes}/${año}`;
-    } catch (error) {
-      console.error('Error al formatear fecha:', error);
-      return '--/--/----';
-    }
+    return formatearFechaCambios(fecha);
   }
 
   /**

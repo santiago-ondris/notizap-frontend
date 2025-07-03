@@ -262,13 +262,6 @@ const FilaDevolucion: React.FC<{
         />
       </td>
 
-      {/* Responsable */}
-      <td className="px-3 py-3 border-r border-white/10">
-        <span className="text-xs text-white/70">
-          {devolucion.responsable || '-'}
-        </span>
-      </td>
-
       {/* Acciones */}
       <td className="px-3 py-3">
         <div className="flex items-center justify-center gap-1">
@@ -436,9 +429,6 @@ export const DevolucionesTabla: React.FC<DevolucionesTablaProps> = ({
               </th>
               <th className="px-3 py-3 text-center text-sm font-medium text-[#B695BF] border-r border-white/10">
                 🧾 Nota
-              </th>
-              <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
-                👨‍💼 Responsable
               </th>
               <th className="px-3 py-3 text-center text-sm font-medium text-white/80">
                 ⚙️ Acciones

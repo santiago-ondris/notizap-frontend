@@ -112,3 +112,76 @@ const DIAS_SEMANA = [
       return false;
     }
   };
+
+  /**
+ * Convierte una fecha de input date (YYYY-MM-DD) a ISO string sin problemas de zona horaria
+ * Mantiene el día exacto independiente de la zona horaria local
+ * 
+ * @param fechaInput - Fecha en formato YYYY-MM-DD del input date
+ * @returns String ISO con día fijo (mediodía UTC)
+ */
+export const fechaInputAISO = (fechaInput: string): string => {
+  if (!fechaInput || fechaInput.trim() === '') {
+    throw new Error('Fecha input requerida');
+  }
+  
+  // Validar formato básico YYYY-MM-DD
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaInput)) {
+    throw new Error('Formato de fecha inválido. Esperado: YYYY-MM-DD');
+  }
+  
+  // Convertir a mediodía UTC para evitar cambios de día por zona horaria
+  return `${fechaInput}T12:00:00.000Z`;
+};
+
+/**
+ * Convierte una fecha ISO a formato para input date (YYYY-MM-DD)
+ * Extrae solo la parte de fecha sin considerar hora/zona horaria
+ * 
+ * @param fechaISO - Fecha en formato ISO string
+ * @returns String en formato YYYY-MM-DD para input date
+ */
+export const fechaISOAInput = (fechaISO: string): string => {
+  try {
+    if (!fechaISO || fechaISO.trim() === '') {
+      return '';
+    }
+    
+    // Extraer solo la parte de la fecha (antes de la T)
+    return fechaISO.split('T')[0];
+  } catch (error) {
+    console.error('Error al convertir fecha ISO a input:', error);
+    return '';
+  }
+};
+
+/**
+ * Formatear fecha para mostrar en cambios (DD/MM/YYYY)
+ * Usa UTC para evitar problemas de zona horaria
+ * 
+ * @param fechaISO - Fecha en formato ISO string
+ * @returns String en formato DD/MM/YYYY
+ */
+export const formatearFechaCambios = (fechaISO: string): string => {
+  try {
+    if (!fechaISO || fechaISO.trim() === '') {
+      return '--/--/----';
+    }
+    
+    const fecha = new Date(fechaISO);
+    
+    if (isNaN(fecha.getTime())) {
+      return '--/--/----';
+    }
+    
+    // Usar UTC para mantener consistencia
+    const dia = fecha.getUTCDate().toString().padStart(2, '0');
+    const mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0');
+    const año = fecha.getUTCFullYear();
+    
+    return `${dia}/${mes}/${año}`;
+  } catch (error) {
+    console.error('Error al formatear fecha para cambios:', error);
+    return '--/--/----';
+  }
+};

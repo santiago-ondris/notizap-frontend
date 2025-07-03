@@ -21,6 +21,7 @@ import {
   type DevolucionFormErrors,
   MOTIVOS_DEVOLUCION
 } from '@/types/cambios/devolucionesTypes';
+import { fechaInputAISO, fechaISOAInput } from '@/utils/envios/fechaHelpers';
 
 interface DevolucionModalProps {
   isOpen: boolean;
@@ -189,7 +190,7 @@ export const DevolucionModal: React.FC<DevolucionModalProps> = ({
       if (esEdicion && devolucion) {
         // Cargar datos para edición
         setFormData({
-          fecha: devolucion.fecha.split('T')[0], // Extraer solo la fecha
+          fecha: fechaISOAInput(devolucion.fecha),
           pedido: devolucion.pedido,
           celular: devolucion.celular,
           modelo: devolucion.modelo,
@@ -286,11 +287,14 @@ export const DevolucionModal: React.FC<DevolucionModalProps> = ({
     setGuardando(true);
 
     try {
-      // Preparar datos para envío
-      const datosCompletos = formData as CreateDevolucionDto;
+      // Preparar datos para envío con fecha correcta
+      const datosCompletos: CreateDevolucionDto = {
+        ...formData as CreateDevolucionDto,
+        fecha: fechaInputAISO(formData.fecha!)
+      };
       
       let resultado: boolean;
-
+    
       if (esEdicion && devolucion) {
         // Actualizar devolución existente
         const devolucionActualizada: DevolucionDto = {
@@ -325,7 +329,7 @@ export const DevolucionModal: React.FC<DevolucionModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-[#212026] border border-white/20 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-visible">
+      <div className="bg-[#212026] border border-white/20 rounded-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
         
         {/* Header del modal */}
         <div className="flex items-center justify-between p-6 border-b border-white/10">
@@ -353,7 +357,12 @@ export const DevolucionModal: React.FC<DevolucionModalProps> = ({
         </div>
 
         {/* Cuerpo del modal */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+        <div 
+          className="flex-1 overflow-y-auto p-6 custom-scrollbar"
+          onWheel={(e) => {
+            e.stopPropagation();
+          }}
+        >
           <form onSubmit={handleSubmit} className="space-y-6">
             
             {/* Fila 1: Fecha y Pedido */}

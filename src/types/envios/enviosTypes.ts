@@ -108,6 +108,44 @@ export interface EnvioDiario {
     message?: string;
     error?: string;
   }
+
+  /**
+ * Representa un cambio pendiente en una celda
+ */
+export interface CambioEnvio {
+  dia: number;
+  fecha: string;
+  campo: TipoEnvio;
+  valorAnterior: number | null;
+  valorNuevo: number | null;
+}
+
+/**
+ * DTO para enviar múltiples envíos al backend
+ */
+export interface GuardarEnviosLoteDto {
+  envios: CreateEnvioDiarioDto[];
+}
+
+/**
+ * Respuesta del backend para operaciones en lote
+ */
+export interface ResultadoLoteDto {
+  exitosos: number;
+  fallidos: number;
+  errores: string[];
+  mensaje: string;
+  todosExitosos: boolean;
+}
+
+/**
+ * Estado de edición local para la tabla
+ */
+export interface EstadoEdicionLocal {
+  cambiosPendientes: Map<string, CambioEnvio>;
+  filasModificadas: Set<number>;
+  tieneChangesPendientes: boolean;
+}
   
   /**
    * Tipos de envío disponibles (para UI)

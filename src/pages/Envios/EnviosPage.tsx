@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Truck, Package, AlertCircle, RefreshCw } from 'lucide-react';
+import { Truck, AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useAuth } from '@/contexts/AuthContext';
 import EnviosSelectorMes from '@/components/Envios/EnviosSelectorMes';
@@ -8,9 +8,9 @@ import EnviosResumen from '@/components/Envios/EnviosResumen';
 import enviosService from '@/services/envios/enviosService';
 import { 
   type EnvioDiario, 
-  type EnvioResumenMensual, 
-  type CreateEnvioDiarioDto,
-  type UpdateEnvioDiarioDto 
+  type EnvioResumenMensual,
+  type CambioEnvio,
+  type ResultadoLoteDto
 } from '@/types/envios/enviosTypes';
 
 const EnviosPage: React.FC = () => {
@@ -88,45 +88,82 @@ const EnviosPage: React.FC = () => {
   };
 
   /**
-   * Manejar guardado de un envío desde la tabla
-   * NUEVA LÓGICA: Siempre usar POST, el backend maneja CREATE/UPDATE automáticamente
+   * NUEVA FUNCIÓN: Manejar guardado en lote (BATCH SAVE)
+   * Esta es la función principal que reemplaza al auto-save
    */
-  const handleGuardarEnvio = async (
-    envioData: CreateEnvioDiarioDto | UpdateEnvioDiarioDto, 
-    _id?: number // Parámetro ignorado - mantenido por compatibilidad
-  ): Promise<boolean> => {
+  const handleGuardarLote = async (cambios: Map<string, CambioEnvio>): Promise<boolean> => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para editar registros');
       return false;
     }
 
+    if (cambios.size === 0) {
+      toast.warning('No hay cambios para guardar');
+      return false;
+    }
+
     try {
-      // Validar datos antes de enviar
-      const validacion = enviosService.validarEnvio(envioData);
-      if (validacion !== true) {
-        toast.error(validacion);
+      // Debug: mostrar cambios que se van a guardar
+      enviosService.debugCambios(cambios);
+
+      // Llamar al servicio para guardar en lote
+      const resultado: ResultadoLoteDto = await enviosService.guardarEnviosLote(cambios);
+      
+      if (resultado.todosExitosos) {
+        // ÉXITO: Todos los registros se guardaron
+        toast.success(resultado.mensaje);
+        
+        // Recargar datos para mostrar los cambios guardados
+        await cargarEnviosMensuales(añoActual, mesActual);
+        await cargarResumenMensual(añoActual, mesActual);
+        
+        return true;
+      } else {
+        
+        toast.error(
+          <div>
+            <p className="font-semibold mb-2">Error al guardar cambios</p>
+            <p className="text-sm">{resultado.mensaje}</p>
+            {resultado.errores.length > 0 && (
+              <details className="mt-2">
+                <summary className="cursor-pointer text-xs opacity-80">Ver errores específicos</summary>
+                <ul className="mt-1 text-xs opacity-70">
+                  {resultado.errores.map((error, i) => (
+                    <li key={i}>• {error}</li>
+                  ))}
+                </ul>
+              </details>
+            )}
+            <p className="text-xs mt-2 opacity-80">
+              💡 Intenta guardando celda por celda para encontrar el error específico
+            </p>
+          </div>,
+          { autoClose: 8000 } // Toast más largo para leer los errores
+        );
+        
         return false;
       }
-
-      // SIEMPRE usar POST - el backend maneja CREATE/UPDATE por fecha
-      await enviosService.guardarEnvio(envioData as CreateEnvioDiarioDto);
-      
-      // Recargar datos completos para asegurar sincronización
-      await cargarEnviosMensuales(añoActual, mesActual);
-      await cargarResumenMensual(añoActual, mesActual);
-      
-      toast.success('Envío guardado correctamente');
-      return true;
       
     } catch (error) {
-      const mensaje = error instanceof Error ? error.message : 'Error al guardar envío';
-      toast.error(mensaje);
+      const mensaje = error instanceof Error ? error.message : 'Error desconocido al guardar cambios';
+      
+      toast.error(
+        <div>
+          <p className="font-semibold mb-2">Error crítico</p>
+          <p className="text-sm">{mensaje}</p>
+          <p className="text-xs mt-2 opacity-80">
+            💡 Intenta guardando celda por celda para encontrar el error específico
+          </p>
+        </div>,
+        { autoClose: 6000 }
+      );
+      
       return false;
     }
   };
 
   /**
-   * Manejar eliminación de un envío
+   * Manejar eliminación de un envío (sin cambios)
    */
   const handleEliminarEnvio = async (id: number): Promise<boolean> => {
     if (!puedeEditar) {
@@ -180,7 +217,7 @@ const EnviosPage: React.FC = () => {
                 📦 Gestión de Envíos
               </h1>
               <p className="text-white/60 text-sm">
-                Control diario de envíos por tipo y destino
+                Control diario de envíos por tipo y destino • Modo Batch Save
               </p>
             </div>
           </div>
@@ -236,29 +273,12 @@ const EnviosPage: React.FC = () => {
         ) : (
           <EnviosTabla
             envios={enviosMensuales}
-            onGuardarEnvio={handleGuardarEnvio}
+            onGuardarLote={handleGuardarLote}
             onEliminarEnvio={handleEliminarEnvio}
             puedeEditar={puedeEditar}
             cargando={cargandoDatos}
           />
         )}
-
-        {/* Información adicional */}
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4">
-          <div className="flex items-start gap-3">
-            <Package className="w-5 h-5 text-[#51590E] mt-0.5" />
-            <div className="space-y-2">
-              <h4 className="font-medium text-white">💡 Información sobre envíos</h4>
-              <div className="text-sm text-white/70 space-y-1">
-                <p>• <strong>Córdoba Capital:</strong> Incluye Roberto, Tino y Caddy</p>
-                <p>• <strong>Totales automáticos:</strong> Se calculan al guardar cada registro</p>
-                {puedeEditar && (
-                  <p>• <strong>Eliminar:</strong> Botón disponible en cada fila con datos</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

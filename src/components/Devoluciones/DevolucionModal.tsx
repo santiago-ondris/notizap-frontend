@@ -22,6 +22,7 @@ import {
   MOTIVOS_DEVOLUCION
 } from '@/types/cambios/devolucionesTypes';
 import { fechaInputAISO, fechaISOAInput } from '@/utils/envios/fechaHelpers';
+import { MultiProductInput } from '@/components/Cambios/MultiProductInput'
 
 interface DevolucionModalProps {
   isOpen: boolean;
@@ -165,12 +166,12 @@ export const DevolucionModal: React.FC<DevolucionModalProps> = ({
   devolucion,
   cargando = false
 }) => {
-  // Estados del formulario
+  // Estados del formulario - CAMBIADO: modelo ahora es string para múltiples productos
   const [formData, setFormData] = useState<Partial<CreateDevolucionDto>>({
     fecha: '',
     pedido: '',
     celular: '',
-    modelo: '',
+    modelo: '', // Ahora manejará múltiples productos como string separado por comas
     motivo: '',
     monto: undefined,
     pagoEnvio: undefined,
@@ -193,7 +194,7 @@ export const DevolucionModal: React.FC<DevolucionModalProps> = ({
           fecha: fechaISOAInput(devolucion.fecha),
           pedido: devolucion.pedido,
           celular: devolucion.celular,
-          modelo: devolucion.modelo,
+          modelo: devolucion.modelo, // Ya viene como string con múltiples productos
           motivo: devolucion.motivo,
           monto: devolucion.monto,
           pagoEnvio: devolucion.pagoEnvio,
@@ -236,7 +237,7 @@ export const DevolucionModal: React.FC<DevolucionModalProps> = ({
     }
 
     if (!formData.modelo?.trim()) {
-      nuevosErrores.modelo = 'El modelo es obligatorio';
+      nuevosErrores.modelo = 'Debe agregar al menos un producto a devolver';
     }
 
     if (!formData.motivo?.trim()) {
@@ -424,7 +425,7 @@ export const DevolucionModal: React.FC<DevolucionModalProps> = ({
               </div>
             </div>
 
-            {/* Fila 2: Celular y Modelo */}
+            {/* Fila 2: Celular y Responsable */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               
               {/* Celular */}
@@ -455,33 +456,48 @@ export const DevolucionModal: React.FC<DevolucionModalProps> = ({
                 )}
               </div>
 
-              {/* Modelo */}
+              {/* Responsable */}
               <div>
                 <label className="block text-sm font-medium text-white mb-2">
-                  📦 Modelo *
+                  👨‍💼 Responsable *
                 </label>
                 <div className="relative">
-                  <Package className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
                   <input
                     type="text"
-                    value={formData.modelo || ''}
-                    onChange={(e) => handleInputChange('modelo', e.target.value)}
-                    placeholder="Ej: Carito beige 36"
+                    value={formData.responsable || ''}
+                    onChange={(e) => handleInputChange('responsable', e.target.value)}
+                    placeholder="Ej: Gringon"
                     disabled={guardando || cargando}
                     className={`
                       w-full pl-10 pr-4 py-2 bg-white/10 border rounded-lg text-white placeholder-white/50 transition-all
-                      ${errors.modelo ? 'border-[#D94854]' : 'border-white/20 focus:border-[#D94854]'}
+                      ${errors.responsable ? 'border-[#D94854]' : 'border-white/20 focus:border-[#D94854]'}
                       disabled:opacity-50
                     `}
                   />
                 </div>
-                {errors.modelo && (
+                {errors.responsable && (
                   <p className="text-[#D94854] text-xs mt-1 flex items-center gap-1">
                     <AlertTriangle className="w-3 h-3" />
-                    {errors.modelo}
+                    {errors.responsable}
                   </p>
                 )}
               </div>
+            </div>
+
+            {/* NUEVO: Productos a devolver usando MultiProductInput */}
+            <div>
+              <MultiProductInput
+                label="📦 Productos a Devolver"
+                value={formData.modelo || ''}
+                onChange={(value) => handleInputChange('modelo', value)}
+                placeholder="Ej: Carito beige 36, Sandalia rosa 37"
+                error={errors.modelo}
+                required
+              />
+              <p className="text-white/50 text-xs mt-1">
+                Agrega todos los productos que el cliente desea devolver
+              </p>
             </div>
 
             {/* Fila 3: Motivo */}
@@ -567,34 +583,6 @@ export const DevolucionModal: React.FC<DevolucionModalProps> = ({
                 )}
                 <p className="text-white/50 text-xs mt-1">Opcional - Costo del envío de devolución</p>
               </div>
-            </div>
-
-            {/* Fila 5: Responsable */}
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">
-                👨‍💼 Responsable *
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
-                <input
-                  type="text"
-                  value={formData.responsable || ''}
-                  onChange={(e) => handleInputChange('responsable', e.target.value)}
-                  placeholder="Ej: Gringon"
-                  disabled={guardando || cargando}
-                  className={`
-                    w-full pl-10 pr-4 py-2 bg-white/10 border rounded-lg text-white placeholder-white/50 transition-all
-                    ${errors.responsable ? 'border-[#D94854]' : 'border-white/20 focus:border-[#D94854]'}
-                    disabled:opacity-50
-                  `}
-                />
-              </div>
-              {errors.responsable && (
-                <p className="text-[#D94854] text-xs mt-1 flex items-center gap-1">
-                  <AlertTriangle className="w-3 h-3" />
-                  {errors.responsable}
-                </p>
-              )}
             </div>
 
             {/* Información adicional para edición */}

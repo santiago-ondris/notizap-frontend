@@ -2,23 +2,23 @@ import api from '@/api/api';
 import { 
   type EnvioDiario, 
   type CreateEnvioDiarioDto, 
-  type UpdateEnvioDiarioDto, 
   type EnvioResumenMensual,
   type EnviosFiltros,
-  type EnviosFecha, 
+  type EnviosFecha,
+  type GuardarEnviosLoteDto,
+  type ResultadoLoteDto,
+  type CambioEnvio,
 } from '@/types/envios/enviosTypes';
 
 /**
  * Servicio para manejar todas las operaciones relacionadas con envíos
- * Centraliza todas las llamadas a la API del módulo de envíos
+ * VERSIÓN CON BATCH SAVE - Sin auto-save
  */
 class EnviosService {
   private readonly BASE_URL = '/api/v1/envios';
 
   /**
    * Obtiene todos los envíos de un mes específico
-   * @param filtros - Año y mes a consultar
-   * @returns Array de envíos diarios del mes
    */
   async getEnviosMensuales(filtros: EnviosFiltros): Promise<EnvioDiario[]> {
     try {
@@ -37,8 +37,6 @@ class EnviosService {
 
   /**
    * Obtiene los envíos de una fecha específica
-   * @param filtros - Fecha específica en formato YYYY-MM-DD
-   * @returns Envío diario de la fecha especificada
    */
   async getEnvioPorFecha(filtros: EnviosFecha): Promise<EnvioDiario | null> {
     try {
@@ -59,40 +57,83 @@ class EnviosService {
   }
 
   /**
-   * Guarda un envío (el backend maneja automáticamente CREATE o UPDATE por fecha)
-   * @param envio - Datos del envío
-   * @returns Mensaje de confirmación
+   * NUEVO: Guarda múltiples envíos en una sola operación (BATCH SAVE)
    */
-  async guardarEnvio(envio: CreateEnvioDiarioDto): Promise<string> {
+  async guardarEnviosLote(cambios: Map<string, CambioEnvio>): Promise<ResultadoLoteDto> {
     try {
-      const response = await api.post<string>(this.BASE_URL, envio);
+      // Agrupar cambios por fecha y construir DTOs completos
+      const enviosPorFecha = new Map<string, CreateEnvioDiarioDto>();
+      
+      for (const cambio of cambios.values()) {
+        const fechaKey = cambio.fecha;
+        
+        if (!enviosPorFecha.has(fechaKey)) {
+          // Crear DTO base con todos los campos en 0
+          enviosPorFecha.set(fechaKey, {
+            fecha: cambio.fecha,
+            oca: 0,
+            andreani: 0,
+            retirosSucursal: 0,
+            roberto: 0,
+            tino: 0,
+            caddy: 0,
+            mercadoLibre: 0
+          });
+        }
+        
+        // Aplicar el cambio específico
+        const dto = enviosPorFecha.get(fechaKey)!;
+        dto[cambio.campo] = cambio.valorNuevo ?? 0;
+      }
+
+      const enviosArray = Array.from(enviosPorFecha.values());
+      
+      const request: GuardarEnviosLoteDto = {
+        envios: enviosArray
+      };
+
+      const response = await api.post<ResultadoLoteDto>(`${this.BASE_URL}/lote`, request);
+      return response.data;
+      
+    } catch (error: any) {
+      console.error('Error al guardar lote de envíos:', error);
+      
+      // Si el backend retornó un ResultadoLoteDto con errores
+      if (error?.response?.data?.mensaje) {
+        return error.response.data as ResultadoLoteDto;
+      }
+      
+      // Error genérico
+      throw new Error('No se pudieron guardar los cambios. Intenta guardando celda por celda para encontrar el error específico.');
+    }
+  }
+
+  /**
+   * FALLBACK: Guarda un envío individual (para cuando falla el lote)
+   */
+  async guardarEnvioIndividual(envio: CreateEnvioDiarioDto): Promise<string> {
+    try {
+      const envioCompleto: CreateEnvioDiarioDto = {
+        fecha: envio.fecha,
+        oca: envio.oca ?? 0,
+        andreani: envio.andreani ?? 0,
+        retirosSucursal: envio.retirosSucursal ?? 0,
+        roberto: envio.roberto ?? 0,
+        tino: envio.tino ?? 0,
+        caddy: envio.caddy ?? 0,
+        mercadoLibre: envio.mercadoLibre ?? 0
+      };
+
+      const response = await api.post<string>(this.BASE_URL, envioCompleto);
       return response.data || 'Registro guardado correctamente';
     } catch (error) {
-      console.error('Error al guardar envío:', error);
+      console.error('Error al guardar envío individual:', error);
       throw new Error('No se pudo guardar el registro de envío');
     }
   }
 
   /**
-   * Actualiza un envío existente específicamente por ID
-   * (Solo usar si necesitas actualizar un registro específico)
-   * @param id - ID del envío a actualizar
-   * @param envio - Nuevos datos del envío
-   * @returns Mensaje de confirmación
-   */
-  async actualizarEnvioPorId(id: number, envio: UpdateEnvioDiarioDto): Promise<string> {
-    try {
-      const response = await api.put<string>(`${this.BASE_URL}/${id}`, envio);
-      return response.data || 'Registro actualizado correctamente';
-    } catch (error) {
-      console.error('Error al actualizar envío:', error);
-      throw new Error('No se pudo actualizar el registro de envío');
-    }
-  }
-
-  /**
    * Elimina un envío por ID
-   * @param id - ID del envío a eliminar
    */
   async eliminarEnvio(id: number): Promise<void> {
     try {
@@ -105,8 +146,6 @@ class EnviosService {
 
   /**
    * Obtiene el resumen mensual con totales por tipo de envío
-   * @param filtros - Año y mes a consultar
-   * @returns Resumen con totales mensuales
    */
   async getResumenMensual(filtros: EnviosFiltros): Promise<EnvioResumenMensual> {
     try {
@@ -123,58 +162,8 @@ class EnviosService {
     }
   }
 
-  // MÉTODOS LEGACY - ELIMINADOS porque el backend maneja automáticamente CREATE/UPDATE
-  // async crearEnvio() - No necesario, usar guardarEnvio()
-  // async actualizarEnvio() - No necesario, usar guardarEnvio()
-  
-  /**
-   * Método simplificado que SIEMPRE usa POST
-   * El backend decide automáticamente si crear o actualizar según la fecha
-   * @param envio - Datos del envío  
-   * @param _id - Parámetro ignorado (mantenido por compatibilidad)
-   * @returns Mensaje de confirmación
-   */
-  async guardarEnvioLegacy(envio: CreateEnvioDiarioDto, _id?: number): Promise<string> {
-    // Ignoramos el ID y SIEMPRE usamos POST
-    // El backend maneja CREATE/UPDATE automáticamente por fecha
-    return this.guardarEnvio(envio);
-  }
-
-  /**
-   * Valida los datos de un envío antes de enviarlo
-   * @param envio - Datos a validar
-   * @returns true si es válido, string con error si no
-   */
-  validarEnvio(envio: CreateEnvioDiarioDto | UpdateEnvioDiarioDto): true | string {
-    // Validar que todos los números sean >= 0
-    const campos = ['oca', 'andreani', 'retirosSucursal', 'roberto', 'tino', 'caddy', 'mercadoLibre'] as const;
-    
-    for (const campo of campos) {
-      const valor = envio[campo];
-      if (typeof valor !== 'number' || valor < 0 || !Number.isInteger(valor)) {
-        return `El campo ${campo} debe ser un número entero mayor o igual a 0`;
-      }
-    }
-
-    // Validar formato de fecha
-    if (!envio.fecha) {
-      return 'La fecha es requerida';
-    }
-
-    const fecha = new Date(envio.fecha);
-    if (isNaN(fecha.getTime())) {
-      return 'La fecha no tiene un formato válido';
-    }
-
-    return true;
-  }
-
   /**
    * Genera los días faltantes de un mes para mostrar en la tabla
-   * @param enviosExistentes - Envíos ya registrados
-   * @param year - Año
-   * @param month - Mes (1-12)
-   * @returns Array completo de 31 días con envíos existentes o vacíos
    */
   generarDiasCompletos(enviosExistentes: EnvioDiario[], year: number, month: number): EnvioDiario[] {
     const diasEnMes = new Date(year, month, 0).getDate();
@@ -210,6 +199,20 @@ class EnviosService {
     }
 
     return diasCompletos;
+  }
+
+  /**
+   * Convierte Map de cambios a formato legible para debugging
+   */
+  debugCambios(cambios: Map<string, CambioEnvio>): void {
+    console.log('🔍 Cambios pendientes:', {
+      total: cambios.size,
+      cambios: Array.from(cambios.values()).map(c => ({
+        fecha: c.fecha.split('T')[0],
+        campo: c.campo,
+        valor: c.valorNuevo
+      }))
+    });
   }
 }
 

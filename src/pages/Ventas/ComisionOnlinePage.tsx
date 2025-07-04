@@ -3,16 +3,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "react-toastify";
 import { Calculator, ArrowLeft, Loader2, AlertTriangle } from "lucide-react";
 
-// Componentes del módulo de comisiones
 import TarjetaVentasPeriodo from "@/components/Comisiones/TarjetaVentasPeriodo";
 import FormularioComision from "@/components/Comisiones/FormularioComision";
 import TarjetaCalculoComision from "@/components/Comisiones/TarjetaCalculoComision";
 import BotonGuardarComision from "@/components/Comisiones/BotonGuardarComision";
 
-// Controles reutilizables
 import SelectorPeriodo from "@/components/Ventas/Controles/SelectorPeriodo";
 
-// Servicios
 import { 
   getComisionByPeriodo,
   createComision,
@@ -23,10 +20,8 @@ import {
 import { getTotalesByPeriodo } from "@/services/woocommerce/wooService";
 import { getManualReports } from "@/services/mercadolibre/mercadolibreService";
 
-// Utils
 import { obtenerPeriodoAnterior, esPeriodoValido } from "@/utils/ventas/ventasUtils";
 
-// Types
 import type { 
   ComisionOnline,
   FormularioComision as FormularioComisionType,
@@ -40,7 +35,6 @@ interface ComisionOnlinePageProps {
 }
 
 export default function ComisionOnlinePage({ onVolver }: ComisionOnlinePageProps) {
-  // Contexto de autenticación
   const { role: userRole } = useAuth();
 
   // Estados principales

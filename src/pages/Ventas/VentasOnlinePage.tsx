@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 
 import DashboardVentas from "@/components/Ventas/Dashboard/DashboardVentas";
 import TablaVentasUnificada from "@/components/Ventas/Dashboard/TablaVentasUnificada";
+import ComisionOnlinePage from "@/pages/Ventas/ComisionOnlinePage";
 
 import VentasAdmin from "@/components/Ventas/Admin/VentasAdmin";
 
@@ -22,7 +23,7 @@ export default function VentasOnlinePage() {
   const [mesSeleccionado, setMesSeleccionado] = useState(periodoAnterior.mes);
   const [añoSeleccionado, setAñoSeleccionado] = useState(periodoAnterior.año);
   const [modoAdmin, setModoAdmin] = useState(false);
-  const [vistaActual, setVistaActual] = useState<'dashboard' | 'tabla'>('dashboard');
+  const [vistaActual, setVistaActual] = useState<'dashboard' | 'tabla' | 'comisiones'>('dashboard');
 
   // Permisos
   const puedeAdmin = userRole === 'admin' || userRole === 'superadmin';
@@ -71,9 +72,6 @@ export default function VentasOnlinePage() {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white">Módulo de Ventas</h1>
-              <p className="text-white/60 text-lg">
-                Dashboard consolidado • WooCommerce + MercadoLibre
-              </p>
             </div>
           </div>
 
@@ -127,6 +125,16 @@ export default function VentasOnlinePage() {
             >
               📋 Tabla Anual
             </button>
+            <button
+              onClick={() => setVistaActual('comisiones')}
+              className={`px-4 py-2 rounded-xl font-medium transition-all ${
+                vistaActual === 'comisiones'
+                  ? 'bg-[#51590E]/20 text-[#51590E] border border-[#51590E]/30'
+                  : 'text-white/60 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              🧮 Comisiones
+            </button>
           </div>
         )}
 
@@ -161,6 +169,13 @@ export default function VentasOnlinePage() {
                     mostrarVariaciones={true}
                   />
 
+                </div>
+              )}
+
+              {vistaActual === 'comisiones' && (
+                <div className="space-y-8">
+                  {/* Módulo de comisiones */}
+                  <ComisionOnlinePage onVolver={() => setVistaActual('dashboard')} />
                 </div>
               )}
             </>

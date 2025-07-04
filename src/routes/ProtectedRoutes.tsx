@@ -31,6 +31,7 @@ import { VentasVendedorasPage } from "@/pages/Vendedoras/VentasVendedorasPage";
 import LocalesStatsPage from "@/pages/Vendedoras/LocalesStatsPage";
 import InstagramPage from "@/pages/Instagram/InstagramPage";
 import VentasOnlinePage from "@/pages/Ventas/VentasOnlinePage";
+import ComisionOnlinePage from "@/pages/Ventas/ComisionOnlinePage";
 
 export const ProtectedRoutes = (
   <>
@@ -42,7 +43,10 @@ export const ProtectedRoutes = (
       <Route path="ventas/resumen"   element={<VentasResumenPage />} />
     </Route>
     <Route path="mailing"           element={<MailingPage />} />
-    <Route path="ventastienda"           element={<VentasOnlinePage />} />
+    <Route path="ventastienda">
+      <Route index                   element={<VentasOnlinePage />} />
+      <Route path="comisiones"            element={<ComisionOnlinePage />} />
+    </Route>
     <Route path="publicidad">
       <Route index                   element={<PublicidadPage />} />
       <Route path="dashboard"           element={<DashboardPage />} />

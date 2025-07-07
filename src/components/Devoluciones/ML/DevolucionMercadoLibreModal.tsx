@@ -15,6 +15,7 @@ import {
   type CreateDevolucionMercadoLibreDto,
   type DevolucionMercadoLibreFormErrors
 } from '@/types/cambios/devolucionesMercadoLibreTypes';
+import { MultiProductInput } from '@/components/Cambios/MultiProductInput';
 
 interface DevolucionMercadoLibreModalProps {
   isOpen: boolean;
@@ -181,11 +182,13 @@ export const DevolucionMercadoLibreModal: React.FC<DevolucionMercadoLibreModalPr
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-[#212026] border border-white/20 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+    onWheel={(e) => e.stopPropagation()}>
+      <div className="bg-[#212026] border border-white/20 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+      onWheel={(e) => e.stopPropagation()}>
         
         {/* Header del modal */}
-        <div className="flex items-center justify-between p-6 border-b border-white/10">
+        <div className="flex items-center justify-between p-6 border-b border-white/10 flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-[#B695BF]/20 border border-[#B695BF]/30 rounded-lg">
               <div className="flex items-center gap-1">
@@ -208,7 +211,11 @@ export const DevolucionMercadoLibreModal: React.FC<DevolucionMercadoLibreModalPr
         </div>
 
         {/* Cuerpo del modal */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden modal-scroll-content"
+        onWheel={(e) => {
+          e.stopPropagation();
+        }}>
+        <div className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             
             {/* Fila 1: Fecha */}
@@ -299,22 +306,15 @@ export const DevolucionMercadoLibreModal: React.FC<DevolucionMercadoLibreModalPr
 
               {/* Modelo */}
               <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  📦 Modelo *
-                </label>
                 <div className="relative">
-                  <Package className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
-                  <input
-                    type="text"
+                  <MultiProductInput
+                    label="📦 Modelo"
                     value={formData.modelo || ''}
-                    onChange={(e) => handleInputChange('modelo', e.target.value)}
-                    placeholder="Ej: Carito beige 36"
+                    onChange={(value) => handleInputChange('modelo', value)}
+                    placeholder="Ej: Gringo negro 40"
+                    required
+                    error={errors.modelo}
                     disabled={guardando || cargando}
-                    className={`
-                      w-full pl-10 pr-4 py-2 bg-white/10 border rounded-lg text-white placeholder-white/50 transition-all
-                      ${errors.modelo ? 'border-[#D94854]' : 'border-white/20 focus:border-[#B695BF]'}
-                      disabled:opacity-50
-                    `}
                   />
                 </div>
                 {errors.modelo && (
@@ -417,9 +417,10 @@ export const DevolucionMercadoLibreModal: React.FC<DevolucionMercadoLibreModalPr
             )}
           </form>
         </div>
+        </div>
 
         {/* Footer del modal */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-white/10">
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-white/10 flex-shrink-0">
           <button
             type="button"
             onClick={handleClose}

@@ -55,7 +55,21 @@ class DevolucionesMercadoLibreService {
    * Actualiza solo el estado de nota de crédito
    */
   async actualizarNotaCredito(id: number, notaCreditoEmitida: boolean): Promise<void> {
-    await api.patch(`${BASE_URL}/${id}/nota-credito`, notaCreditoEmitida);
+    try {
+      const response = await api.patch(
+        `${BASE_URL}/${id}/nota-credito`, 
+        { notaCreditoEmitida },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error al actualizar nota de crédito:', error);
+      throw new Error('Error al actualizar el estado de la nota de crédito');
+    }
   }
 
   // ========== FILTROS Y BÚSQUEDA ==========

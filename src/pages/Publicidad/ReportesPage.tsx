@@ -69,7 +69,7 @@ const ReportesPage: React.FC = () => {
   };
 
   const handleEdit = (reporte: AdReportDto) => {
-    navigate(`/publicidad/reportes/editar/${reporte.id}`);
+    navigate(`/publicidad/campanas/editar/${reporte.id}`);
   };
 
   const handleView = (reporte: AdReportDto) => {

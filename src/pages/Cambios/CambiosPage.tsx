@@ -6,7 +6,6 @@ import CambiosEstadisticas from '@/components/Cambios/CambiosEstadisticas';
 import CambiosTabla from '@/components/Cambios/CambiosTabla';
 import CambiosFiltros from '@/components/Cambios/CambiosFiltros';
 import CambioModal from '@/components/Cambios/CambioModal';
-import CambioDetalle from '@/components/Cambios/CambioDetalle';
 import cambiosService from '@/services/cambios/cambiosService';
 import { 
   type CambioSimpleDto, 
@@ -34,7 +33,6 @@ const CambiosPage: React.FC = () => {
   // Estados de modales
   const [modalCrearAbierto, setModalCrearAbierto] = useState<boolean>(false);
   const [modalEditarAbierto, setModalEditarAbierto] = useState<boolean>(false);
-  const [modalDetalleAbierto, setModalDetalleAbierto] = useState<boolean>(false);
   const [cambioSeleccionado, setCambioSeleccionado] = useState<CambioSimpleDto | null>(null);
 
   // Estados de filtros
@@ -214,20 +212,11 @@ const CambiosPage: React.FC = () => {
   };
 
   /**
-   * Manejar apertura del modal de detalle
-   */
-  const handleVerDetalle = (cambio: CambioSimpleDto) => {
-    setCambioSeleccionado(cambio);
-    setModalDetalleAbierto(true);
-  };
-
-  /**
    * Cerrar todos los modales
    */
   const cerrarModales = () => {
     setModalCrearAbierto(false);
     setModalEditarAbierto(false);
-    setModalDetalleAbierto(false);
     setCambioSeleccionado(null);
   };
 
@@ -372,7 +361,6 @@ const CambiosPage: React.FC = () => {
             cambios={cambiosFiltrados}
             onActualizarEstados={handleActualizarEstados}
             onEliminar={handleEliminarCambio}
-            onVerDetalle={handleVerDetalle}
             onEditar={handleEditarModal}
             puedeEditar={puedeEditar}
             cargando={cargandoDatos}
@@ -406,13 +394,6 @@ const CambiosPage: React.FC = () => {
         onSave={handleGuardarCambio}
         cambio={cambioSeleccionado}
         cargando={cargandoDatos}
-      />
-
-      {/* Modal de detalle */}
-      <CambioDetalle
-        isOpen={modalDetalleAbierto}
-        onClose={cerrarModales}
-        cambio={cambioSeleccionado}
       />
     </div>
   );

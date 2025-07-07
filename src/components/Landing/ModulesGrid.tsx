@@ -99,8 +99,8 @@ const modules = [
     roles: ["viewer", "admin", "superadmin"]
   },
   {
-    title: "Mayorista",
-    description: "Gestion de clientes mayoristas",
+    title: "Acuerdos",
+    description: "Clientes de acuerdos comerciales",
     icon: Receipt,
     color: "#51590E",
     roles: ["viewer", "admin", "superadmin"]

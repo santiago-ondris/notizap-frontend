@@ -10,13 +10,13 @@ import {
   Zap,
   AlertCircle,
   ArrowRight,
+  Settings
 } from 'lucide-react';
 
-const PublicidadPageImproved = () => {
+const PublicidadPage = () => {
   const navigate = useNavigate();
   const { role } = useAuth();
   
-
   // Permisos
   const canView = ['viewer', 'admin', 'superadmin'].includes(role || '');
   const canManage = ['admin', 'superadmin'].includes(role || '');
@@ -80,13 +80,13 @@ const PublicidadPageImproved = () => {
           </div>
         </div>
 
-        {/* Sección Principal - Grid optimizado */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+        {/* Grid Principal - 4 Cards del mismo tamaño */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
-          {/* Dashboard - Más prominente */}
+          {/* Dashboard - Análisis y métricas */}
           <div 
             onClick={() => handleNavigate('/dashboard')}
-            className="lg:col-span-5 group cursor-pointer bg-gradient-to-br from-[#D94854]/20 to-[#D94854]/10 backdrop-blur-sm border border-[#D94854]/30 rounded-2xl p-6 hover:from-[#D94854]/30 hover:to-[#D94854]/20 transition-all hover:scale-[1.02] hover:shadow-2xl"
+            className="group cursor-pointer bg-gradient-to-br from-[#D94854]/20 to-[#D94854]/10 backdrop-blur-sm border border-[#D94854]/30 rounded-2xl p-6 hover:from-[#D94854]/30 hover:to-[#D94854]/20 transition-all hover:scale-[1.02] hover:shadow-2xl"
           >
             <div className="flex items-start justify-between mb-4">
               <div className="p-3 rounded-xl bg-[#D94854]/30 border border-[#D94854]/40">
@@ -95,64 +95,103 @@ const PublicidadPageImproved = () => {
               <ArrowRight className="w-6 h-6 text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all" />
             </div>
             
-            <h3 className="text-2xl font-bold text-white mb-2">Estadisticas de publicidad</h3>
-            <p className="text-white/70 mb-4">Vista completa de datos</p>
+            <h3 className="text-2xl font-bold text-white mb-2">Dashboard Analytics</h3>
+            <p className="text-white/70 mb-4">Vista completa de métricas y estadísticas</p>
             
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-white/70">
+                <Eye className="w-4 h-4 text-[#D94854]" />
+                <span>Análisis ejecutivo</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-white/70">
+                <BarChart3 className="w-4 h-4 text-[#D94854]" />
+                <span>ROI y rendimiento</span>
+              </div>
+            </div>
           </div>
 
-          {/* Reportes Manuales */}
+          {/* Gestión de Campañas */}
           {canManage && (
             <div 
-              onClick={() => handleNavigate('/reportes')}
-              className="lg:col-span-4 group cursor-pointer bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-all hover:scale-[1.02]"
+              onClick={() => handleNavigate('/campanas')}
+              className="group cursor-pointer bg-gradient-to-br from-[#B695BF]/20 to-[#B695BF]/10 backdrop-blur-sm border border-[#B695BF]/30 rounded-2xl p-6 hover:from-[#B695BF]/30 hover:to-[#B695BF]/20 transition-all hover:scale-[1.02] hover:shadow-2xl"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 rounded-xl bg-[#B695BF]/20 border border-[#B695BF]/30">
-                  <FileText className="w-6 h-6 text-[#B695BF]" />
+                <div className="p-3 rounded-xl bg-[#B695BF]/30 border border-[#B695BF]/40">
+                  <Target className="w-8 h-8 text-[#B695BF]" />
                 </div>
-                <ArrowRight className="w-5 h-5 text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="w-6 h-6 text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all" />
               </div>
               
-              <h3 className="text-xl font-bold text-white mb-2">Reportes Manuales</h3>
-              <p className="text-white/60 text-sm mb-4">Gestión de campañas manuales</p>
+              <h3 className="text-2xl font-bold text-white mb-2">Gestión de Campañas</h3>
+              <p className="text-white/70 mb-4">Administra todas las campañas activas</p>
               
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-white/70">📝 Crear y editar</span>
-                  <PlusCircle className="w-3 h-3 text-[#B695BF]" />
+                <div className="flex items-center gap-2 text-sm text-white/70">
+                  <Settings className="w-4 h-4 text-[#B695BF]" />
+                  <span>Configurar campañas</span>
                 </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-white/70">📊 Ver métricas</span>
-                  <Eye className="w-3 h-3 text-[#B695BF]" />
+                <div className="flex items-center gap-2 text-sm text-white/70">
+                  <Eye className="w-4 h-4 text-[#B695BF]" />
+                  <span>Monitoreo en tiempo real</span>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Sincronización */}
+          {/* Reportes Manuales */}
+          {canManage && (
+            <div 
+              onClick={() => handleNavigate('/reportes')}
+              className="group cursor-pointer bg-gradient-to-br from-[#e327c4]/20 to-[#e327c4]/10 backdrop-blur-sm border border-[#e327c4]/30 rounded-2xl p-6 hover:from-[#e327c4]/30 hover:to-[#e327c4]/20 transition-all hover:scale-[1.02] hover:shadow-2xl"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-3 rounded-xl bg-[#e327c4]/30 border border-[#e327c4]/40">
+                  <FileText className="w-8 h-8 text-[#e327c4]" />
+                </div>
+                <ArrowRight className="w-6 h-6 text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all" />
+              </div>
+              
+              <h3 className="text-2xl font-bold text-white mb-2">Reportes Manuales</h3>
+              <p className="text-white/70 mb-4">Gestión de campañas manuales</p>
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-white/70">
+                  <PlusCircle className="w-4 h-4 text-[#e327c4]" />
+                  <span>Crear y editar</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-white/70">
+                  <Eye className="w-4 h-4 text-[#e327c4]" />
+                  <span>Ver histórico</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Sincronización Meta API */}
           {canSync && (
             <div 
               onClick={() => handleNavigate('/sync')}
-              className="lg:col-span-3 group cursor-pointer bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-all hover:scale-[1.02]"
+              className="group cursor-pointer bg-gradient-to-br from-[#51590E]/20 to-[#51590E]/10 backdrop-blur-sm border border-[#51590E]/30 rounded-2xl p-6 hover:from-[#51590E]/30 hover:to-[#51590E]/20 transition-all hover:scale-[1.02] hover:shadow-2xl"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 rounded-xl bg-[#51590E]/20 border border-[#51590E]/30">
-                  <SyncIcon className="w-6 h-6 text-[#51590E]" />
+                <div className="p-3 rounded-xl bg-[#51590E]/30 border border-[#51590E]/40">
+                  <SyncIcon className="w-8 h-8 text-[#51590E]" />
                 </div>
-                <ArrowRight className="w-5 h-5 text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="w-6 h-6 text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all" />
               </div>
               
-              <h3 className="text-lg font-bold text-white mb-2">Sync Meta API</h3>
-              <p className="text-white/60 text-xs mb-3">Importar datos</p>
+              <h3 className="text-2xl font-bold text-white mb-2">Sync Meta API</h3>
+              <p className="text-white/70 mb-4">Importar datos automáticamente</p>
               
-              <div className="space-y-1">
-                <div className="flex items-center gap-1 text-xs text-white/70">
-                  <Zap className="w-3 h-3 text-[#51590E]" />
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-white/70">
+                  <Zap className="w-4 h-4 text-[#51590E]" />
                   <span>Auto-sync</span>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-white/70">
-                  <Eye className="w-3 h-3 text-[#51590E]" />
-                  <span>Preview</span>
+                <div className="flex items-center gap-2 text-sm text-white/70">
+                  <Eye className="w-4 h-4 text-[#51590E]" />
+                  <span>Preview y validación</span>
                 </div>
               </div>
             </div>
@@ -163,4 +202,4 @@ const PublicidadPageImproved = () => {
   );
 };
 
-export default PublicidadPageImproved;
+export default PublicidadPage;

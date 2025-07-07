@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { 
-  Eye, 
+import {
   Edit3, 
   Trash2, 
   Package, 
@@ -27,7 +26,6 @@ interface CambiosTablaProps {
   onActualizarEstados: (id: number, estados: EstadosCambio) => Promise<boolean>;
   onActualizarEnvio: (id: number, envio: string) => Promise<boolean>;
   onEliminar: (id: number) => Promise<boolean>;
-  onVerDetalle: (cambio: CambioSimpleDto) => void;
   onEditar: (cambio: CambioSimpleDto) => void;
   puedeEditar: boolean;
   cargando?: boolean;
@@ -222,7 +220,6 @@ const FilaCambio: React.FC<{
   onActualizarEstados: (id: number, estados: EstadosCambio) => Promise<boolean>;
   onActualizarEnvio: (id: number, envio: string) => Promise<boolean>;
   onEliminar: (id: number) => Promise<boolean>;
-  onVerDetalle: (cambio: CambioSimpleDto) => void;
   onEditar: (cambio: CambioSimpleDto) => void;
   puedeEditar: boolean;
 }> = ({ 
@@ -230,7 +227,6 @@ const FilaCambio: React.FC<{
   onActualizarEstados, 
   onActualizarEnvio,
   onEliminar, 
-  onVerDetalle, 
   onEditar, 
   puedeEditar 
 }) => {
@@ -436,15 +432,6 @@ const FilaCambio: React.FC<{
       {/* Acciones */}
       <td className="px-3 py-3">
         <div className="flex items-center justify-center gap-1">
-          
-          {/* Ver detalle */}
-          <button
-            onClick={() => onVerDetalle(cambio)}
-            className="p-1 text-[#B695BF] hover:bg-[#B695BF]/20 rounded transition-colors"
-            title="Ver detalles completos"
-          >
-            <Eye className="w-4 h-4" />
-          </button>
 
           {/* Editar */}
           {puedeEditar && (
@@ -486,7 +473,6 @@ export const CambiosTabla: React.FC<CambiosTablaProps> = ({
   onActualizarEstados,
   onActualizarEnvio,
   onEliminar,
-  onVerDetalle,
   onEditar,
   puedeEditar,
   cargando = false
@@ -608,7 +594,6 @@ export const CambiosTabla: React.FC<CambiosTablaProps> = ({
                 onActualizarEstados={onActualizarEstados}
                 onActualizarEnvio={onActualizarEnvio}
                 onEliminar={onEliminar}
-                onVerDetalle={onVerDetalle}
                 onEditar={onEditar}
                 puedeEditar={puedeEditar}
               />

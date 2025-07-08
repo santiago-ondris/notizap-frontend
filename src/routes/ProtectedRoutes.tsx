@@ -29,7 +29,6 @@ import CampaignsPage from "@/pages/Publicidad/CampaignsPage";
 import CampaignEditPage from "@/pages/Publicidad/CampaignEditPage";
 import { VentasVendedorasPage } from "@/pages/Vendedoras/VentasVendedorasPage";
 import LocalesStatsPage from "@/pages/Vendedoras/LocalesStatsPage";
-import InstagramPage from "@/pages/Instagram/InstagramPage";
 import VentasOnlinePage from "@/pages/Ventas/VentasOnlinePage";
 import ComisionOnlinePage from "@/pages/Ventas/ComisionOnlinePage";
 
@@ -73,7 +72,6 @@ export const ProtectedRoutes = (
       <Route path="analisis"         element={<GastosAnalysisPage />} />
     </Route>
     <Route path="envios"            element={<EnviosPage />} />
-    <Route path="instagram"            element={<InstagramPage />} />
     <Route path="cambios">
       <Route index                   element={<CambiosPage />} />
       <Route path="devoluciones"            element={<DevolucionesPage />} />

@@ -110,6 +110,7 @@ const modules = [
     description: "Reels, posteos, historias y seguidores",
     icon: Instagram,
     color: "#B695BF",
+    to: "/instagram",
     roles: ["viewer", "admin", "superadmin"]
   }
 ];

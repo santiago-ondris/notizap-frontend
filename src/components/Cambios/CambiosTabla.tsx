@@ -333,7 +333,13 @@ const FilaCambio: React.FC<{
 
       {/* Motivo */}
       <td className="px-3 py-3 border-r border-white/10">
-        <span className="text-xs text-white/70 bg-white/10 px-2 py-1 rounded">
+        <span className={`
+          text-xs px-2 py-1 rounded font-medium
+          ${cambio.motivo === 'Falla de fábrica' 
+            ? 'text-white bg-[#D94854] border border-[#D94854]/50 shadow-lg animate-pulse' 
+            : 'text-white/70 bg-white/10'
+          }
+        `}>
           {cambio.motivo}
         </span>
       </td>

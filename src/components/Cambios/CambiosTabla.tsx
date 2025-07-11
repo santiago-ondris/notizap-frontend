@@ -284,7 +284,7 @@ const FilaCambio: React.FC<{
     <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
       
       {/* Fecha */}
-      <td className="px-4 py-3 border-r border-white/10">
+      <td className="px-2 py-3 border-r border-white/10">
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-[#B695BF]" />
           <span className="text-sm text-white">
@@ -294,7 +294,7 @@ const FilaCambio: React.FC<{
       </td>
 
       {/* Pedido */}
-      <td className="px-3 py-3 border-r border-white/10">
+      <td className="px-2 py-3 border-r border-white/10">
         <div className="flex items-center gap-2">
           <FileText className="w-4 h-4 text-[#D94854]" />
           <span className="text-sm font-medium text-white">
@@ -304,7 +304,7 @@ const FilaCambio: React.FC<{
       </td>
 
       {/* Cliente */}
-      <td className="px-3 py-3 border-r border-white/10">
+      <td className="px-2 py-3 border-r border-white/10">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-[#B695BF]" />
@@ -322,7 +322,7 @@ const FilaCambio: React.FC<{
       </td>
 
       {/* Modelos */}
-      <td className="px-3 py-3 border-r border-white/10">
+      <td className="px-2 py-3 border-r border-white/10">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Package className="w-4 h-4 text-[#D94854]" />
@@ -343,7 +343,7 @@ const FilaCambio: React.FC<{
       </td>
 
       {/* Motivo */}
-      <td className="px-3 py-3 border-r border-white/10">
+      <td className="px-2 py-3 border-r border-white/10">
         <span className={`
           text-xs px-2 py-1 rounded font-medium
           ${cambio.motivo === 'Falla de fábrica' 
@@ -356,7 +356,7 @@ const FilaCambio: React.FC<{
       </td>
 
       {/* Diferencia */}
-      <td className="px-3 py-3 border-r border-white/10">
+      <td className="px-2 py-3 border-r border-white/10">
         <div className="text-center">
           {cambio.diferenciaAbonada ? (
             <div className="flex items-center gap-1 justify-center">
@@ -379,7 +379,7 @@ const FilaCambio: React.FC<{
       </td>
 
       {/* Estado General */}
-      <td className="px-3 py-3 border-r border-white/10">
+      <td className="px-1 py-3 border-r border-white/10">
         <div className="text-center">
           <span 
             className="text-xs font-medium px-2 py-1 rounded"
@@ -394,7 +394,7 @@ const FilaCambio: React.FC<{
       </td>
 
       {/* Checkbox: Par pedido*/}
-      <td className="px-3 py-3 border-r border-white/10">
+      <td className="px-1 py-3 border-r border-white/10">
         <CheckboxInline
           valor={cambio.parPedido}
           onCambio={(valor) => handleActualizarEstado('parPedido', valor)}
@@ -405,7 +405,7 @@ const FilaCambio: React.FC<{
       </td>      
 
       {/* Checkbox: Llegó al Depósito */}
-      <td className="px-3 py-3 border-r border-white/10">
+      <td className="px-1 py-3 border-r border-white/10">
         <CheckboxInline
           valor={cambio.llegoAlDeposito}
           onCambio={(valor) => handleActualizarEstado('llegoAlDeposito', valor)}
@@ -416,7 +416,7 @@ const FilaCambio: React.FC<{
       </td>
 
       {/* Checkbox: Ya Enviado */}
-      <td className="px-3 py-3 border-r border-white/10">
+      <td className="px-1 py-3 border-r border-white/10">
         <CheckboxInline
           valor={cambio.yaEnviado}
           onCambio={(valor) => handleActualizarEstado('yaEnviado', valor)}
@@ -427,7 +427,7 @@ const FilaCambio: React.FC<{
       </td>
 
       {/* Checkbox: Registrado en Sistema */}
-      <td className="px-3 py-3 border-r border-white/10">
+      <td className="px-1 py-3 border-r border-white/10">
         <CheckboxInline
           valor={cambio.cambioRegistradoSistema}
           onCambio={(valor) => handleActualizarEstado('cambioRegistradoSistema', valor)}
@@ -438,7 +438,7 @@ const FilaCambio: React.FC<{
       </td>
 
       {/* Envío - Campo editable */}
-      <td className="px-3 py-3 border-r border-white/10 min-w-[150px]">
+      <td className="px-2 py-3 border-r border-white/10 min-w-[120px]">
         <CampoEnvioEditable
           valor={cambio.envio || ''}
           onCambio={handleActualizarEnvio}
@@ -446,7 +446,7 @@ const FilaCambio: React.FC<{
         />
       </td>
 
-      <td className="px-3 py-3 border-r border-white/10 min-w-[220px]">
+      <td className="px-2 py-3 border-r border-white/10 min-w-[180px]">
         <CeldaEtiqueta
           estado={{
             valor: cambio.etiqueta || '',
@@ -458,7 +458,7 @@ const FilaCambio: React.FC<{
       </td>      
 
       {/* Acciones */}
-      <td className="px-3 py-3">
+      <td className="px-2 py-3">
         <div className="flex items-center justify-center gap-1">
 
           {/* Editar */}
@@ -575,52 +575,53 @@ export const CambiosTabla: React.FC<CambiosTablaProps> = ({
       </div>
 
       {/* Tabla con indicadores de scroll */}
-      <TablaConIndicadores minWidth="1620px"
+      <div className="2xl:overflow-x-visible">
+      <TablaConIndicadores minWidth="1400"
       onScrollStateChange={setTieneScroll}>
         
         {/* Header de columnas */}
         <thead className="bg-white/5">
           <tr>
-            <th className="px-4 py-3 text-left text-sm font-medium text-white/80 border-r border-white/10">
+            <th className="px-2 py-3 text-left text-xs font-medium text-white/80 border-r border-white/10"> {/* ← px-2 y text-xs */}
               📅 Fecha
             </th>
-            <th className="px-3 py-3 text-left text-sm font-medium text-white/80 border-r border-white/10">
+            <th className="px-2 py-3 text-left text-xs font-medium text-white/80 border-r border-white/10">
               🛒 Pedido
             </th>
-            <th className="px-3 py-3 text-left text-sm font-medium text-white/80 border-r border-white/10">
+            <th className="px-2 py-3 text-left text-xs font-medium text-white/80 border-r border-white/10">
               👤 Cliente
             </th>
-            <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
+            <th className="px-2 py-3 text-center text-xs font-medium text-white/80 border-r border-white/10">
               📦 Modelos
             </th>
-            <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
+            <th className="px-2 py-3 text-center text-xs font-medium text-white/80 border-r border-white/10">
               ❓ Motivo
             </th>
-            <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
+            <th className="px-2 py-3 text-center text-xs font-medium text-white/80 border-r border-white/10">
               💰 Diferencia
             </th>
-            <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
+            <th className="px-1 py-3 text-center text-xs font-medium text-white/80 border-r border-white/10">
               📊 Estado
             </th>
-            <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
-              🙉 Par Pedido
+            <th className="px-1 py-3 text-center text-xs font-medium text-white/80 border-r border-white/10">
+              🙉 Par
             </th>              
-            <th className="px-3 py-3 text-center text-sm font-medium text-[#FFD700] border-r border-white/10">
+            <th className="px-1 py-3 text-center text-xs font-medium text-[#FFD700] border-r border-white/10">
               🏠 Llegó
             </th>
-            <th className="px-3 py-3 text-center text-sm font-medium text-[#B695BF] border-r border-white/10">
+            <th className="px-1 py-3 text-center text-xs font-medium text-[#B695BF] border-r border-white/10">
               🚚 Enviado
             </th>
-            <th className="px-3 py-3 text-center text-sm font-medium text-[#51590E] border-r border-white/10">
+            <th className="px-1 py-3 text-center text-xs font-medium text-[#51590E] border-r border-white/10">
               ✅ Sistema
             </th>
-            <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
+            <th className="px-2 py-3 text-center text-xs font-medium text-white/80 border-r border-white/10">
               📦 Envío
             </th>
-            <th className="px-3 py-3 text-center text-sm font-medium text-[#D94854] border-r border-white/10">
+            <th className="px-2 py-3 text-center text-xs font-medium text-[#D94854] border-r border-white/10">
               🏷️ Etiqueta
             </th>
-            <th className="px-3 py-3 text-center text-sm font-medium text-white/80">
+            <th className="px-2 py-3 text-center text-xs font-medium text-white/80">
               ⚙️ Acciones
             </th>
           </tr>
@@ -643,6 +644,7 @@ export const CambiosTabla: React.FC<CambiosTablaProps> = ({
         </tbody>
         
       </TablaConIndicadores>
+      </div>
 
       {/* Footer con información */}
       <div className="bg-white/5 border-t border-white/10 p-4">

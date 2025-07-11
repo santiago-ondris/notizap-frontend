@@ -277,7 +277,7 @@ const CambiosPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#1A1A20] p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-none xl:max-w-screen-2xl mx-auto space-y-6 px-4">
         
       {/* Header */}
       <div className="flex items-center justify-between">

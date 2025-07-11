@@ -16,6 +16,7 @@ export interface CreateCambioSimpleDto {
   diferenciaAFavor?: number;
   envio?: string;
   observaciones?: string;
+  etiqueta?: string;
 }
 
 /**
@@ -26,6 +27,7 @@ export interface CambioSimpleDto extends CreateCambioSimpleDto {
   llegoAlDeposito: boolean;
   yaEnviado: boolean;
   cambioRegistradoSistema: boolean;
+  etiquetaDespachada: boolean;
 }
 
 /**
@@ -115,3 +117,19 @@ export const LABELS_ESTADO = {
   sin_registrar: 'Sin registrar en sistema',
   todos: 'Todos los estados'
 } as const;
+
+/**
+ * DTO para actualizar solo etiqueta y estado de despacho
+ */
+export interface ActualizarEtiquetaDto {
+  etiqueta: string;
+  etiquetaDespachada: boolean;
+}
+
+/**
+ * Estados de etiqueta para el componente
+ */
+export interface EstadoEtiqueta {
+  valor: string;
+  despachada: boolean;
+}

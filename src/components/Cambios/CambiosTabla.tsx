@@ -13,18 +13,23 @@ import {
   FileText,
   Check,
   X,
-  Edit
+  Edit,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { 
   type CambioSimpleDto, 
   type EstadosCambio 
 } from '@/types/cambios/cambiosTypes';
 import cambiosService from '@/services/cambios/cambiosService';
+import CeldaEtiqueta from './CeldaEtiqueta';
+import TablaConIndicadores from './TablaConIndicadores';
 
 interface CambiosTablaProps {
   cambios: CambioSimpleDto[];
   onActualizarEstados: (id: number, estados: EstadosCambio) => Promise<boolean>;
   onActualizarEnvio: (id: number, envio: string) => Promise<boolean>;
+  onActualizarEtiqueta: (id: number, etiqueta: string, despachada: boolean) => Promise<boolean>;
   onEliminar: (id: number) => Promise<boolean>;
   onEditar: (cambio: CambioSimpleDto) => void;
   puedeEditar: boolean;
@@ -219,6 +224,7 @@ const FilaCambio: React.FC<{
   cambio: CambioSimpleDto;
   onActualizarEstados: (id: number, estados: EstadosCambio) => Promise<boolean>;
   onActualizarEnvio: (id: number, envio: string) => Promise<boolean>;
+  onActualizarEtiqueta: (id: number, etiqueta: string, despachada: boolean) => Promise<boolean>;
   onEliminar: (id: number) => Promise<boolean>;
   onEditar: (cambio: CambioSimpleDto) => void;
   puedeEditar: boolean;
@@ -226,6 +232,7 @@ const FilaCambio: React.FC<{
   cambio, 
   onActualizarEstados, 
   onActualizarEnvio,
+  onActualizarEtiqueta,
   onEliminar, 
   onEditar, 
   puedeEditar 
@@ -246,6 +253,10 @@ const FilaCambio: React.FC<{
     };
 
     return await onActualizarEstados(cambio.id, estadosActualizados);
+  };
+
+  const handleActualizarEtiqueta = async (etiqueta: string, despachada: boolean): Promise<boolean> => {
+    return await onActualizarEtiqueta(cambio.id, etiqueta, despachada);
   };
 
   // Manejar actualización de envío
@@ -433,6 +444,17 @@ const FilaCambio: React.FC<{
           onCambio={handleActualizarEnvio}
           deshabilitado={!puedeEditar}
         />
+      </td>
+
+      <td className="px-3 py-3 border-r border-white/10 min-w-[220px]">
+        <CeldaEtiqueta
+          estado={{
+            valor: cambio.etiqueta || '',
+            despachada: cambio.etiquetaDespachada
+          }}
+          onActualizar={handleActualizarEtiqueta}
+          deshabilitado={!puedeEditar}
+        />
       </td>      
 
       {/* Acciones */}
@@ -478,12 +500,13 @@ export const CambiosTabla: React.FC<CambiosTablaProps> = ({
   cambios,
   onActualizarEstados,
   onActualizarEnvio,
+  onActualizarEtiqueta,
   onEliminar,
   onEditar,
   puedeEditar,
   cargando = false
 }) => {
-
+  const [tieneScroll, setTieneScroll] = useState(false);
   // Estado de carga
   if (cargando) {
     return (
@@ -531,6 +554,15 @@ export const CambiosTabla: React.FC<CambiosTablaProps> = ({
             <span className="text-sm text-white/60 ml-2">
               ({cambios.length} {cambios.length === 1 ? 'cambio' : 'cambios'})
             </span>
+            
+            {/* Hint de scroll - SOLO si hay scroll disponible */}
+            {tieneScroll && (
+              <div className="flex items-center gap-1 ml-4 px-2 py-1 bg-white/10 rounded-full border border-white/20">
+                <ChevronLeft className="w-3 h-3 text-white/60" />
+                <span className="text-xs text-white/60">Desliza para ver más columnas</span>
+                <ChevronRight className="w-3 h-3 text-white/60" />
+              </div>
+            )}
           </div>
           
           {!puedeEditar && (
@@ -542,71 +574,75 @@ export const CambiosTabla: React.FC<CambiosTablaProps> = ({
         </div>
       </div>
 
-      {/* Tabla con scroll horizontal */}
-      <div className="overflow-x-auto custom-scrollbar">
-        <table className="w-full min-w-[1400px]">
-          
-          {/* Header de columnas */}
-          <thead className="bg-white/5">
-            <tr>
-              <th className="px-4 py-3 text-left text-sm font-medium text-white/80 border-r border-white/10">
-                📅 Fecha
-              </th>
-              <th className="px-3 py-3 text-left text-sm font-medium text-white/80 border-r border-white/10">
-                🛒 Pedido
-              </th>
-              <th className="px-3 py-3 text-left text-sm font-medium text-white/80 border-r border-white/10">
-                👤 Cliente
-              </th>
-              <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
-                📦 Modelos
-              </th>
-              <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
-                ❓ Motivo
-              </th>
-              <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
-                💰 Diferencia
-              </th>
-              <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
-                📊 Estado
-              </th>
-              <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
-                🙉 Par Pedido
-              </th>              
-              <th className="px-3 py-3 text-center text-sm font-medium text-[#FFD700] border-r border-white/10">
-                🏠 Llegó
-              </th>
-              <th className="px-3 py-3 text-center text-sm font-medium text-[#B695BF] border-r border-white/10">
-                🚚 Enviado
-              </th>
-              <th className="px-3 py-3 text-center text-sm font-medium text-[#51590E] border-r border-white/10">
-                ✅ Sistema
-              </th>
-              <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
-                📦 Envío
-              </th>
-              <th className="px-3 py-3 text-center text-sm font-medium text-white/80">
-                ⚙️ Acciones
-              </th>
-            </tr>
-          </thead>
+      {/* Tabla con indicadores de scroll */}
+      <TablaConIndicadores minWidth="1620px"
+      onScrollStateChange={setTieneScroll}>
+        
+        {/* Header de columnas */}
+        <thead className="bg-white/5">
+          <tr>
+            <th className="px-4 py-3 text-left text-sm font-medium text-white/80 border-r border-white/10">
+              📅 Fecha
+            </th>
+            <th className="px-3 py-3 text-left text-sm font-medium text-white/80 border-r border-white/10">
+              🛒 Pedido
+            </th>
+            <th className="px-3 py-3 text-left text-sm font-medium text-white/80 border-r border-white/10">
+              👤 Cliente
+            </th>
+            <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
+              📦 Modelos
+            </th>
+            <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
+              ❓ Motivo
+            </th>
+            <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
+              💰 Diferencia
+            </th>
+            <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
+              📊 Estado
+            </th>
+            <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
+              🙉 Par Pedido
+            </th>              
+            <th className="px-3 py-3 text-center text-sm font-medium text-[#FFD700] border-r border-white/10">
+              🏠 Llegó
+            </th>
+            <th className="px-3 py-3 text-center text-sm font-medium text-[#B695BF] border-r border-white/10">
+              🚚 Enviado
+            </th>
+            <th className="px-3 py-3 text-center text-sm font-medium text-[#51590E] border-r border-white/10">
+              ✅ Sistema
+            </th>
+            <th className="px-3 py-3 text-center text-sm font-medium text-white/80 border-r border-white/10">
+              📦 Envío
+            </th>
+            <th className="px-3 py-3 text-center text-sm font-medium text-[#D94854] border-r border-white/10">
+              🏷️ Etiqueta
+            </th>
+            <th className="px-3 py-3 text-center text-sm font-medium text-white/80">
+              ⚙️ Acciones
+            </th>
+          </tr>
+        </thead>
 
-          {/* Cuerpo de la tabla */}
-          <tbody>
-            {cambios.map((cambio) => (
-              <FilaCambio
-                key={cambio.id}
-                cambio={cambio}
-                onActualizarEstados={onActualizarEstados}
-                onActualizarEnvio={onActualizarEnvio}
-                onEliminar={onEliminar}
-                onEditar={onEditar}
-                puedeEditar={puedeEditar}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
+        {/* Cuerpo de la tabla */}
+        <tbody>
+          {cambios.map((cambio) => (
+            <FilaCambio
+              key={cambio.id}
+              cambio={cambio}
+              onActualizarEstados={onActualizarEstados}
+              onActualizarEnvio={onActualizarEnvio}
+              onActualizarEtiqueta={onActualizarEtiqueta}
+              onEliminar={onEliminar}
+              onEditar={onEditar}
+              puedeEditar={puedeEditar}
+            />
+          ))}
+        </tbody>
+        
+      </TablaConIndicadores>
 
       {/* Footer con información */}
       <div className="bg-white/5 border-t border-white/10 p-4">

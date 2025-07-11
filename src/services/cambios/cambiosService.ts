@@ -79,6 +79,23 @@ class CambiosService {
     }
   }
 
+    /**
+   * Actualizar etiqueta y estado de despacho
+   */
+  async actualizarEtiqueta(id: number, etiqueta: string, etiquetaDespachada: boolean): Promise<void> {
+    try {
+      const dto = {
+        etiqueta: etiqueta.trim(),
+        etiquetaDespachada
+      };
+
+      await api.put(`${this.baseUrl}/${id}/etiqueta`, dto);
+    } catch (error) {
+      console.error('Error al actualizar etiqueta:', error);
+      throw new Error('Error al actualizar la etiqueta del cambio');
+    }
+  }
+
   /**
    * Eliminar un cambio
    */

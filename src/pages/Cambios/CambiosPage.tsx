@@ -187,6 +187,24 @@ const CambiosPage: React.FC = () => {
     }
   };
 
+  const handleActualizarEtiqueta = async (id: number, etiqueta: string, etiquetaDespachada: boolean): Promise<boolean> => {
+    if (!puedeEditar) {
+      toast.error('No tienes permisos para actualizar etiquetas');
+      return false;
+    }
+
+    try {
+      await cambiosService.actualizarEtiqueta(id, etiqueta, etiquetaDespachada);
+      toast.success('Etiqueta actualizada correctamente');
+      await cargarCambios();
+      return true;
+    } catch (error) {
+      const mensaje = error instanceof Error ? error.message : 'Error al actualizar etiqueta';
+      toast.error(mensaje);
+      return false;
+    }
+  };
+
   /**
    * Manejar apertura del modal de creación
    */
@@ -365,6 +383,7 @@ const CambiosPage: React.FC = () => {
             puedeEditar={puedeEditar}
             cargando={cargandoDatos}
             onActualizarEnvio={handleActualizarEnvio}
+            onActualizarEtiqueta={handleActualizarEtiqueta}
           />
         )}
         {/* Cards de estadísticas */}

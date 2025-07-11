@@ -239,6 +239,13 @@ const FilaCambio: React.FC<{
 }) => {
   const [eliminando, setEliminando] = useState(false);
 
+  const esCompletado = (cambio: CambioSimpleDto): boolean => {
+    return cambio.llegoAlDeposito && 
+           cambio.yaEnviado && 
+           cambio.cambioRegistradoSistema && 
+           cambio.parPedido && 
+           cambio.etiquetaDespachada;
+  };
   // Manejar actualización de un estado específico
   const handleActualizarEstado = async (
     campo: keyof EstadosCambio, 
@@ -281,7 +288,13 @@ const FilaCambio: React.FC<{
   const descripcionEstado = cambiosService.obtenerDescripcionEstado(cambio);
 
   return (
-    <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
+    <tr className={`
+      border-b border-white/5 transition-colors
+      ${esCompletado(cambio) 
+        ? 'bg-[#51590E]/20 border-[#51590E]/30 hover:bg-[#51590E]/25' 
+        : 'hover:bg-white/5'
+      }
+    `}>
       
       {/* Fecha */}
       <td className="px-2 py-3 border-r border-white/10">

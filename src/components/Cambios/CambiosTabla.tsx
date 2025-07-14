@@ -10,12 +10,13 @@ import {
   Loader2,
   AlertTriangle,
   DollarSign,
-  FileText,
   Check,
   X,
   Edit,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ShoppingCart,
+  Copy
 } from 'lucide-react';
 import { 
   type CambioSimpleDto, 
@@ -24,6 +25,8 @@ import {
 import cambiosService from '@/services/cambios/cambiosService';
 import CeldaEtiqueta from './CeldaEtiqueta';
 import TablaConIndicadores from './TablaConIndicadores';
+import { copiarAlPortapapeles } from '@/utils/clipboard';
+import { toast } from 'react-toastify';
 
 interface CambiosTablaProps {
   cambios: CambioSimpleDto[];
@@ -308,11 +311,23 @@ const FilaCambio: React.FC<{
 
       {/* Pedido */}
       <td className="px-2 py-3 border-r border-white/10">
-        <div className="flex items-center gap-2">
-          <FileText className="w-4 h-4 text-[#D94854]" />
-          <span className="text-sm font-medium text-white">
+        <div 
+          className="flex items-center gap-2 cursor-pointer hover:bg-white/10 rounded px-2 py-1 transition-colors group"
+          onClick={async () => {
+            const exito = await copiarAlPortapapeles(cambio.pedido);
+            if (exito) {
+              toast.success(`Pedido "${cambio.pedido}" copiado al portapapeles`);
+            } else {
+              toast.error('Error al copiar al portapapeles');
+            }
+          }}
+          title={`Click para copiar: ${cambio.pedido}`}
+        >
+          <ShoppingCart className="w-4 h-4 text-[#D94854]" />
+          <span className="text-sm text-white/90 max-w-[150px] truncate">
             {cambio.pedido}
           </span>
+          <Copy className="w-3 h-3 text-white/40 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
       </td>
 

@@ -4,6 +4,7 @@ export interface DevolucionMercadoLibreDto {
     cliente: string;
     modelo: string;
     notaCreditoEmitida: boolean;
+    trasladado : boolean;
     fechaCreacion: string;
     fechaActualizacion?: string;
     pedido: string;
@@ -14,6 +15,7 @@ export interface DevolucionMercadoLibreDto {
     cliente: string;
     modelo: string;
     notaCreditoEmitida?: boolean;
+    trasladado?: boolean;
     pedido: string;
   }
   
@@ -22,6 +24,7 @@ export interface DevolucionMercadoLibreDto {
     cliente: string;
     modelo: string;
     notaCreditoEmitida: boolean;
+    trasladado: boolean;
     pedido: string;
   }
   

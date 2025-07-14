@@ -143,6 +143,27 @@ const DevolucionesMercadoLibrePage: React.FC = () => {
     }
   };
 
+  const handleActualizarTrasladado = async (id: number, trasladado: boolean): Promise<boolean> => {
+    if (!puedeEditar) {
+      toast.error('No tienes permisos para actualizar el estado de trasladado');
+      return false;
+    }
+  
+    try {
+      await devolucionesMercadoLibreService.actualizarTrasladado(id, trasladado);
+      toast.success(`${trasladado ? 'Marcado como trasladado' : 'Marcado como no trasladado'}`);
+      
+      // Recargar datos
+      await cargarDevoluciones();
+      return true;
+      
+    } catch (error) {
+      const mensaje = error instanceof Error ? error.message : 'Error al actualizar estado de trasladado';
+      toast.error(mensaje);
+      return false;
+    }
+  };
+
   /**
    * Manejar eliminación de una devolución
    */
@@ -386,6 +407,7 @@ const DevolucionesMercadoLibrePage: React.FC = () => {
           <DevolucionesMercadoLibreTabla
             devoluciones={devolucionesFiltradas}
             onActualizarNotaCredito={handleActualizarNotaCredito}
+            onActualizarTrasladado={handleActualizarTrasladado}
             onEliminar={handleEliminarDevolucion}
             onVerDetalle={handleVerDetalle}
             onEditar={handleEditarModal}

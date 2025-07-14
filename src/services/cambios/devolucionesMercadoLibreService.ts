@@ -72,6 +72,24 @@ class DevolucionesMercadoLibreService {
     }
   }
 
+  async actualizarTrasladado(id: number, trasladado: boolean): Promise<void> {
+    try {
+      const response = await api.patch(
+        `${BASE_URL}/${id}/traslado`, 
+        { trasladado },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error al actualizar trasladado:', error);
+      throw new Error('Error al actualizar el estado de trasladado');
+    }
+  }
+
   // ========== FILTROS Y BÚSQUEDA ==========
 
   /**

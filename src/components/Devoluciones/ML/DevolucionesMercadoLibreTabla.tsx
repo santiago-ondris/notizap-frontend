@@ -9,16 +9,20 @@ import {
   Loader2,
   AlertTriangle,
   FileText,
-  ShoppingCart
+  ShoppingCart,
+  Copy
 } from 'lucide-react';
 import { 
   type DevolucionMercadoLibreDto
 } from '@/types/cambios/devolucionesMercadoLibreTypes';
 import devolucionesMercadoLibreService from '@/services/cambios/devolucionesMercadoLibreService';
+import { copiarAlPortapapeles } from '@/utils/clipboard';
+import { toast } from 'react-toastify';
 
 interface DevolucionesMercadoLibreTablaProps {
   devoluciones: DevolucionMercadoLibreDto[];
   onActualizarNotaCredito: (id: number, notaCreditoEmitida: boolean) => Promise<boolean>;
+  onActualizarTrasladado: (id: number, trasladado: boolean) => Promise<boolean>;
   onEliminar: (id: number) => Promise<boolean>;
   onVerDetalle: (devolucion: DevolucionMercadoLibreDto) => void;
   onEditar: (devolucion: DevolucionMercadoLibreDto) => void;
@@ -76,12 +80,53 @@ const CheckboxNotaCredito: React.FC<{
   );
 };
 
+const CheckboxTrasladado: React.FC<{
+  valor: boolean;
+  onCambio: (nuevoValor: boolean) => void;
+  deshabilitado?: boolean;
+}> = ({ valor, onCambio, deshabilitado = false }) => {
+  const [actualizando, setActualizando] = useState(false);
+  
+  const handleClick = async () => {
+    if (deshabilitado || actualizando) return;
+    
+    setActualizando(true);
+    try {
+      await onCambio(!valor);
+    } finally {
+      setActualizando(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-center">
+      <button
+        onClick={handleClick}
+        disabled={deshabilitado || actualizando}
+        className={`
+          relative w-6 h-6 rounded border-2 transition-all
+          ${deshabilitado ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-110'}
+          ${valor ? 'bg-[#FFD700] border-transparent' : 'border-white/40 hover:border-white/60 bg-transparent'}
+        `}
+        title={valor ? 'Trasladado - Click para desmarcar' : 'No trasladado - Click para marcar'}
+      >
+        {actualizando ? (
+          <Loader2 className="w-4 h-4 animate-spin text-white absolute inset-0 m-auto" />
+        ) : valor && (
+          <span className="text-white text-sm font-bold absolute inset-0 flex items-center justify-center">✓</span>
+        )}
+      </button>
+    </div>
+  );
+};
+
 /**
  * Componente de fila de devolución
  */
 const FilaDevolucion: React.FC<{
   devolucion: DevolucionMercadoLibreDto;
   onActualizarNotaCredito: (id: number, notaCreditoEmitida: boolean) => Promise<boolean>;
+  onActualizarTrasladado: (id: number, trasladado: boolean) => Promise<boolean>;
   onEliminar: (id: number) => Promise<boolean>;
   onVerDetalle: (devolucion: DevolucionMercadoLibreDto) => void;
   onEditar: (devolucion: DevolucionMercadoLibreDto) => void;
@@ -89,6 +134,7 @@ const FilaDevolucion: React.FC<{
 }> = ({ 
   devolucion, 
   onActualizarNotaCredito, 
+  onActualizarTrasladado,
   onEliminar, 
   onVerDetalle, 
   onEditar, 
@@ -99,6 +145,10 @@ const FilaDevolucion: React.FC<{
   // Manejar actualización de nota de crédito
   const handleActualizarNotaCredito = async (nuevoValor: boolean) => {
     return await onActualizarNotaCredito(devolucion.id, nuevoValor);
+  };
+
+  const handleActualizarTrasladado = async (nuevoValor: boolean) => {
+    return await onActualizarTrasladado(devolucion.id, nuevoValor);
   };
 
   // Manejar eliminación
@@ -138,11 +188,23 @@ const FilaDevolucion: React.FC<{
 
       {/* Pedido */}
       <td className="px-3 py-3 border-r border-white/10">
-        <div className="flex items-center gap-2">
+        <div 
+          className="flex items-center gap-2 cursor-pointer hover:bg-white/10 rounded px-2 py-1 transition-colors group"
+          onClick={async () => {
+            const exito = await copiarAlPortapapeles(devolucion.pedido);
+            if (exito) {
+              toast.success(`Pedido "${devolucion.pedido}" copiado al portapapeles`);
+            } else {
+              toast.error('Error al copiar al portapapeles');
+            }
+          }}
+          title={`Click para copiar: ${devolucion.pedido}`}
+        >
           <FileText className="w-4 h-4 text-[#B695BF]" />
-          <span className="text-sm text-white/90 max-w-[150px] truncate" title={devolucion.pedido}>
+          <span className="text-sm text-white/90 max-w-[150px] truncate">
             {devolucion.pedido}
           </span>
+          <Copy className="w-3 h-3 text-white/40 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
       </td>
 
@@ -167,6 +229,17 @@ const FilaDevolucion: React.FC<{
           <span className="text-xs text-white/60 hidden lg:inline">
             {devolucionesMercadoLibreService.obtenerTextoNotaCredito(devolucion.notaCreditoEmitida)}
           </span>
+        </div>
+      </td>
+
+      {/* Trasladado (Checkbox simple) */}
+      <td className="px-3 py-3 border-r border-white/10">
+        <div className="flex items-center justify-center">
+          <CheckboxTrasladado
+            valor={devolucion.trasladado}
+            onCambio={handleActualizarTrasladado}
+            deshabilitado={!puedeEditar}
+          />
         </div>
       </td>
 
@@ -221,6 +294,7 @@ const FilaDevolucion: React.FC<{
 export const DevolucionesMercadoLibreTabla: React.FC<DevolucionesMercadoLibreTablaProps> = ({
   devoluciones,
   onActualizarNotaCredito,
+  onActualizarTrasladado,
   onEliminar,
   onVerDetalle,
   onEditar,
@@ -318,6 +392,9 @@ export const DevolucionesMercadoLibreTabla: React.FC<DevolucionesMercadoLibreTab
               <th className="px-3 py-3 text-center text-sm font-medium text-[#B695BF] border-r border-white/10">
                 🧾 Nota de Crédito
               </th>
+              <th className="px-3 py-3 text-center text-sm font-medium text-[#FFD700] border-r border-white/10">
+                📦 Trasladado
+              </th>
               <th className="px-3 py-3 text-center text-sm font-medium text-white/80">
                 ⚙️ Acciones
               </th>
@@ -331,6 +408,7 @@ export const DevolucionesMercadoLibreTabla: React.FC<DevolucionesMercadoLibreTab
                 key={devolucion.id}
                 devolucion={devolucion}
                 onActualizarNotaCredito={onActualizarNotaCredito}
+                onActualizarTrasladado={onActualizarTrasladado}
                 onEliminar={onEliminar}
                 onVerDetalle={onVerDetalle}
                 onEditar={onEditar}

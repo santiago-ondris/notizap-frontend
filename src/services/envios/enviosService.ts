@@ -12,7 +12,7 @@ import {
 
 /**
  * Servicio para manejar todas las operaciones relacionadas con envíos
- * VERSIÓN CON BATCH SAVE - Sin auto-save
+ * VERSIÓN CORREGIDA - Solo envía campos modificados
  */
 class EnviosService {
   private readonly BASE_URL = '/api/v1/envios';
@@ -57,36 +57,44 @@ class EnviosService {
   }
 
   /**
-   * NUEVO: Guarda múltiples envíos en una sola operación (BATCH SAVE)
+   * CORREGIDO: Guarda múltiples envíos aplicando solo los cambios específicos
    */
   async guardarEnviosLote(cambios: Map<string, CambioEnvio>): Promise<ResultadoLoteDto> {
     try {
-      // Agrupar cambios por fecha y construir DTOs completos
-      const enviosPorFecha = new Map<string, CreateEnvioDiarioDto>();
+      // Agrupar cambios por fecha
+      const cambiosPorFecha = new Map<string, CambioEnvio[]>();
       
       for (const cambio of cambios.values()) {
         const fechaKey = cambio.fecha;
         
-        if (!enviosPorFecha.has(fechaKey)) {
-          // Crear DTO base con todos los campos en 0
-          enviosPorFecha.set(fechaKey, {
-            fecha: cambio.fecha,
-            oca: 0,
-            andreani: 0,
-            retirosSucursal: 0,
-            roberto: 0,
-            tino: 0,
-            caddy: 0,
-            mercadoLibre: 0
-          });
+        if (!cambiosPorFecha.has(fechaKey)) {
+          cambiosPorFecha.set(fechaKey, []);
         }
         
-        // Aplicar el cambio específico
-        const dto = enviosPorFecha.get(fechaKey)!;
-        dto[cambio.campo] = cambio.valorNuevo ?? 0;
+        cambiosPorFecha.get(fechaKey)!.push(cambio);
       }
 
-      const enviosArray = Array.from(enviosPorFecha.values());
+      // Construir DTOs aplicando solo los cambios específicos
+      const enviosArray: CreateEnvioDiarioDto[] = [];
+      
+      for (const [fechaKey, cambiosFecha] of cambiosPorFecha.entries()) {
+        // ✅ NUEVA LÓGICA: Solo incluir campos que realmente cambiaron
+        const dto: Partial<CreateEnvioDiarioDto> = {
+          fecha: fechaKey
+        };
+
+        // Aplicar solo los cambios específicos para esta fecha
+        for (const cambio of cambiosFecha) {
+          // Solo agregar el campo si el valor nuevo no es null
+          if (cambio.valorNuevo !== null) {
+            (dto as any)[cambio.campo] = cambio.valorNuevo;
+          }
+        }
+
+        // ✅ El backend recibirá solo los campos modificados + fecha
+        // AutoMapper en el backend mantendrá los campos no especificados
+        enviosArray.push(dto as CreateEnvioDiarioDto);
+      }
       
       const request: GuardarEnviosLoteDto = {
         envios: enviosArray
@@ -110,21 +118,25 @@ class EnviosService {
 
   /**
    * FALLBACK: Guarda un envío individual (para cuando falla el lote)
+   * TAMBIÉN CORREGIDO: Solo incluye campos con valores
    */
-  async guardarEnvioIndividual(envio: CreateEnvioDiarioDto): Promise<string> {
+  async guardarEnvioIndividual(envio: Partial<CreateEnvioDiarioDto>): Promise<string> {
     try {
-      const envioCompleto: CreateEnvioDiarioDto = {
-        fecha: envio.fecha,
-        oca: envio.oca ?? 0,
-        andreani: envio.andreani ?? 0,
-        retirosSucursal: envio.retirosSucursal ?? 0,
-        roberto: envio.roberto ?? 0,
-        tino: envio.tino ?? 0,
-        caddy: envio.caddy ?? 0,
-        mercadoLibre: envio.mercadoLibre ?? 0
+      // ✅ Solo incluir campos que tienen valores definidos
+      const envioLimpio: Partial<CreateEnvioDiarioDto> = {
+        fecha: envio.fecha
       };
 
-      const response = await api.post<string>(this.BASE_URL, envioCompleto);
+      // Solo agregar campos que no sean null/undefined
+      if (envio.oca !== undefined && envio.oca !== null) envioLimpio.oca = envio.oca;
+      if (envio.andreani !== undefined && envio.andreani !== null) envioLimpio.andreani = envio.andreani;
+      if (envio.retirosSucursal !== undefined && envio.retirosSucursal !== null) envioLimpio.retirosSucursal = envio.retirosSucursal;
+      if (envio.roberto !== undefined && envio.roberto !== null) envioLimpio.roberto = envio.roberto;
+      if (envio.tino !== undefined && envio.tino !== null) envioLimpio.tino = envio.tino;
+      if (envio.caddy !== undefined && envio.caddy !== null) envioLimpio.caddy = envio.caddy;
+      if (envio.mercadoLibre !== undefined && envio.mercadoLibre !== null) envioLimpio.mercadoLibre = envio.mercadoLibre;
+
+      const response = await api.post<string>(this.BASE_URL, envioLimpio);
       return response.data || 'Registro guardado correctamente';
     } catch (error) {
       console.error('Error al guardar envío individual:', error);
@@ -185,13 +197,13 @@ class EnviosService {
         diasCompletos.push({
           id: 0, // ID temporal para días sin registro
           fecha: `${fechaString}T00:00:00.000Z`,
-          oca: null as any,
-          andreani: null as any,
-          retirosSucursal: null as any,
-          roberto: null as any,
-          tino: null as any,
-          caddy: null as any,
-          mercadoLibre: null as any,
+          oca: null,
+          andreani: null,
+          retirosSucursal: null,
+          roberto: null,
+          tino: null,
+          caddy: null,
+          mercadoLibre: null,
           totalCordobaCapital: 0,
           totalEnvios: 0
         });
@@ -210,7 +222,8 @@ class EnviosService {
       cambios: Array.from(cambios.values()).map(c => ({
         fecha: c.fecha.split('T')[0],
         campo: c.campo,
-        valor: c.valorNuevo
+        valorAnterior: c.valorAnterior,
+        valorNuevo: c.valorNuevo
       }))
     });
   }

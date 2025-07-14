@@ -37,6 +37,7 @@ interface CeldaEditando {
  * Componente de celda editable CON estado local (no auto-save)
  */
 const CeldaEditable: React.FC<{
+  
   valor: number | null;
   valorLocal?: number | null; // Valor modificado localmente
   esEditable: boolean;
@@ -57,7 +58,6 @@ const CeldaEditable: React.FC<{
   onCancelar,
   color
 }) => {
-  // Usar valor local si existe, sino el valor original
   const valorAMostrar = tieneModificacion ? valorLocal : valor;
   
   const [valorTemporal, setValorTemporal] = useState(
@@ -379,7 +379,7 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
                   <button
                     onClick={handleGuardarTodos}
                     disabled={guardandoLote}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#51590E]/20 hover:bg-[#51590E]/30 border border-[#51590E]/30 rounded-lg text-[#51590E] transition-all disabled:opacity-50"
+                    className="flex items-center gap-2 px-4 py-2 bg-[#51590E]/20 hover:bg-[#51590E]/30 border border-[#51590E]/30 rounded-lg text-[#cbdd24] transition-all disabled:opacity-50"
                   >
                     {guardandoLote ? (
                       <Loader2 className="w-4 h-4 animate-spin" />

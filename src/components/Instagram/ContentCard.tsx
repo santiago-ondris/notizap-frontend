@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { 
   Heart, 
   MessageCircle, 
@@ -32,6 +32,9 @@ export const ContentCard: React.FC<ContentCardProps> = ({
   const isPost = contentType === 'posts';
   const isStory = contentType === 'stories';
   const isReel = contentType === 'reels';
+  
+  // Solo necesitamos imageLoading para stories
+  const [imageLoading, setImageLoading] = useState(true);
 
   const getContentText = () => {
     if (isPost) return (content as InstagramPost).content;
@@ -46,15 +49,9 @@ export const ContentCard: React.FC<ContentCardProps> = ({
   };
 
   const contentText = getContentText();
-  const truncatedText = contentText && contentText.length > 100 
-    ? contentText.substring(0, 100) + '...' 
+  const truncatedText = contentText && contentText.length > 1000 
+    ? contentText.substring(0, 1000) + '...' 
     : contentText;
-
-  const getImageUrl = () => {
-    if (isStory) return (content as InstagramStory).thumbnailUrl;
-    if (isPost) return (content as InstagramPost).imageUrl;
-    return (content as InstagramReel).imageUrl;
-  };
 
   const getContentUrl = () => {
     if (isStory) return (content as InstagramStory).permalink;
@@ -83,28 +80,38 @@ export const ContentCard: React.FC<ContentCardProps> = ({
           </div>
         </div>
 
-        {/* Image */}
-        <div className="relative mb-4 group">
-          <img
-            src={getImageUrl()}
-            alt="Contenido de Instagram"
-            className="w-full h-48 object-cover rounded-xl border border-white/10"
-            loading="lazy"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = '/api/placeholder/400/300';
-            }}
-          />
-          
-          {isReel && (
-            <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-xs flex items-center gap-1.5 border border-white/20">
-              <Play className="h-3 w-3 text-[#D94854]" />
-              <span>Reel</span>
-            </div>
-          )}
+        {/* IMAGEN - Solo para stories */}
+        {isStory && (
+          <div className="relative mb-4 group">
+            {/* Skeleton loader mientras carga */}
+            {imageLoading && (
+              <div className="w-full h-48 bg-white/5 animate-pulse rounded-xl border border-white/10 flex items-center justify-center">
+                <div className="text-white/40 text-sm">Cargando imagen...</div>
+              </div>
+            )}
 
-          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"></div>
-        </div>
+            {/* LA IMAGEN REAL - solo para stories */}
+            <img
+              src={(content as InstagramStory).thumbnailUrl}
+              alt="Story de Instagram"
+              className={`w-full h-48 object-cover rounded-xl border border-white/10 transition-opacity duration-300 ${
+                imageLoading ? 'opacity-0 absolute' : 'opacity-100'
+              }`}
+              loading="lazy"
+              onLoad={() => setImageLoading(false)}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                setImageLoading(false);
+                target.src = '/api/placeholder/400/300';
+              }}
+            />
+
+            {/* Overlay hover */}
+            {!imageLoading && (
+              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"></div>
+            )}
+          </div>
+        )}
 
         {/* Content Text */}
         {truncatedText && (
@@ -211,11 +218,10 @@ export const ContentCard: React.FC<ContentCardProps> = ({
         </div>
 
         {/* Action Button */}
-        <div className="flex justify-end pt-2 border-t border-white/10">
+        <div className="flex justify-center pt-2 border-t border-white/10">
           <button
             onClick={() => window.open(getContentUrl(), '_blank')}
             className="flex items-center gap-2 px-4 py-2 bg-[#22c55e]/10 hover:bg-[#22c55e]/20 border border-[#22c55e]/20 hover:border-[#22c55e]/30 text-[#22c55e] rounded-lg text-sm font-medium transition-all duration-200"
-
           >
             <ExternalLink className="h-3 w-3" />
             Ver en Instagram

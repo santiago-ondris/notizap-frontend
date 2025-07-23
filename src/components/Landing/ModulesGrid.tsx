@@ -1,15 +1,11 @@
 import { ModuleCard } from "./ModuleCard";
 import {
   ShoppingCart,
-  Instagram,
   Mail,
   DollarSign,
-  Package,
   Repeat,
   Send,
-  Megaphone,
   BarChart3,
-  Receipt,
   User,
   Grid3X3,
   Lock,
@@ -30,32 +26,24 @@ const modules = [
     title: "Mailing",
     description: "Campañas y métricas de Mailchimp",
     icon: Mail,
-    color: "#51590E",
+    color: "#B695BF",
     to: "/mailing",
     roles: ["viewer", "admin", "superadmin"]
   },
   {
     title: "Clientes",
-    description: "Analisis de clientes de Montella",
+    description: "Analisis y datos de clientes de Montella",
     icon: User,
-    color: "#B695BF",
+    color: "#F23D5E",
     to: "/clientes",
     roles: ["viewer", "admin", "superadmin"]
   },
   {
     title: "MercadoLibre",
-    description: "Estadísticas y reportes manuales",
+    description: "Estadísticas y reportes manuales de facturacion mensual",
     icon: DollarSign,
-    color: "#F23D5E",
+    color: "#B695BF",
     to: "/mercadolibre",
-    roles: ["viewer", "admin", "superadmin"]
-  },
-  {
-    title: "Gastos",
-    description: "Control y registro de gastos mensuales",
-    icon: Package,
-    color: "#51590E",
-    to: "/gastos",
     roles: ["viewer", "admin", "superadmin"]
   },
   {
@@ -75,16 +63,8 @@ const modules = [
     roles: ["admin", "superadmin"]
   },
   {
-    title: "Publicidad",
-    description: "Métricas y campañas publicitarias",
-    icon: Megaphone,
-    color: "#51590E",
-    to: "/publicidad",
-    roles: ["viewer", "admin", "superadmin"]
-  },
-  {
     title: "Vendedoras",
-    description: "Rendimiento por sucursal",
+    description: "Rendimiento por sucursal y datos por vendedora",
     icon: Fish,
     color: "#B695BF",
     to: "/vendedoras",
@@ -92,27 +72,12 @@ const modules = [
   },
   {
     title: "Ventas",
-    description: "Ventas mensuales online",
+    description: "Ventas mensuales online y comision",
     icon: ShoppingCart,
     color: "#F23D5E",
     to: "/ventastienda",
     roles: ["viewer", "admin", "superadmin"]
   },
-  {
-    title: "Acuerdos",
-    description: "Clientes de acuerdos comerciales",
-    icon: Receipt,
-    color: "#51590E",
-    roles: ["viewer", "admin", "superadmin"]
-  },
-  {
-    title: "Instagram",
-    description: "Reels, posteos, historias y seguidores",
-    icon: Instagram,
-    color: "#B695BF",
-    to: "/instagram",
-    roles: ["viewer", "admin", "superadmin"]
-  }
 ];
 
 export const ModulesGrid: React.FC = () => {
@@ -190,7 +155,7 @@ export const ModulesGrid: React.FC = () => {
       </div>
 
       {/* Modules grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {filteredModules.map((module, index) => (
           <div
             key={module.title}

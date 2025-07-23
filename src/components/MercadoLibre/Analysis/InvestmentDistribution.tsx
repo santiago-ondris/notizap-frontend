@@ -205,39 +205,6 @@ export default function InvestmentDistribution({ data, loading = false }: Invest
               </div>
             ))}
           </div>
-
-          {/* Insights */}
-          <div className="mt-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4">
-            <h4 className="font-medium text-white mb-2 flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-[#FFD700]" />
-              💡 Insights de Inversión
-            </h4>
-            <div className="space-y-2 text-sm text-white/70">
-              {data.length > 0 && (
-                <>
-                  <p>
-                    • <strong className="text-white">Tipo dominante:</strong> {getTypeLabel(data[0].tipo)} ({data[0].porcentaje.toFixed(1)}%)
-                  </p>
-                  {data.length > 1 && (
-                    <p>
-                      • <strong className="text-white">Diversificación:</strong> {
-                        data.length === 1 ? 'Concentrada en un tipo' :
-                        data.length === 2 ? 'Distribuida en 2 tipos' :
-                        `Diversificada en ${data.length} tipos`
-                      }
-                    </p>
-                  )}
-                  <p>
-                    • <strong className="text-white">Recomendación:</strong> {
-                      data[0].porcentaje > 70 ? 'Considerar diversificar' :
-                      data[0].porcentaje > 50 ? 'Distribución balanceada' :
-                      'Excelente diversificación'
-                    }
-                  </p>
-                </>
-              )}
-            </div>
-          </div>
         </div>
       </div>
 

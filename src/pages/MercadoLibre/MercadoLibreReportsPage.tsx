@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAllAds, getExcelAnalysisHistory } from "@/services/mercadolibre/mercadolibreService";
-import TopProductosTable from "@/components/MercadoLibre/TopProductosTable";
+import { getAllAds } from "@/services/mercadolibre/mercadolibreService";
 import AdsReportsTable from "@/components/MercadoLibre/AdsReportsTable";
 import ReportsTable from "@/components/MercadoLibre/ReportsTable";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,7 +8,6 @@ import {
   BarChart3, 
   FileText, 
   TrendingUp, 
-  Palette, 
   Settings, 
   ArrowRight, 
   Loader2,
@@ -17,13 +15,11 @@ import {
 
 export default function MercadoLibreReportsPage() {
   const [, setAdsReports] = useState([]);
-  const [excelTop, setExcelTop] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       getAllAds().then(r => setAdsReports(r.data)),
-      getExcelAnalysisHistory().then(r => setExcelTop(r.data))
     ]).finally(() => setLoading(false));
   }, []);
 
@@ -124,24 +120,6 @@ export default function MercadoLibreReportsPage() {
             </div>
           </div>
           <AdsReportsTable />
-        </section>
-
-        {/* Sección de Top Productos */}
-        <section className="mb-8">
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 mb-6">
-            <div className="flex items-center gap-3">
-              <div className="bg-[#B695BF]/20 p-2 rounded-lg">
-                <Palette className="w-5 h-5 text-[#B695BF]" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-white">🎨 Top Productos por Color</h2>
-                <p className="text-white/60 text-sm">
-                  Análisis procesado desde archivos Excel con ranking de productos más vendidos
-                </p>
-              </div>
-            </div>
-          </div>
-          <TopProductosTable data={excelTop} />
         </section>
 
       </div>

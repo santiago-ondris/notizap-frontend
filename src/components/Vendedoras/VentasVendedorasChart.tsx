@@ -312,7 +312,7 @@ export const VentasVendedorasChart: React.FC<Props> = ({
               }
             }}
           />
-          <div className="text-center mt-3">
+          <div className="text-center mb-5">
             <span className="text-white/70 font-medium text-lg">
               <span className="text-white font-bold">Total vendido:</span>{" "}
               {estadisticasHelpers.formatearMoneda(totalMonto)}

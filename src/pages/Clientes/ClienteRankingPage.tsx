@@ -1,4 +1,3 @@
-// ClienteRankingPage.tsx - Versión mejorada con filtros
 import { useState } from "react";
 import ClienteRankingTable from "@/components/Clientes/ClienteRankingTable";
 import ClienteFilters from "@/components/Clientes/ClienteFilters";

@@ -1,5 +1,4 @@
 import { Route } from "react-router-dom";
-
 import { UsersPage }                 from "@/pages/Login/UsersPage";
 import AnalisisRotacionPage      from "@/pages/Analisis/AnalisisRotacionPage";
 import VentasPage                from "@/pages/Analisis/VentasPage";
@@ -12,26 +11,15 @@ import ClientesPage              from "@/pages/Clientes/ClientesPage";
 import ClienteDetallePage        from "@/pages/Clientes/ClienteDetallePage";
 import ClientesRankingPage       from "@/pages/Clientes/ClienteRankingPage";
 import ClientesImportPage        from "@/pages/Clientes/ClientesImportPage";
-import { GastosPage }           from "@/pages/Gastos/GastosPage";
-import { GastosListPage }            from "@/pages/Gastos/GastosListPage";
-import { GastosAnalysisPage }       from "@/pages/Gastos/GastosAnalysisPage";
 import EnviosPage                from "@/pages/Envios/EnviosPage";
 import CambiosPage               from "@/pages/Cambios/CambiosPage";
 import DevolucionesPage from "@/pages/Cambios/DevolucionesPage";
 import MercadoLibreAnalysisPage from "@/pages/MercadoLibre/MercadoLibreAnalysisPage";
 import DevolucionesMercadoLibrePage from "@/pages/Cambios/DevolucionesMercadoLibrePage";
-import DashboardPage from "@/pages/Publicidad/DashboardPage";
-import PublicidadPage from "@/pages/Publicidad/PublicidadPage";
-import SyncPage from "@/pages/Publicidad/SyncPage";
-import CrearReportePage from "@/pages/Publicidad/CrearReportePage";
-import ReportesPage from "@/pages/Publicidad/ReportesPage";
-import CampaignsPage from "@/pages/Publicidad/CampaignsPage";
-import CampaignEditPage from "@/pages/Publicidad/CampaignEditPage";
 import { VentasVendedorasPage } from "@/pages/Vendedoras/VentasVendedorasPage";
 import LocalesStatsPage from "@/pages/Vendedoras/LocalesStatsPage";
 import VentasOnlinePage from "@/pages/Ventas/VentasOnlinePage";
 import ComisionOnlinePage from "@/pages/Ventas/ComisionOnlinePage";
-import InstagramDashboardPage from "@/pages/Instagram/InstagramDashboardPage";
 
 export const ProtectedRoutes = (
   <>
@@ -47,15 +35,6 @@ export const ProtectedRoutes = (
       <Route index                   element={<VentasOnlinePage />} />
       <Route path="comisiones"            element={<ComisionOnlinePage />} />
     </Route>
-    <Route path="publicidad">
-      <Route index                   element={<PublicidadPage />} />
-      <Route path="dashboard"           element={<DashboardPage />} />
-      <Route path="sync"          element={<SyncPage />} />
-      <Route path="reportes/nuevo"   element={<CrearReportePage />} />
-      <Route path="reportes"   element={<ReportesPage />} />
-      <Route path="campanas"   element={<CampaignsPage />} />
-      <Route path="campanas/editar/:id"   element={<CampaignEditPage />} />
-    </Route>
     <Route path="mercadolibre">
       <Route index                   element={<MercadoLibreReportsPage />} />
       <Route path="admin"            element={<AdminMercadoLibrePage />} />
@@ -67,13 +46,7 @@ export const ProtectedRoutes = (
       <Route path="ranking"          element={<ClientesRankingPage />} />
       <Route path=":id"              element={<ClienteDetallePage />} />
     </Route>
-    <Route path="gastos">
-      <Route index                   element={<GastosPage />} />
-      <Route path="lista"            element={<GastosListPage />} />
-      <Route path="analisis"         element={<GastosAnalysisPage />} />
-    </Route>
     <Route path="envios"            element={<EnviosPage />} />
-    <Route path="instagram"            element={<InstagramDashboardPage />} />
     <Route path="cambios">
       <Route index                   element={<CambiosPage />} />
       <Route path="devoluciones"            element={<DevolucionesPage />} />

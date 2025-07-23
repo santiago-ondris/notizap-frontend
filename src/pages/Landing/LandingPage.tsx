@@ -12,8 +12,10 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="relative">
+      
       {/* Background layers */}
       <div className="absolute inset-0 overflow-hidden">
+        
         {/* Animated gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#212026] via-[#1a1d22] to-[#2a1f2b]" />
         
@@ -50,7 +52,7 @@ const LandingPage: React.FC = () => {
         />
         
         {/* Separator with gradient line */}
-        <div className="relative py-12">
+        <div className="relative py-1">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           </div>

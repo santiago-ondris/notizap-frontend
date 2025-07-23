@@ -13,7 +13,6 @@ import ROIChart from "@/components/MercadoLibre/Analysis/ROIChart";
 import InvestmentDistribution from "@/components/MercadoLibre/Analysis/InvestmentDistribution";
 import { 
   BarChart3, 
-  TrendingUp, 
   Settings, 
   ArrowRight, 
   Loader2,
@@ -32,9 +31,9 @@ import type {
 export default function MercadoLibreAnalysisPage() {
   const [reports, setReports] = useState<MercadoLibreManualReport[]>([]);
   const [adsReports, setAdsReports] = useState<ReadAdDto[]>([]);
-  const [excelData, setExcelData] = useState<ExcelTopProductoDto[]>([]);
+  const [, setExcelData] = useState<ExcelTopProductoDto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [lastUpdated, setLastUpdated] = useState<string>("");
+  const [, setLastUpdated] = useState<string>("");
 
   // Estados para análisis
   const [metrics, setMetrics] = useState<AnalysisMetrics | null>(null);
@@ -222,74 +221,6 @@ export default function MercadoLibreAnalysisPage() {
           <InvestmentDistribution data={investmentData} loading={false} />
         </div>
 
-        {/* Información del dashboard */}
-        <div className="mb-8">
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <TrendingUp className="w-5 h-5 text-[#51590E]" />
-              <h3 className="font-semibold text-white">💡 Insights del Dashboard</h3>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
-                <h4 className="font-medium text-white mb-2">📈 Evolución Temporal</h4>
-                <p className="text-white/70">
-                  Análisis comparativo de ventas vs inversión publicitaria con cálculo automático de ROI mensual
-                </p>
-              </div>
-              
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
-                <h4 className="font-medium text-white mb-2">🎯 ROI por Campaña</h4>
-                <p className="text-white/70">
-                  Segmentación de retorno de inversión por Product Ads, Brand Ads y Display Ads
-                </p>
-              </div>
-              
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
-                <h4 className="font-medium text-white mb-2">📊 Métricas Clave</h4>
-                <p className="text-white/70">
-                  Facturación total, inversión, ticket promedio y análisis de crecimiento mensual
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer con metadata */}
-        <div className="mt-12">
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-sm">
-              <div className="flex flex-wrap items-center gap-4">
-                <span className="text-white/60">
-                  📅 Última actualización: <span className="text-white font-medium">{lastUpdated}</span>
-                </span>
-                <span className="text-white/60">
-                  📊 Reportes analizados: <span className="text-white font-medium">
-                    {reports.length} ventas + {adsReports.length} campañas
-                  </span>
-                </span>
-                {selectedYear && (
-                  <span className="text-white/60">
-                    🗓️ Filtrado por: <span className="text-[#B695BF] font-medium">{selectedYear}</span>
-                  </span>
-                )}
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <span className="text-white/60">
-                  💾 Datos Excel: <span className="text-white font-medium">{excelData.length} productos</span>
-                </span>
-                <Link
-                  to="/mercadolibre"
-                  className="flex items-center gap-2 text-[#B695BF] hover:text-white transition-colors"
-                >
-                  Ver reportes detallados
-                  <ArrowRight className="w-3 h-3" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

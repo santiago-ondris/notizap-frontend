@@ -2,13 +2,11 @@ import { useState } from "react";
 import ReporteManualForm from "@/components/MercadoLibre/ReporteManualForm";
 import AdsReportForm from "@/components/MercadoLibre/AdsReportForm";
 import DisplayAdsForm from "@/components/MercadoLibre/DisplayAdsForm";
-import ExcelProcessor from "@/components/MercadoLibre/ExcelProcessor";
 import { Link } from "react-router";
 import { 
   FileText, 
   Target, 
   Monitor, 
-  FileSpreadsheet, 
   BarChart3, 
   ArrowRight,
   Shield
@@ -16,7 +14,7 @@ import {
 import React from "react";
 
 export default function AdminMercadoLibrePage() {
-  const [modo, setModo] = useState<"reportes" | "ads" | "display" | "excel">("reportes");
+  const [modo, setModo] = useState<"reportes" | "ads" | "display" >("reportes");
 
   const modos = [
     {
@@ -40,13 +38,6 @@ export default function AdminMercadoLibrePage() {
       description: "Administrar anuncios display",
       emoji: "📺"
     },
-    {
-      key: "excel",
-      label: "Procesar Excel",
-      icon: FileSpreadsheet,
-      description: "Analizar archivos de productos",
-      emoji: "📊"
-    }
   ];
 
   const getModoActual = () => modos.find(m => m.key === modo);
@@ -87,7 +78,7 @@ export default function AdminMercadoLibrePage() {
         {/* Navegación por pestañas */}
         <div className="mb-8">
           <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
               {modos.map((modoItem) => {
                 const IconComponent = modoItem.icon;
                 const isActive = modo === modoItem.key;
@@ -172,7 +163,6 @@ export default function AdminMercadoLibrePage() {
           {modo === "reportes" && <ReporteManualForm />}
           {modo === "ads" && <AdsReportForm />}
           {modo === "display" && <DisplayAdsForm />}
-          {modo === "excel" && <ExcelProcessor />}
         </div>
       </div>
     </div>

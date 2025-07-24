@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, Users, DollarSign, Calendar, Award, Clock } from 'lucide-react';
+import { TrendingUp, Users, DollarSign, Calendar, Award, Clock, ShoppingCart } from 'lucide-react';
 import type { VentaVendedoraStats } from '@/types/vendedoras/ventaVendedoraTypes';
 import { estadisticasHelpers } from '@/utils/vendedoras/estadisticasHelpers';
 import { turnoHelpers } from '@/utils/vendedoras/turnoHelpers';
@@ -48,18 +48,26 @@ export const VentasVendedorasStats: React.FC<Props> = ({ stats, loading = false 
     {
       titulo: 'Monto Total',
       valor: estadisticasHelpers.formatearMonedaCompacta(stats.montoTotal),
-      subtitulo: estadisticasHelpers.formatearMoneda(stats.montoTotal),
+      subtitulo: estadisticasHelpers.formatearMonedaCompleta(stats.montoTotal),
       icono: DollarSign,
       color: 'bg-green-500/20 text-green-400',
       emoji: '💰'
     },
     {
-      titulo: 'Promedio por Día',
-      valor: estadisticasHelpers.formatearMonedaCompacta(promedios.ventaPorDia),
+      titulo: 'Promedio Monto por Día',
+      valor: estadisticasHelpers.formatearMonedaCompleta(promedios.ventaPorDia),
       subtitulo: 'sin domingos',
       icono: TrendingUp,
       color: 'bg-orange-500/20 text-orange-400',
       emoji: '📈'
+    },
+    {
+      titulo: 'Promedio Ventas Netas por Día',
+      valor: estadisticasHelpers.formatearNumero(Math.round(promedios.ventasNetasPorDia)),
+      subtitulo: 'transacciones diarias',
+      icono: ShoppingCart,
+      color: 'bg-cyan-500/20 text-cyan-400',
+      emoji: '🛒'
     },
     {
       titulo: 'Días con Ventas',
@@ -109,6 +117,7 @@ export const VentasVendedorasStats: React.FC<Props> = ({ stats, loading = false 
           loading={loading}
         />
       )}
+      
       {/* Cards principales */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsCards.map((card, index) => (
@@ -133,26 +142,26 @@ export const VentasVendedorasStats: React.FC<Props> = ({ stats, loading = false 
       </div>
 
       {/* Análisis de turnos detallado */}
-      {datosMañana && datosTarde && (
+      {stats.ventasPorTurno && stats.ventasPorTurno.length > 0 && (
         <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
-              <Clock className="w-5 h-5 text-purple-400" />
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center">
+              <Clock className="w-6 h-6 text-indigo-400" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-white">⏰ Análisis por Turnos</h3>
-              <p className="text-sm text-white/60">Comparación de rendimiento</p>
+              <h3 className="text-xl font-bold text-white">Análisis por Turnos</h3>
+              <p className="text-sm text-white/60">Comparación de rendimiento entre turnos</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-6">
             {/* Turno Mañana */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <span className="text-lg">🌅</span>
                 <h4 className="font-medium text-white">Turno Mañana</h4>
-                <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">
-                  8:00 - 14:30
+                <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">
+                  07:00 - 15:00
                 </span>
               </div>
               

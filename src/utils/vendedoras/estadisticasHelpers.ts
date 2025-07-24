@@ -11,6 +11,16 @@ export const estadisticasHelpers = {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
       currency: 'ARS',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(monto);
+  },
+
+  // Formateo de moneda sin decimales para números grandes
+  formatearMonedaCompleta(monto: number): string {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(monto);
@@ -23,7 +33,7 @@ export const estadisticasHelpers = {
     if (monto >= 1000) {
       return `$${(monto / 1000).toFixed(1)}K`;
     }
-    return this.formatearMoneda(monto);
+    return this.formatearMonedaCompleta(monto);
   },
 
   // Formateo de números
@@ -68,7 +78,9 @@ export const estadisticasHelpers = {
       ventaPorVendedora: numVendedoras > 0 ? 
         montoTotal / numVendedoras : 0,
       eficienciaDiaria: diasConVentas > 0 ? 
-        (montoTotal / diasConVentas) / (numVendedoras || 1) : 0
+        (montoTotal / diasConVentas) / (numVendedoras || 1) : 0,
+      // Nueva función para promedio de ventas netas por día
+      ventasNetasPorDia: diasConVentas > 0 ? stats.totalVentas / diasConVentas : 0
     };
   },
 

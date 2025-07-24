@@ -88,66 +88,58 @@ export const VentasSucursalSelector: React.FC<VentasSucursalSelectorProps> = ({
       </div>
 
       {/* Grid de sucursales */}
-      <div 
-        className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto pr-2" 
-        style={{ scrollbarWidth: "thin" }}
-        onWheel={(e) => {
-          e.stopPropagation();
-          const container = e.currentTarget;
-          container.scrollTop += e.deltaY;
-        }}
-      >
-        {sucursalesDisponibles.map((sucursal) => {
-          const isSelected = sucursalesSeleccionadas.includes(sucursal.sucursal);
-          const ventasFinales = sucursal.serie[sucursal.serie.length - 1] || 0;
-          
-          return (
-            <button
-              key={sucursal.sucursal}
-              onClick={() => handleToggleSucursal(sucursal.sucursal)}
-              className={`
-                flex items-center justify-between p-3 rounded-lg transition-all border-2
-                ${isSelected
-                  ? 'bg-[#B695BF]/20 border-[#B695BF] text-white'
-                  : 'bg-white/5 border-white/20 hover:border-white/40 text-white/80 hover:text-white hover:bg-white/10'
-                }
-              `}
-            >
-              <div className="flex items-center gap-3">
-                {/* Check indicator */}
-                <div className={`
-                  w-4 h-4 rounded-full border-2 flex items-center justify-center
-                  ${isSelected ? 'border-[#B695BF] bg-[#B695BF]' : 'border-white/40 bg-white/10'}
-                `}>
-                  {isSelected && <Check className="w-2 h-2 text-white" />}
-                </div>
-                
-                {/* Color indicator */}
-                <div 
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: sucursal.color }}
-                />
-                
-                {/* Sucursal name */}
-                <span className="font-medium">🏢 {sucursal.sucursal}</span>
+      <div className="grid grid-cols-1 gap-2">
+      {sucursalesDisponibles.map((sucursal) => {
+        const isSelected = sucursalesSeleccionadas.includes(sucursal.sucursal);
+        const ventasFinales = sucursal.serie[sucursal.serie.length - 1] || 0;
+        
+        return (
+          <button
+            key={sucursal.sucursal}
+            onClick={() => handleToggleSucursal(sucursal.sucursal)}
+            className={`
+              flex items-center justify-between p-3 rounded-lg transition-all border-2
+              ${isSelected
+                ? 'bg-[#B695BF]/20 border-[#B695BF] text-white'
+                : 'bg-white/5 border-white/20 hover:border-white/40 text-white/80 hover:text-white hover:bg-white/10'
+              }
+            `}
+          >
+            <div className="flex items-center gap-3">
+              {/* Check indicator */}
+              <div className={`
+                w-4 h-4 rounded-full border-2 flex items-center justify-center
+                ${isSelected ? 'border-[#B695BF] bg-[#B695BF]' : 'border-white/40 bg-white/10'}
+              `}>
+                {isSelected && <Check className="w-2 h-2 text-white" />}
               </div>
+              
+              {/* Color indicator */}
+              <div 
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: sucursal.color }}
+              />
+              
+              {/* Sucursal name */}
+              <span className="font-medium">🏢 {sucursal.sucursal}</span>
+            </div>
 
-              {/* Ventas totales de la sucursal */}
-              <div className="text-right">
-                <div className={`text-sm font-semibold ${isSelected ? 'text-[#B695BF]' : 'text-white/60'}`}>
-                  {tipoVista === 'cantidad' 
-                    ? ventasFinales.toLocaleString()
-                    : `$${ventasFinales.toLocaleString()}`
-                  }
-                </div>
-                <div className="text-xs text-white/50">
-                  {tipoVista === 'cantidad' ? 'unidades' : 'facturado'}
-                </div>
+            {/* Ventas totales de la sucursal */}
+            <div className="text-right">
+              <div className={`text-sm font-semibold ${isSelected ? 'text-[#B695BF]' : 'text-white/60'}`}>
+                {tipoVista === 'cantidad' 
+                  ? ventasFinales.toLocaleString()
+                  : `$${ventasFinales.toLocaleString()}`
+                }
               </div>
-            </button>
-          );
-        })}
-      </div>
+              <div className="text-xs text-white/50">
+                {tipoVista === 'cantidad' ? 'unidades' : 'facturado'}
+              </div>
+            </div>
+          </button>
+        );
+      })}
+    </div>
 
       {/* Resumen de selección */}
       <div className="bg-white/5 rounded-lg p-3 border border-white/10">

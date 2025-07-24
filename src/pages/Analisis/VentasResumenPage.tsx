@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Upload, RotateCcw, Building2, TrendingUp } from "lucide-react";
+import { Upload, RotateCcw, TrendingUp } from "lucide-react";
 import { VentasResumenChart } from "@/components/Analisis/ventas/VentasResumenChart";
 import { VentasDiariasChart } from "@/components/Analisis/ventas/VentasDiariasChart";
 import { VentasSucursalSelector } from "@/components/Analisis/ventas/VentasSucursalSelector";
@@ -311,56 +311,6 @@ const VentasResumenPage: React.FC = () => {
                   </>
                 );
               })()}
-            </div>
-
-            {/* Sucursales List */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6">
-              <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-[#B695BF]" />
-                Detalle por Sucursal
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {(tipoVista === 'cantidad' ? data.cantidad?.sucursales || [] : data.facturacion?.sucursales || []).map((sucursal: any, index: number) => {
-                  const ventasFinales = sucursal.serie?.[sucursal.serie.length - 1] || 0;
-                  const ventasIniciales = sucursal.serie?.[0] || 0;
-                  const crecimiento = ventasIniciales > 0 
-                    ? ((ventasFinales - ventasIniciales) / ventasIniciales * 100)
-                    : 0;
-                  
-                  return (
-                    <div key={`${sucursal.sucursal}-${tipoVista}-${index}`} className="bg-white/5 rounded-xl p-4 border border-white/10">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div 
-                          className="w-4 h-4 rounded-full"
-                          style={{ backgroundColor: sucursal.color }}
-                        />
-                        <span className="text-white font-medium">
-                          {sucursal.sucursal === "GLOBAL" ? "🌍 Global" : `🏢 ${sucursal.sucursal}`}
-                        </span>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-white/60">Total:</span>
-                          <span className="text-white font-medium">
-                            {tipoVista === 'cantidad' 
-                              ? ventasFinales.toLocaleString() 
-                              : `$${ventasFinales.toLocaleString()}`
-                            }
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-white/60">Crecimiento:</span>
-                          <span className={`font-medium ${crecimiento >= 0 ? 'text-[#51590E]' : 'text-[#D94854]'}`}>
-                            {crecimiento >= 0 ? '+' : ''}{crecimiento.toFixed(1)}%
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
             </div>
           </div>
         )}

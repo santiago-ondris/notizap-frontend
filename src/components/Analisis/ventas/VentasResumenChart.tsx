@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
-import { TrendingUp, Building2 } from "lucide-react";
+import { TrendingUp, Eye, EyeOff } from "lucide-react";
 
 interface SucursalData {
   sucursal: string;
@@ -21,6 +21,9 @@ export const VentasResumenChart: React.FC<VentasResumenChartProps> = ({
   sucursalesSeleccionadas,
   tipoVista
 }) => {
+  // Estado para controlar qué líneas están visibles
+  const [lineasVisibles, setLineasVisibles] = useState<Record<string, boolean>>({});
+
   // Filtrar sucursales: quitar "Sin Sucursal" y mostrar solo las seleccionadas + GLOBAL
   const sucursalesFiltradas = sucursales.filter(s => {
     if (s.sucursal === "GLOBAL") return true; // Siempre mostrar GLOBAL
@@ -28,6 +31,28 @@ export const VentasResumenChart: React.FC<VentasResumenChartProps> = ({
     return sucursalesSeleccionadas.includes(s.sucursal); // Solo las seleccionadas
   });
   
+  // Inicializar estado de visibilidad si no existe
+  React.useEffect(() => {
+    const nuevasLineasVisibles: Record<string, boolean> = {};
+    sucursalesFiltradas.forEach(sucursal => {
+      if (!(sucursal.sucursal in lineasVisibles)) {
+        nuevasLineasVisibles[sucursal.sucursal] = true; // Por defecto todas visibles
+      }
+    });
+    
+    if (Object.keys(nuevasLineasVisibles).length > 0) {
+      setLineasVisibles(prev => ({ ...prev, ...nuevasLineasVisibles }));
+    }
+  }, [sucursalesFiltradas]);
+
+  // Función para toggle de visibilidad
+  const toggleVisibilidad = (sucursal: string) => {
+    setLineasVisibles(prev => ({
+      ...prev,
+      [sucursal]: !prev[sucursal]
+    }));
+  };
+
   // Preparar datos para el gráfico
   const data = fechas.map((fecha, i) => {
     const point: any = { fecha: fecha.slice(8) + '-' + fecha.slice(5, 7) }; // DD-MM
@@ -74,7 +99,7 @@ export const VentasResumenChart: React.FC<VentasResumenChartProps> = ({
     return null;
   };
 
-  // Leyenda personalizada
+  // Leyenda personalizada interactiva
   const CustomLegend = ({ payload }: any) => {
     if (!payload) return null;
     
@@ -86,20 +111,46 @@ export const VentasResumenChart: React.FC<VentasResumenChartProps> = ({
             if (b.dataKey === "GLOBAL") return 1;
             return 0;
           })
-          .map((entry: any, index: number) => (
-            <div key={index} className="flex items-center gap-2">
-              <div
-                className="w-4 h-1 rounded-full"
-                style={{ backgroundColor: entry.color }}
-              />
-              <span className="text-white/80 text-sm font-medium">
-                {entry.dataKey === "GLOBAL" 
-                  ? `🌍 ${tipoVista === 'cantidad' ? 'Ventas' : 'Facturación'} Globales` 
-                  : `🏢 ${entry.dataKey}`
-                }
-              </span>
-            </div>
-          ))}
+          .map((entry: any, index: number) => {
+            const isVisible = lineasVisibles[entry.dataKey] !== false;
+            const isGlobal = entry.dataKey === "GLOBAL";
+            
+            return (
+              <button
+                key={index}
+                onClick={() => toggleVisibilidad(entry.dataKey)}
+                className={`
+                  flex items-center gap-2 px-3 py-2 rounded-lg transition-all
+                  ${isVisible 
+                    ? 'bg-white/10 hover:bg-white/15' 
+                    : 'bg-white/5 hover:bg-white/10 opacity-50'
+                  }
+                  ${isGlobal ? 'border border-[#51590E]/30' : 'border border-white/10'}
+                `}
+              >
+                {/* Indicador de visibilidad */}
+                {isVisible ? (
+                  <Eye className="w-3 h-3 text-white/60" />
+                ) : (
+                  <EyeOff className="w-3 h-3 text-white/40" />
+                )}
+                
+                {/* Indicador de color de línea */}
+                <div
+                  className={`w-4 h-1 rounded-full ${!isVisible ? 'opacity-50' : ''}`}
+                  style={{ backgroundColor: entry.color }}
+                />
+                
+                {/* Texto de la leyenda */}
+                <span className={`text-sm font-medium ${isVisible ? 'text-white/80' : 'text-white/50'}`}>
+                  {entry.dataKey === "GLOBAL" 
+                    ? `🌍 ${tipoVista === 'cantidad' ? 'Ventas' : 'Facturación'} Globales` 
+                    : `🏢 ${entry.dataKey}`
+                  }
+                </span>
+              </button>
+            );
+          })}
       </div>
     );
   };
@@ -172,55 +223,33 @@ export const VentasResumenChart: React.FC<VentasResumenChartProps> = ({
               <Tooltip content={<CustomTooltip />} />
               <Legend content={<CustomLegend />} />
 
-              {/* Líneas de ventas por sucursal */}
-              {sucursalesFiltradas.map((sucursal) => (
+              {/* Líneas de ventas por sucursal - Solo las visibles */}
+              {sucursalesFiltradas
+                .filter(sucursal => lineasVisibles[sucursal.sucursal] !== false)
+                .map((sucursal) => (
                 <Line
                   key={sucursal.sucursal}
                   type="monotone"
                   dataKey={sucursal.sucursal}
                   name={sucursal.sucursal}
                   stroke={sucursal.color}
-                  strokeWidth={sucursal.sucursal === "GLOBAL" ? 5 : 4}
-                  dot={false}
-                  activeDot={{
+                  strokeWidth={sucursal.sucursal === "GLOBAL" ? 4 : 3}
+                  dot={{
                     stroke: sucursal.color,
-                    strokeWidth: 3,
-                    r: 10,
-                    fill: "#212026",
+                    strokeWidth: 2,
+                    r: sucursal.sucursal === "GLOBAL" ? 5 : 4,
+                    fill: sucursal.color
+                  }}
+                  activeDot={{
+                    r: sucursal.sucursal === "GLOBAL" ? 7 : 6,
+                    stroke: sucursal.color,
+                    strokeWidth: 2,
+                    fill: "white"
                   }}
                 />
               ))}
             </LineChart>
           </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Footer con ranking de sucursales */}
-      <div className="px-6 py-4 bg-white/5 border-t border-white/10">
-        <div className="flex items-center justify-between text-sm flex-wrap gap-4">
-          <div className="flex items-center gap-4">
-            <div className="text-white/60">
-              📅 Período: {fechas[0]?.slice(8) + '-' + fechas[0]?.slice(5, 7)} - {fechas[fechas.length - 1]?.slice(8) + '-' + fechas[fechas.length - 1]?.slice(5, 7)}
-            </div>
-            <div className="text-white/60">
-              🏆 Top sucursal: {
-                sucursalesSinGlobal
-                  .sort((a, b) => (b.serie[b.serie.length - 1] || 0) - (a.serie[a.serie.length - 1] || 0))[0]?.sucursal || "N/A"
-              }
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <div className="text-white/60">
-              📊 {fechas.length} días de datos
-            </div>
-            <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-[#B695BF]" />
-              <span className="text-white/60">
-                💡 Las líneas muestran {tipoVista === 'cantidad' ? 'unidades' : 'facturación'} acumuladas • GLOBAL incluye todas las sucursales
-              </span>
-            </div>
-          </div>
         </div>
       </div>
     </div>

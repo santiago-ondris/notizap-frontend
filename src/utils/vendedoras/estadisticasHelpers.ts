@@ -79,8 +79,8 @@ export const estadisticasHelpers = {
         montoTotal / numVendedoras : 0,
       eficienciaDiaria: diasConVentas > 0 ? 
         (montoTotal / diasConVentas) / (numVendedoras || 1) : 0,
-      // Nueva función para promedio de ventas netas por día
-      ventasNetasPorDia: diasConVentas > 0 ? stats.totalVentas / diasConVentas : 0
+      // Nueva función para promedio de cantidad neta vendida por día
+      ventasNetasPorDia: diasConVentas > 0 ? stats.cantidadTotal / diasConVentas : 0
     };
   },
 

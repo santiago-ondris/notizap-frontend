@@ -467,16 +467,6 @@ export const VentasVendedorasFilters: React.FC<Props> = ({
         formData.vendedorNombre || formData.turno || formData.montoMinimo || 
         formData.montoMaximo) && (
         <div className="mt-4 flex flex-wrap gap-2">
-          {formData.fechaInicio && (
-            <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-lg text-xs">
-              📅 Desde {dateHelpers.formatearFechaCompleta(formData.fechaInicio.toISOString())}
-            </span>
-          )}
-          {formData.fechaFin && (
-            <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-lg text-xs">
-              📅 Hasta {dateHelpers.formatearFechaCompleta(formData.fechaFin.toISOString())}
-            </span>
-          )}
           {formData.sucursalNombre && (
             <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-lg text-xs">
               🏢 {formData.sucursalNombre}

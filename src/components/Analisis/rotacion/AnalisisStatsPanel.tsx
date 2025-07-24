@@ -1,4 +1,3 @@
-// components/Analisis/AnalisisStatsPanel.tsx
 import React from "react";
 import { TrendingUp, Package, ShoppingCart, BarChart3 } from "lucide-react";
 

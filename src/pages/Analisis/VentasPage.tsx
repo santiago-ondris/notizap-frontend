@@ -1,4 +1,3 @@
-// VentasPage.tsx - Página principal rediseñada
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { useArchivosAnalisis } from "@/store/useArchivosAnalisis";

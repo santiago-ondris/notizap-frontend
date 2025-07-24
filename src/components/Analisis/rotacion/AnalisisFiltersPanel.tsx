@@ -1,4 +1,3 @@
-// components/Analisis/AnalisisFiltersPanel.tsx
 import React from "react";
 import { Filter, Search, MapPin, Tag } from "lucide-react";
 

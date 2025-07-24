@@ -3,14 +3,14 @@
  * Corresponde al CreateDevolucionDto del backend
  */
 export interface CreateDevolucionDto {
-    fecha: string;                    // ISO date string (YYYY-MM-DD)
-    pedido: string;                   // Número de pedido
-    celular: string;                  // Teléfono del cliente
-    modelo: string;                   // Modelo devuelto
-    motivo: string;                   // Motivo de la devolución
-    monto?: number;                   // Monto de la devolución (opcional)
-    pagoEnvio?: number;               // Pago de envío (opcional)
-    responsable: string;              // Persona responsable
+    fecha: string;                   
+    pedido: string;                 
+    celular: string;                  
+    modelo: string;              
+    motivo: string;                  
+    monto?: number;                   
+    pagoEnvio?: number;               
+    responsable: string;             
   }
   
   /**
@@ -18,10 +18,10 @@ export interface CreateDevolucionDto {
    * Corresponde al DevolucionDto del backend
    */
   export interface DevolucionDto extends CreateDevolucionDto {
-    id: number;                       // ID único
-    llegoAlDeposito: boolean;         // ¿Llegó al depósito?
-    dineroDevuelto: boolean;          // ¿Dinero devuelto al cliente?
-    notaCreditoEmitida: boolean;      // ¿Nota de crédito emitida?
+    id: number;                      
+    llegoAlDeposito: boolean;         
+    dineroDevuelto: boolean;         
+    notaCreditoEmitida: boolean;    
   }
   
   /**
@@ -42,12 +42,12 @@ export interface CreateDevolucionDto {
    */
   export type EstadoDevolucionFiltro = 
     | 'todos'
-    | 'pendiente_llegada'      // No llegó al depósito
-    | 'llegado_sin_procesar'   // Llegó pero sin procesar dinero/nota
-    | 'dinero_devuelto'        // Dinero devuelto pero sin nota
-    | 'nota_emitida'           // Nota emitida pero sin dinero
-    | 'completado'             // Todo procesado
-    | 'sin_llegar';            // Aún no llegó
+    | 'pendiente_llegada'     
+    | 'llegado_sin_procesar'   
+    | 'dinero_devuelto'        
+    | 'nota_emitida'           
+    | 'completado'             
+    | 'sin_llegar';            
   
   /**
    * Filtros para devoluciones

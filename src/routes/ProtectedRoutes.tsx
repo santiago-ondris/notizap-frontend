@@ -1,6 +1,5 @@
 import { Route } from "react-router-dom";
 import { UsersPage }                 from "@/pages/Login/UsersPage";
-import AnalisisRotacionPage      from "@/pages/Analisis/AnalisisRotacionPage";
 import VentasPage                from "@/pages/Analisis/VentasPage";
 import GraficoEvolucionPage      from "@/pages/Analisis/GraficoEvolucionPage";
 import VentasResumenPage         from "@/pages/Analisis/VentasResumenPage";
@@ -25,10 +24,9 @@ export const ProtectedRoutes = (
   <>
     <Route path="usuarios"          element={<UsersPage />} />
     <Route path="analisis">
-      <Route index                   element={<AnalisisRotacionPage />} />
+      <Route index                   element={<VentasResumenPage />} />
       <Route path="ventas"           element={<VentasPage />} />
       <Route path="grafico"          element={<GraficoEvolucionPage />} />
-      <Route path="ventas/resumen"   element={<VentasResumenPage />} />
     </Route>
     <Route path="mailing"           element={<MailingPage />} />
     <Route path="ventastienda">

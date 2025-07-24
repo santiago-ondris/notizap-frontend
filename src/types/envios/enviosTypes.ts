@@ -1,12 +1,7 @@
-/**
- * Representa un registro de envío diario
- * Incluye todos los tipos de envío y totales calculados
- */
 export interface EnvioDiario {
   id: number;
   fecha: string; // ISO string format "2025-06-11T19:07:27.112Z"
   
-  // ✅ CAMPOS NULLABLE - null significa "no disponible ese día"
   oca: number | null;
   andreani: number | null;
   retirosSucursal: number | null;
@@ -15,8 +10,8 @@ export interface EnvioDiario {
   caddy: number | null;
   mercadoLibre: number | null;
   
-  totalCordobaCapital: number; // roberto + tino + caddy (calculado, siempre number)
-  totalEnvios: number; // suma de todos los envíos (calculado, siempre number)
+  totalCordobaCapital: number; 
+  totalEnvios: number;
 }
 
 /**

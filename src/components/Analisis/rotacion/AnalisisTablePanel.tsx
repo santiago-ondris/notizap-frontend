@@ -1,4 +1,3 @@
-// components/Analisis/AnalisisTablePanel.tsx
 import React from "react";
 import { Package, ShoppingCart, TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";

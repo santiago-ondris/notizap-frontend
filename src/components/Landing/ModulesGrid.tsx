@@ -68,7 +68,7 @@ const modules = [
     icon: Fish,
     color: "#B695BF",
     to: "/vendedoras",
-    roles: ["superadmin"]
+    roles: ["admin", "superadmin"]
   },
   {
     title: "Ventas",

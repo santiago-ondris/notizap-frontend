@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Loader2, BarChart3, Calendar } from "lucide-react";
+import { Loader2, Calendar } from "lucide-react";
 import { VentasProductSelector } from "./VentasProductSelector";
 import { VentasChartMulti } from "./VentasChartMulti";
 import { VentasColorSelector } from "./VentasColorSelector";
@@ -22,7 +22,7 @@ export const VentasResultados: React.FC<VentasResultadosProps> = ({
   const productoObj = data.productos.find((p: any) => p.nombre === producto);
 
   const sucursales = productoObj?.sucursales.map((s: any) => s.sucursal) ?? [];
-  const [sucursal, setSucursal] = useState<string>("GLOBAL");
+  const [sucursal, setSucursal] = useState<string>();
   const sucursalObj = productoObj?.sucursales.find((s: any) => s.sucursal === sucursal);
 
   const variantesPorColor = sucursalObj?.variantesPorColor ?? [];
@@ -53,15 +53,6 @@ export const VentasResultados: React.FC<VentasResultadosProps> = ({
       })),
   ];
 
-  // Calcular estadísticas
-  const totalVentas = sucursalObj?.serie?.reduce((acc: number, val: number) => acc + val, 0) ?? 0;
-  const ventasPromedio = sucursalObj?.serie?.length > 0 
-    ? totalVentas / sucursalObj.serie.length 
-    : 0;
-  const ventaMaxima = sucursalObj?.serie?.length > 0 
-    ? Math.max(...sucursalObj.serie) 
-    : 0;
-
   return (
     <div className="space-y-6">
       {/* Loading overlay */}
@@ -76,48 +67,6 @@ export const VentasResultados: React.FC<VentasResultadosProps> = ({
         </div>
       )}
 
-      {/* Header de resultados */}
-      <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-white flex items-center gap-3 mb-2">
-              <BarChart3 className="w-7 h-7 text-[#D94854]" />
-              Resultados del Análisis
-            </h2>
-            <p className="text-white/60">
-              Evolución de ventas con comparativas por color y fechas de compra
-            </p>
-          </div>
-          
-          <div className="flex gap-6 text-sm">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-[#D94854]">
-                {productos.length}
-              </div>
-              <div className="text-white/60 text-xs">
-                Productos
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-[#B695BF]">
-                {sucursales.length}
-              </div>
-              <div className="text-white/60 text-xs">
-                Sucursales
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-[#51590E]">
-                {variantesPorColor.length}
-              </div>
-              <div className="text-white/60 text-xs">
-                Colores
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Selectores en grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Selector de productos y sucursales */}
@@ -128,7 +77,7 @@ export const VentasResultados: React.FC<VentasResultadosProps> = ({
             productoSeleccionado={producto}
             setProducto={setProducto}
             sucursales={sucursales}
-            sucursalSeleccionada={sucursal}
+            sucursalSeleccionada={sucursal ?? ""}
             setSucursal={setSucursal}
           />
         </div>
@@ -143,33 +92,6 @@ export const VentasResultados: React.FC<VentasResultadosProps> = ({
           />
         </div>
       </div>
-
-      {/* Estadísticas rápidas */}
-      {sucursalObj && (
-        <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6">
-          <h3 className="text-white font-semibold mb-4">Estadísticas de ventas</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-center">
-              <div className="text-2xl font-bold text-[#D94854] mb-1">
-                {totalVentas.toLocaleString()}
-              </div>
-              <div className="text-white/60 text-sm">Total Vendido</div>
-            </div>
-            <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-center">
-              <div className="text-2xl font-bold text-[#B695BF] mb-1">
-                {Math.round(ventasPromedio).toLocaleString()}
-              </div>
-              <div className="text-white/60 text-sm">Promedio Diario</div>
-            </div>
-            <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-center">
-              <div className="text-2xl font-bold text-[#51590E] mb-1">
-                {ventaMaxima.toLocaleString()}
-              </div>
-              <div className="text-white/60 text-sm">Venta Máxima</div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Gráfico */}
       <VentasChartMulti

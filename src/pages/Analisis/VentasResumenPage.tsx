@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router";
-import { Upload, ArrowLeft, RotateCcw, Building2, TrendingUp } from "lucide-react";
+import { Upload, RotateCcw, Building2, TrendingUp } from "lucide-react";
 import { VentasResumenChart } from "@/components/Analisis/ventas/VentasResumenChart";
 import { VentasDiariasChart } from "@/components/Analisis/ventas/VentasDiariasChart";
 import { VentasSucursalSelector } from "@/components/Analisis/ventas/VentasSucursalSelector";
 import { fetchEvolucionVentasResumen } from "@/services/analisis/analisisService";
+import { AnalisisNavigation } from "@/components/Analisis/AnalisisNavigation";
 
 // Función para filtrar días sin ventas (para acumulado)
 const filtrarDiasSinVentasAcumulado = (fechas: string[], sucursales: any[]) => {
@@ -64,10 +64,9 @@ const filtrarDiasSinVentasDiario = (fechas: string[], sucursales: any[]) => {
 const VentasResumenPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<any>(null);
-  const [archivo, setArchivo] = useState<File | null>(null);
+  const [, setArchivo] = useState<File | null>(null);
   const [sucursalesSeleccionadas, setSucursalesSeleccionadas] = useState<string[]>([]);
   const [tipoVista, setTipoVista] = useState<'cantidad' | 'facturacion'>('cantidad');
-  const navigate = useNavigate();
 
   const handleUpload = async (file: File) => {
     setLoading(true);
@@ -123,54 +122,24 @@ const VentasResumenPage: React.FC = () => {
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
-        <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6 mb-6">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-4">
+        <div className="flex justify-center">
+          <AnalisisNavigation />
+        </div>
+
+        {/* Nuevo analisis */}
+        <div className="flex justify-center mb-4">
+          {data && (
+            <div className="flex gap-3">
               <button
-                onClick={() => navigate("/analisis/ventas")}
-                className="p-2 bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-all group"
+                onClick={handleReset}
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-all flex items-center gap-2 text-white/80 hover:text-white"
               >
-                <ArrowLeft className="w-5 h-5 text-white/80 group-hover:text-white" />
+                <RotateCcw className="w-4 h-4" />
+                Nuevo análisis
               </button>
-              
-              <div>
-                <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-                  <Building2 className="w-8 h-8 text-[#D94854]" />
-                  Resumen de Ventas por Sucursal
-                </h1>
-                <p className="text-white/60 mt-1">
-                  📊 Vista agregada de ventas por sucursal y global para análisis ejecutivo
-                </p>
-              </div>
-            </div>
-
-            {data && (
-              <div className="flex gap-3">
-                <button
-                  onClick={handleReset}
-                  className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-all flex items-center gap-2 text-white/80 hover:text-white"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  Nuevo análisis
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Info del archivo cargado */}
-          {archivo && (
-            <div className="mt-4 pt-4 border-t border-white/10">
-              <div className="flex items-center gap-3 text-sm text-white/60">
-                <div className="w-2 h-2 bg-[#51590E] rounded-full"></div>
-                <span>Archivo: {archivo.name}</span>
-                <span>•</span>
-                <span>Tamaño: {(archivo.size / 1024 / 1024).toFixed(2)} MB</span>
-                <span>•</span>
-                <span>Cargado: {new Date().toLocaleString("es-AR")}</span>
-              </div>
             </div>
           )}
-        </div>
+        </div>  
 
         {/* Content */}
         {!data ? (

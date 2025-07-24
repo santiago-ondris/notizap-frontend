@@ -67,15 +67,7 @@ export const VentasColorSelector: React.FC<VentasColorSelectorProps> = ({
       </div>
 
       {/* Grid de colores */}
-      <div 
-        className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto pr-2" 
-        style={{ scrollbarWidth: "thin" }}
-        onWheel={(e) => {
-          e.stopPropagation();
-          const container = e.currentTarget;
-          container.scrollTop += e.deltaY;
-        }}
-      >
+      <div className="flex flex-wrap gap-2">
         {variantesPorColor.map((variante) => {
           const isSelected = coloresSeleccionados.includes(variante.color);
           
@@ -102,14 +94,6 @@ export const VentasColorSelector: React.FC<VentasColorSelectorProps> = ({
                 
                 {/* Color name */}
                 <span className="font-medium">{variante.color}</span>
-              </div>
-
-              {/* Ventas totales del color */}
-              <div className="text-right">
-                <div className={`text-sm font-semibold ${isSelected ? 'text-[#51590E]' : 'text-white/60'}`}>
-                  {variante.serie ? variante.serie.reduce((acc: number, val: number) => acc + val, 0).toLocaleString() : '0'}
-                </div>
-                <div className="text-xs text-white/50">ventas</div>
               </div>
             </button>
           );

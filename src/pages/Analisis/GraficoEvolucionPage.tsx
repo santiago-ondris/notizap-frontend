@@ -1,14 +1,13 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useArchivosAnalisis } from "@/store/useArchivosAnalisis";
 import { fetchEvolucionStock } from "@/services/analisis/analisisService";
 import type { EvolucionStockRequest } from "@/types/analisis/analisis";
 
 // Componentes modularizados
-import { EvolucionPageHeader } from "@/components/Analisis/grafico/EvolucionPageHeader";
 import { EvolucionUploadForm } from "@/components/Analisis/grafico/EvolucionUploadForm";
 import { EvolucionChartsSection } from "@/components/Analisis/grafico/EvolucionChartsSection";
+import { AnalisisNavigation } from "@/components/Analisis/AnalisisNavigation";
 
 const GraficoEvolucionPage: React.FC = () => {
   // Estados y hooks
@@ -21,7 +20,6 @@ const GraficoEvolucionPage: React.FC = () => {
   } = useArchivosAnalisis();
 
   const [loading, setLoading] = React.useState(false);
-  const navigate = useNavigate();
 
   // Handler para el submit del formulario
   const handleSubmit = async (data: EvolucionStockRequest) => {
@@ -71,7 +69,9 @@ const GraficoEvolucionPage: React.FC = () => {
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
-        <EvolucionPageHeader navigate={navigate} />
+        <div className="flex justify-center">
+          <AnalisisNavigation />
+        </div>
 
         {/* Upload Form */}
         <EvolucionUploadForm 

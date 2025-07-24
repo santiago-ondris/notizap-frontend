@@ -1,22 +1,20 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router";
 import { useArchivosAnalisis } from "@/store/useArchivosAnalisis";
 import { fetchEvolucionVentas, fetchFechasCompra } from "@/services/analisis/analisisService";
 
 // Componentes modularizados
-import { VentasPageHeader } from "@/components/Analisis/ventas/VentasPageHeader";
 import { VentasUploadForm } from "@/components/Analisis/ventas/VentasUploadForm";
 import { VentasResultados } from "@/components/Analisis/ventas/VentasResultados";
+import { AnalisisNavigation } from "@/components/Analisis/AnalisisNavigation";
+import { RotateCcw } from "lucide-react";
 
 const VentasPage: React.FC = () => {
   // Estados y hooks
   const {
-    archivos,
     setArchivo,
     resultadoVentas,
     setResultadoVentas,
     limpiarResultadoVentas,
-    fechaVentas,
   } = useArchivosAnalisis();
 
   const [loading, setLoading] = useState(false);
@@ -26,8 +24,6 @@ const VentasPage: React.FC = () => {
     cabecera?: File,
     detalles?: File,
   }>({});
-
-  const navigate = useNavigate();
 
   // Handler para el upload de archivos
   const handleUpload = async (
@@ -89,12 +85,6 @@ const VentasPage: React.FC = () => {
     }
   };
 
-  // Información de archivos para mostrar
-  const archivosInfo = {
-    ventas: archivos.archivoVentasEvolucion || null,
-    fecha: fechaVentas || null
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#212026] via-[#1a1d22] to-[#2a1f2b]">
       {/* Background pattern */}
@@ -111,11 +101,23 @@ const VentasPage: React.FC = () => {
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
-        <VentasPageHeader 
-          navigate={navigate}
-          onReset={handleReset}
-          archivosInfo={archivosInfo}
-        />
+
+        <div className="flex justify-center">
+          <AnalisisNavigation />
+        </div>
+
+        {/* Nuevo analisis */}
+        <div className="flex justify-center mb-4">
+          <div className="flex gap-3">
+            <button
+              onClick={handleReset}
+              className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-all flex items-center gap-2 text-white/80 hover:text-white"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Nuevo análisis
+            </button>
+          </div>
+        </div>  
 
         {/* Content */}
         {!resultadoVentas ? (

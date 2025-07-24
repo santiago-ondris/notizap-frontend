@@ -19,12 +19,14 @@ import { VentasVendedorasPage } from "@/pages/Vendedoras/VentasVendedorasPage";
 import LocalesStatsPage from "@/pages/Vendedoras/LocalesStatsPage";
 import VentasOnlinePage from "@/pages/Ventas/VentasOnlinePage";
 import ComisionOnlinePage from "@/pages/Ventas/ComisionOnlinePage";
+import AnalisisLandingPage from "@/pages/Analisis/AnalisisLandingPage";
 
 export const ProtectedRoutes = (
   <>
     <Route path="usuarios"          element={<UsersPage />} />
     <Route path="analisis">
-      <Route index                   element={<VentasResumenPage />} />
+      <Route index                   element={<AnalisisLandingPage />} />
+      <Route path="ventas-resumen"   element={<VentasResumenPage />} />
       <Route path="ventas"           element={<VentasPage />} />
       <Route path="grafico"          element={<GraficoEvolucionPage />} />
     </Route>

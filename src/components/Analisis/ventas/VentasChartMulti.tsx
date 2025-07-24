@@ -1,4 +1,3 @@
-// components/Analisis/ventas/VentasChartMulti.tsx
 import React from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { TrendingUp, Palette } from "lucide-react";
@@ -61,10 +60,6 @@ export const VentasChartMulti: React.FC<VentasChartMultiProps> = ({
     return point;
   });
 
-  // Calcular estadísticas
-  const serieGlobal = series.find(s => s.nombre === "GLOBAL");
-  const ventasGlobales = serieGlobal?.serie?.reduce((a, b) => a + b, 0) ?? 0;
-
   // Tooltip personalizado
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -108,22 +103,7 @@ export const VentasChartMulti: React.FC<VentasChartMultiProps> = ({
             </p>
           </div>
           
-          <div className="flex items-center gap-6 text-sm">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-[#51590E]">
-                {ventasGlobales.toLocaleString()}
-              </div>
-              <div className="text-white/60 text-xs">Ventas Globales</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-[#D94854]">
-                {series.length - 1}
-              </div>
-              <div className="text-white/60 text-xs">
-                {modoComparacion === "colores" ? "Colores" : "Sucursales"}
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
 

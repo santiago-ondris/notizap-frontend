@@ -14,19 +14,18 @@ import {
 import { useState } from "react";
 import { Button } from "../ui/button";
 import AgregarTelefonoModal from "./AgregarTelefonoModal";
-import PlantillaWhatsAppModal from "../WhatsApp/PlantillaWhatsAppModal";
 import { actualizarTelefonoCliente } from "@/services/cliente/clienteService";
+import { abrirWhatsAppConMensaje } from "@/services/cliente/plantillaService";
 
 interface Props {
   cliente: ClienteResumenDto;
   children?: React.ReactNode;
   onClienteUpdated?: (clienteActualizado: ClienteResumenDto) => void;
-  onVerDetalles?: () => void; // <- CAMBIO: onCardClick → onVerDetalles
+  onVerDetalles?: () => void;
 }
 
 export default function ClienteCard({ cliente, children, onClienteUpdated, onVerDetalles }: Props) {
   const [showAgregarTelefonoModal, setShowAgregarTelefonoModal] = useState(false);
-  const [showPlantillaWhatsAppModal, setShowPlantillaWhatsAppModal] = useState(false);
   const [clienteLocal, setClienteLocal] = useState(cliente);
 
   const formatCurrency = (amount: number) => {
@@ -72,16 +71,19 @@ export default function ClienteCard({ cliente, children, onClienteUpdated, onVer
   };
 
   const handleWhatsAppClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // evita cualquier propagación
+    e.stopPropagation();
     if (clienteLocal.telefono && clienteLocal.telefono.trim()) {
-      setShowPlantillaWhatsAppModal(true);
+      // Si ya tiene teléfono, abrir WhatsApp directamente con mensaje genérico
+      const mensajeGenerico = `¡Hola ${clienteLocal.nombre}! 👋\n\n¿Cómo estás? Te escribo desde Montella para saludarte.\n\n¡Esperamos verte pronto por nuestras tiendas! 😊`;
+      abrirWhatsAppConMensaje(clienteLocal.telefono, mensajeGenerico);
     } else {
+      // Si no tiene teléfono, mostrar modal para agregarlo
       setShowAgregarTelefonoModal(true);
     }
   };
 
   const handleVerDetalles = (e: React.MouseEvent) => {
-    e.stopPropagation(); // evita cualquier propagación
+    e.stopPropagation();
     onVerDetalles?.();
   };
 
@@ -93,7 +95,6 @@ export default function ClienteCard({ cliente, children, onClienteUpdated, onVer
       if (onClienteUpdated) {
         onClienteUpdated(clienteActualizado);
       }
-      setShowPlantillaWhatsAppModal(true);
       console.log("Teléfono guardado exitosamente");
     } catch (error) {
       console.error("Error al guardar teléfono:", error);
@@ -106,8 +107,6 @@ export default function ClienteCard({ cliente, children, onClienteUpdated, onVer
   return (
     <div
       className="group bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:border-[#B695BF]/30 transition-all duration-300 overflow-hidden w-full min-w-[320px]"
-      // ❌ REMOVIDO: onClick={onCardClick} - Ya no toda la card es clickeable
-      // ❌ REMOVIDO: cursor-pointer - Ya no hay cursor pointer en toda la card
     >
       {/* Header con gradiente */}
       <div className="bg-gradient-to-r from-[#B695BF] to-[#D94854] p-4">
@@ -116,7 +115,6 @@ export default function ClienteCard({ cliente, children, onClienteUpdated, onVer
             <h3 className="font-bold text-white text-lg leading-tight mb-1">
               {clienteLocal.nombre}
             </h3>
-            {/* ✅ NUEVO: Botón específico para ver detalles */}
             <Button
               onClick={handleVerDetalles}
               variant="ghost"
@@ -150,46 +148,56 @@ export default function ClienteCard({ cliente, children, onClienteUpdated, onVer
           <div className="bg-[#51590E]/10 rounded-xl p-3">
             <div className="flex items-center gap-2 mb-1">
               <DollarSign className="text-[#51590E]" size={16} />
-              <span className="text-[#51590E] text-sm font-medium">Gastado</span>
+              <span className="text-[#51590E] text-sm font-medium">Total gastado</span>
             </div>
-            <div className="text-sm font-bold text-[#212026] leading-tight">
+            <div className="text-lg font-bold text-[#212026]">
               {formatCurrency(clienteLocal.montoTotalGastado)}
             </div>
           </div>
         </div>
 
         {/* Fechas */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-3 text-sm">
-            <Calendar className="text-gray-400" size={16} />
-            <span className="text-gray-600">Primera:</span>
-            <span className="font-medium text-[#212026]">
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <div className="flex items-center gap-1 text-gray-600 mb-1">
+              <Calendar size={14} />
+              <span>Primera compra</span>
+            </div>
+            <div className="text-[#212026] font-medium">
               {formatDate(clienteLocal.fechaPrimeraCompra)}
-            </span>
+            </div>
           </div>
-          <div className="flex items-center gap-3 text-sm">
-            <Calendar className="text-gray-400" size={16} />
-            <span className="text-gray-600">Última:</span>
-            <span className="font-medium text-[#212026]">
+          <div>
+            <div className="flex items-center gap-1 text-gray-600 mb-1">
+              <Calendar size={14} />
+              <span>Última compra</span>
+            </div>
+            <div className="text-[#212026] font-medium">
               {formatDate(clienteLocal.fechaUltimaCompra)}
-            </span>
-          </div>
-          
-          {/* Indicador de días sin comprar */}
-          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium ${getEstiloAlerta(diasSinComprar)}`}>
-            {diasSinComprar > 90 && <AlertTriangle size={14} />}
-            <span>No compra hace {diasSinComprar} día{diasSinComprar !== 1 ? 's' : ''}</span>
+            </div>
           </div>
         </div>
 
+        {/* Alerta de inactividad */}
+        {diasSinComprar > 30 && (
+          <div className={`px-3 py-2 rounded-xl border text-sm ${getEstiloAlerta(diasSinComprar)}`}>
+            <div className="flex items-center gap-2">
+              <AlertTriangle size={14} />
+              <span className="font-medium">
+                {diasSinComprar} días sin comprar
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Canales */}
-        <div>
-          <div className="flex items-center gap-2 mb-2">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
             <MapPin className="text-gray-400" size={16} />
             <span className="text-gray-600 text-sm">Canales:</span>
           </div>
           <div className="flex flex-wrap gap-1">
-            {clienteLocal.canales.split(',').map((canal, index) => (
+            {clienteLocal.canales?.split(',').map((canal, index) => (
               <span
                 key={index}
                 className={`px-2 py-1 rounded-full text-xs font-medium ${getChannelColor(canal.trim())}`}
@@ -201,11 +209,11 @@ export default function ClienteCard({ cliente, children, onClienteUpdated, onVer
         </div>
 
         {/* Botones de acción */}
-        <div className="pt-2 border-t border-gray-100 space-y-3">
-          {/* Botón WhatsApp */}
+        <div className="space-y-2 pt-2 border-t border-gray-100">
+          {/* Botón principal de WhatsApp/Teléfono */}
           <Button
             onClick={handleWhatsAppClick}
-            className={`w-full flex items-center gap-2 h-9 text-white ${
+            className={`w-full flex items-center gap-2 h-10 text-white font-medium transition-all duration-200 ${
               clienteLocal.telefono && clienteLocal.telefono.trim()
                 ? 'bg-[#25D366] hover:bg-[#128C7E]'
                 : 'bg-[#B695BF] hover:bg-[#9A7BA8]'
@@ -224,7 +232,7 @@ export default function ClienteCard({ cliente, children, onClienteUpdated, onVer
             )}
           </Button>
 
-          {/* ✅ NUEVO: Botón secundario "Ver detalles completos" */}
+          {/* Botón secundario "Ver detalles completos" */}
           <Button
             onClick={handleVerDetalles}
             variant="outline"
@@ -265,20 +273,12 @@ export default function ClienteCard({ cliente, children, onClienteUpdated, onVer
         )}
       </div>
 
-      {/* ❌ REMOVIDO: Hover effect overlay - Ya no es necesario */}
-
-      {/* Modales */}
+      {/* Solo modal de agregar teléfono */}
       <AgregarTelefonoModal
         isOpen={showAgregarTelefonoModal}
         onClose={() => setShowAgregarTelefonoModal(false)}
         clienteNombre={clienteLocal.nombre}
         onTelefonoGuardado={handleTelefonoGuardado}
-      />
-
-      <PlantillaWhatsAppModal
-        isOpen={showPlantillaWhatsAppModal}
-        onClose={() => setShowPlantillaWhatsAppModal(false)}
-        cliente={clienteLocal}
       />
     </div>
   );

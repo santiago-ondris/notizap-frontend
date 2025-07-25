@@ -1,24 +1,50 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ClienteRankingTable from "@/components/Clientes/ClienteRankingTable";
 import ClienteFilters from "@/components/Clientes/ClienteFilters";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Trophy, Users, Upload, Filter, BarChart3 } from "lucide-react";
+import { Trophy, Users, Upload, Filter, BarChart3, RotateCcw } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
+import { useClienteFiltersStore, useHasActiveClienteFilters } from "@/store/useClienteFiltersStore";
 
 export default function ClientesRankingPage() {
   const navigate = useNavigate();
   const { role } = useAuth();
-  const [filtrosAplicados, setFiltrosAplicados] = useState<any>(null);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
+  
+  // Usar el store de filtros
+  const { 
+    lastAppliedFilters, 
+    clearFilters  } = useClienteFiltersStore();
+  
+  const hasActiveFiltersHook = useHasActiveClienteFilters();
+
+  // Estado local para la interfaz
+  const [filtrosAplicados, setFiltrosAplicados] = useState<any>(null);
+
+  // Sincronizar con el store al montar y cuando cambien los filtros
+  useEffect(() => {
+    if (lastAppliedFilters) {
+      setFiltrosAplicados(lastAppliedFilters);
+    }
+  }, [lastAppliedFilters]);
+
+  // Mostrar filtros automáticamente si hay filtros activos
+  useEffect(() => {
+    if (hasActiveFiltersHook && !mostrarFiltros) {
+      setMostrarFiltros(true);
+    }
+  }, [hasActiveFiltersHook]);
 
   const handleFiltersApplied = (filters: any) => {
     setFiltrosAplicados(filters);
   };
 
   const limpiarFiltros = () => {
+    clearFilters(); // Limpiar desde el store
     setFiltrosAplicados(null);
+    setMostrarFiltros(false);
   };
 
   const contarFiltrosActivos = () => {
@@ -133,6 +159,11 @@ export default function ClientesRankingPage() {
                   {contarFiltrosActivos()} filtro{contarFiltrosActivos() > 1 ? 's' : ''} activo{contarFiltrosActivos() > 1 ? 's' : ''}
                 </Badge>
               )}
+              {hasActiveFiltersHook && (
+                <Badge variant="secondary" className="bg-[#B695BF]/20 text-[#B695BF] border-[#B695BF]/30">
+                  Sesión activa
+                </Badge>
+              )}
             </div>
             <div className="flex items-center gap-2">
               {filtrosAplicados && (
@@ -142,6 +173,7 @@ export default function ClientesRankingPage() {
                   onClick={limpiarFiltros}
                   className="text-white hover:bg-white/20"
                 >
+                  <RotateCcw size={14} className="mr-1" />
                   Limpiar filtros
                 </Button>
               )}

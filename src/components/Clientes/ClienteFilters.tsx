@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
 import ClienteOrdenamiento from "./ClienteOrdenamiento";
-import { Calendar, MapPin, Tag, Store, Filter, X, ChevronDown, Check, Download } from "lucide-react";
+import { Calendar, MapPin, Tag, Store, Filter, X, ChevronDown, Check, Download, RotateCcw } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -20,10 +20,11 @@ import {
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useClienteFiltersStore, useHasActiveClienteFilters } from "@/store/useClienteFiltersStore";
 
 interface Props {
   onResult: (resultado: PagedResult<ClienteResumenDto> | null) => void;
-  onFiltersApplied: (filters: any) => void; // Para comunicar los filtros aplicados
+  onFiltersApplied: (filters: any) => void;
 }
 
 // Tipos para las opciones de filtro
@@ -35,27 +36,38 @@ interface FilterOptions {
 }
 
 export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
-  const [desde, setDesde] = useState("");
-  const [hasta, setHasta] = useState("");
-  const [canalesSeleccionados, setCanalesSeleccionados] = useState<string[]>([]);
-  const [sucursalesSeleccionadas, setSucursalesSeleccionadas] = useState<string[]>([]);
-  const [marcasSeleccionadas, setMarcasSeleccionadas] = useState<string[]>([]);
-  const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState<string[]>([]);
+  // Estado del store de filtros
+  const {
+    filters,
+    setDesde,
+    setHasta,
+    setCanalesSeleccionados,
+    setSucursalesSeleccionadas,
+    setMarcasSeleccionadas,
+    setCategoriasSeleccionadas,
+    setOrdenarPor,
+    setModoExclusivoCanal,
+    setModoExclusivoSucursal,
+    setModoExclusivoMarca,
+    setModoExclusivoCategoria,
+    applyFilters,
+    clearFilters,
+    checkHasActiveFilters,
+    lastAppliedFilters,
+  } = useClienteFiltersStore();
+
+  const hasActiveFilters = useHasActiveClienteFilters();
+
+  // Estados locales para UI
   const [loading, setLoading] = useState(false);
   const [loadingOptions, setLoadingOptions] = useState(true);
   const [exportLoading, setExportLoading] = useState(false);
-  const [ordenarPor, setOrdenarPor] = useState("montoTotal");
 
   // Estados para los popover
   const [openCanales, setOpenCanales] = useState(false);
   const [openSucursales, setOpenSucursales] = useState(false);
   const [openMarcas, setOpenMarcas] = useState(false);
   const [openCategorias, setOpenCategorias] = useState(false);
-
-  const [modoExclusivoCanal, setModoExclusivoCanal] = useState(false);
-  const [modoExclusivoSucursal, setModoExclusivoSucursal] = useState(false);
-  const [modoExclusivoMarca, setModoExclusivoMarca] = useState(false);
-  const [modoExclusivoCategoria, setModoExclusivoCategoria] = useState(false);
 
   // Opciones disponibles
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
@@ -71,9 +83,7 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
       try {
         setLoadingOptions(true);
         
-        // Usar la función híbrida que intenta los endpoints específicos primero
         const options = await getFilterOptionsHybrid();
-        
         setFilterOptions(options);
 
         console.log('Opciones cargadas desde endpoints:', options);
@@ -98,16 +108,51 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
     cargarOpciones();
   }, []);
 
+  // Aplicar filtros automáticamente si hay filtros guardados
+  useEffect(() => {
+    if (lastAppliedFilters && !loading) {
+      // Solo aplicar automáticamente si hay resultados guardados
+      handleAutoApplyFilters();
+    }
+  }, [lastAppliedFilters, loadingOptions]);
+
+  // Actualizar el estado de filtros activos cuando cambian los filtros
+  useEffect(() => {
+    checkHasActiveFilters();
+  }, [filters, checkHasActiveFilters]);
+
+  const handleAutoApplyFilters = async () => {
+    if (!lastAppliedFilters) return;
+    
+    try {
+      setLoading(true);
+      const resultadoPaginado = await filtrarClientes(lastAppliedFilters, 1, 12);
+      
+      onResult(resultadoPaginado);
+      onFiltersApplied(lastAppliedFilters);
+
+      // Toast más sutil para auto-aplicación
+      console.log(`Filtros restaurados: ${resultadoPaginado.totalRecords || resultadoPaginado.items.length} clientes`);
+    } catch (error) {
+      console.error("Error al auto-aplicar filtros:", error);
+      // En caso de error, limpiar los filtros guardados
+      clearFilters();
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      const hasFilters = desde || hasta || 
-        canalesSeleccionados.length > 0 || 
-        sucursalesSeleccionadas.length > 0 || 
-        marcasSeleccionadas.length > 0 || 
-        categoriasSeleccionadas.length > 0;
+      // Verificar si hay filtros
+      const hasFilters = filters.desde || filters.hasta || 
+        filters.canalesSeleccionados.length > 0 || 
+        filters.sucursalesSeleccionadas.length > 0 || 
+        filters.marcasSeleccionadas.length > 0 || 
+        filters.categoriasSeleccionadas.length > 0;
   
       if (!hasFilters) {
         toast.warning("Selecciona al menos un filtro para buscar");
@@ -115,19 +160,8 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
         return;
       }
   
-      const filtrosAplicados = {
-        desde: desde || undefined,
-        hasta: hasta || undefined,
-        canal: canalesSeleccionados.length > 0 ? canalesSeleccionados.join(',') : undefined,
-        sucursal: sucursalesSeleccionadas.length > 0 ? sucursalesSeleccionadas.join(',') : undefined,
-        marca: marcasSeleccionadas.length > 0 ? marcasSeleccionadas.join(',') : undefined,
-        categoria: categoriasSeleccionadas.length > 0 ? categoriasSeleccionadas.join(',') : undefined,
-        modoExclusivoCanal,
-        modoExclusivoSucursal, 
-        modoExclusivoMarca,
-        modoExclusivoCategoria,
-        ordenarPor,
-      };
+      // Aplicar filtros usando el store
+      const filtrosAplicados = applyFilters();
   
       const resultadoPaginado = await filtrarClientes(filtrosAplicados, 1, 12);
       
@@ -155,220 +189,176 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
   };
 
   const handleExport = async () => {
+    if (!hasActiveFilters || !lastAppliedFilters) {
+      toast.warning("Primero aplica algunos filtros para exportar");
+      return;
+    }
+
     setExportLoading(true);
     try {
-      const filtrosParaExport = {
-        desde: desde || undefined,
-        hasta: hasta || undefined,
-        canal: canalesSeleccionados.length > 0 ? canalesSeleccionados.join(',') : undefined,
-        sucursal: sucursalesSeleccionadas.length > 0 ? sucursalesSeleccionadas.join(',') : undefined,
-        marca: marcasSeleccionadas.length > 0 ? marcasSeleccionadas.join(',') : undefined,
-        categoria: categoriasSeleccionadas.length > 0 ? categoriasSeleccionadas.join(',') : undefined,
-        modoExclusivoCanal,
-        modoExclusivoSucursal,
-        modoExclusivoMarca,
-        modoExclusivoCategoria,
-        ordenarPor,
-      };
-  
-      await exportarClientesExcel(filtrosParaExport);
+      await exportarClientesExcel(lastAppliedFilters);
       toast.success("Excel exportado exitosamente");
     } catch (error) {
-      toast.error("Error al exportar Excel");
+      console.error("Error al exportar:", error);
+      toast.error("Error al exportar el archivo Excel");
     } finally {
       setExportLoading(false);
     }
   };
 
-  const handleReset = () => {
-    setDesde("");
-    setHasta("");
-    setCanalesSeleccionados([]);
-    setSucursalesSeleccionadas([]);
-    setMarcasSeleccionadas([]);
-    setCategoriasSeleccionadas([]);
-    setOrdenarPor("montoTotal");
-    setModoExclusivoCanal(false);
-    setModoExclusivoSucursal(false);
-    setModoExclusivoMarca(false);
-    setModoExclusivoCategoria(false);
+  const handleClearFilters = () => {
+    clearFilters();
     onResult(null);
     onFiltersApplied(null);
     toast.info("Filtros limpiados");
   };
 
-  const tieneCategoriasSeleccionadas = categoriasSeleccionadas.length > 0 || marcasSeleccionadas.length > 0;
-
-  const hasActiveFilters = desde || hasta || 
-    canalesSeleccionados.length > 0 || 
-    sucursalesSeleccionadas.length > 0 || 
-    marcasSeleccionadas.length > 0 || 
-    categoriasSeleccionadas.length > 0;
-
-    const MultiSelectFilter = ({ 
-      title, 
-      icon, 
-      selectedValues, 
-      onSelectionChange, 
-      options, 
-      placeholder,
-      open,
-      onOpenChange,
-      color = "#B695BF",
-      modoExclusivo,
-      onModoExclusivoChange
-    }: {
-      title: string;
-      icon: React.ReactNode;
-      selectedValues: string[];
-      onSelectionChange: (values: string[]) => void;
-      options: string[];
-      placeholder: string;
-      open: boolean;
-      onOpenChange: (open: boolean) => void;
-      color?: string;
-      modoExclusivo?: boolean;
-      onModoExclusivoChange?: (exclusivo: boolean) => void;
-    }) => {
-      const toggleSelection = (value: string) => {
-        if (selectedValues.includes(value)) {
-          onSelectionChange(selectedValues.filter(v => v !== value));
-        } else {
-          onSelectionChange([...selectedValues, value]);
-        }
-      };
-    
-      const removeSelection = (value: string) => {
-        onSelectionChange(selectedValues.filter(v => v !== value));
-      };
-    
-      return (
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-            {icon}
-            {title}
-          </label>
-          <Popover open={open} onOpenChange={onOpenChange}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={open}
-                className={cn(
-                  "w-full justify-between h-11 border-gray-200",
-                  `focus:border-[${color}] focus:ring-[${color}]/20`
-                )}
-              >
-                {selectedValues.length === 0 ? (
-                  <span className="text-gray-500">{placeholder}</span>
-                ) : (
-                  <span className="text-sm">
-                    {selectedValues.length} seleccionado{selectedValues.length > 1 ? 's' : ''}
-                    {modoExclusivo && <span className="ml-1 text-xs">(exclusivo)</span>}
-                  </span>
-                )}
-                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-full p-0" align="start">
-              <Command>
-                <CommandInput placeholder={`Buscar ${title.toLowerCase()}...`} />
-                <CommandEmpty>No se encontraron opciones.</CommandEmpty>
-                <CommandGroup className="max-h-64 overflow-auto">
-                  {options.map((option) => (
-                    <CommandItem
-                      key={option}
-                      onSelect={() => toggleSelection(option)}
-                      className="cursor-pointer"
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          selectedValues.includes(option) ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      {option}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
-          
-          {onModoExclusivoChange && (
-            <div className="flex items-center gap-2 mt-2">
-              <input 
-                type="checkbox" 
-                id={`exclusivo-${title}`}
-                checked={modoExclusivo || false}
-                onChange={(e) => onModoExclusivoChange(e.target.checked)}
-                disabled={selectedValues.length === 0}
-                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <label 
-                htmlFor={`exclusivo-${title}`}
-                className={cn(
-                  "text-xs cursor-pointer",
-                  selectedValues.length === 0 ? "text-gray-400" : "text-gray-600"
-                )}
-              >
-                Solo estas opciones (exclusivo)
-              </label>
-            </div>
-          )}
-          
-          {/* Badges de seleccionados */}
-          {selectedValues.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
-              {selectedValues.map((value) => (
-                <Badge 
-                  key={value} 
-                  variant="secondary" 
-                  className={cn(
-                    "text-xs",
-                    modoExclusivo && "ring-2 ring-offset-1"
-                  )}
-                  style={{ 
-                    backgroundColor: `${color}15`, 
-                    color: color,
-                    ...(modoExclusivo && { ringColor: color })
+  // Componente para un filtro multi-select
+  const MultiSelectFilter = ({ 
+    title, 
+    icon, 
+    selectedValues, 
+    onSelectionChange, 
+    options, 
+    placeholder, 
+    open, 
+    onOpenChange, 
+    color,
+    modoExclusivo,
+    onModoExclusivoChange 
+  }: {
+    title: string;
+    icon: React.ReactNode;
+    selectedValues: string[];
+    onSelectionChange: (values: string[]) => void;
+    options: string[];
+    placeholder: string;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    color: string;
+    modoExclusivo: boolean;
+    onModoExclusivoChange: (modo: boolean) => void;
+  }) => (
+    <div className="space-y-2">
+      <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+        {icon}
+        {title}
+      </label>
+      
+      <Popover open={open} onOpenChange={onOpenChange}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-full justify-between h-10 bg-white border-gray-200 hover:bg-gray-50"
+          >
+            <span className="truncate">
+              {selectedValues.length === 0 ? (
+                <span className="text-gray-500">{placeholder}</span>
+              ) : selectedValues.length === 1 ? (
+                selectedValues[0]
+              ) : (
+                `${selectedValues.length} seleccionados`
+              )}
+            </span>
+            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[300px] p-0">
+          <Command>
+            <CommandInput placeholder={`Buscar ${title.toLowerCase()}...`} />
+            <CommandEmpty>No se encontraron opciones.</CommandEmpty>
+            <CommandGroup 
+              className="max-h-64 overflow-auto"
+              onWheel={(e) => {
+                e.stopPropagation();
+                const container = e.currentTarget;
+                const scrollTop = container.scrollTop;
+                const scrollHeight = container.scrollHeight;
+                const height = container.clientHeight;
+                const wheelDelta = e.deltaY;
+                
+                if (
+                  (wheelDelta > 0 && scrollTop + height >= scrollHeight) ||
+                  (wheelDelta < 0 && scrollTop <= 0)
+                ) {
+                  e.preventDefault();
+                }
+              }}
+            >
+              {/* Modo exclusivo toggle */}
+              <div className="px-2 py-1 border-b border-gray-100">
+                <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={modoExclusivo}
+                    onChange={(e) => onModoExclusivoChange(e.target.checked)}
+                    className="rounded text-xs"
+                  />
+                  Modo exclusivo (solo estos valores)
+                </label>
+              </div>
+              
+              {options.map((option) => (
+                <CommandItem
+                  key={option}
+                  onSelect={() => {
+                    const newSelection = selectedValues.includes(option)
+                      ? selectedValues.filter(item => item !== option)
+                      : [...selectedValues, option];
+                    onSelectionChange(newSelection);
                   }}
+                  className="cursor-pointer"
                 >
-                  {value}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      removeSelection(value);
-                    }}
-                    className="ml-1 hover:bg-gray-200 rounded-full w-4 h-4 flex items-center justify-center"
-                  >
-                    <X size={10} />
-                  </button>
-                </Badge>
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      selectedValues.includes(option) ? "opacity-100" : "opacity-0"
+                    )}
+                    style={{ color }}
+                  />
+                  {option}
+                </CommandItem>
               ))}
-            </div>
-          )}
+            </CommandGroup>
+          </Command>
+        </PopoverContent>
+      </Popover>
+
+      {/* Badges para valores seleccionados */}
+      {selectedValues.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {selectedValues.map((value) => (
+            <Badge
+              key={value}
+              variant="secondary"
+              className="text-xs px-2 py-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+            >
+              {value}
+              <X
+                className="ml-1 h-3 w-3 cursor-pointer hover:text-red-600"
+                onClick={() => {
+                  const newSelection = selectedValues.filter(item => item !== value);
+                  onSelectionChange(newSelection);
+                }}
+              />
+            </Badge>
+          ))}
         </div>
-      );
-    };
+      )}
+    </div>
+  );
+
+  const tieneCategoriasSeleccionadas = filters.categoriasSeleccionadas.length > 0;
 
   if (loadingOptions) {
     return (
-      <div className="bg-gradient-to-r from-slate-50 to-gray-50 rounded-2xl p-6 mb-8 border border-gray-200 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="bg-[#B695BF] p-2 rounded-lg">
-            <Filter className="text-white" size={20} />
-          </div>
-          <h2 className="text-lg font-semibold text-gray-800">Cargando filtros...</h2>
-        </div>
-        <div className="animate-pulse space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="h-11 bg-gray-200 rounded"></div>
-            <div className="h-11 bg-gray-200 rounded"></div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="h-11 bg-gray-200 rounded"></div>
-            <div className="h-11 bg-gray-200 rounded"></div>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="flex items-center justify-center py-8">
+          <div className="flex items-center gap-3 text-gray-600">
+            <div className="w-5 h-5 border-2 border-[#D94854] border-t-transparent rounded-full animate-spin"></div>
+            Cargando opciones de filtro...
           </div>
         </div>
       </div>
@@ -376,171 +366,168 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
   }
 
   return (
-    <div className="bg-gradient-to-r from-slate-50 to-gray-50 rounded-2xl p-6 mb-8 border border-gray-200 shadow-sm">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="bg-[#B695BF] p-2 rounded-lg">
-          <Filter className="text-white" size={20} />
+    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Filter className="text-[#D94854]" size={20} />
+          <h3 className="text-lg font-semibold text-gray-900">Filtros de Clientes</h3>
+          {hasActiveFilters && (
+            <Badge variant="secondary" className="bg-[#D94854]/10 text-[#D94854]">
+              Filtros aplicados
+            </Badge>
+          )}
         </div>
-        <h2 className="text-lg font-semibold text-gray-800">Filtros de búsqueda</h2>
+        
         {hasActiveFilters && (
-          <span className="bg-[#D94854] text-white px-2 py-1 rounded-full text-xs font-medium">
-            Filtros activos
-          </span>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleClearFilters}
+            className="text-gray-600 hover:text-red-600 hover:border-red-300"
+          >
+            <RotateCcw size={14} className="mr-1" />
+            Limpiar filtros
+          </Button>
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Fechas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-              <Calendar size={16} className="text-[#B695BF]" />
-              Fecha desde
-            </label>
-            <Input 
-              type="date" 
-              value={desde} 
-              onChange={e => setDesde(e.target.value)}
-              className="h-11 border-gray-200 focus:border-[#B695BF] focus:ring-[#B695BF]/20"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-              <Calendar size={16} className="text-[#B695BF]" />
-              Fecha hasta
-            </label>
-            <Input 
-              type="date" 
-              value={hasta} 
-              onChange={e => setHasta(e.target.value)}
-              className="h-11 border-gray-200 focus:border-[#B695BF] focus:ring-[#B695BF]/20"
-            />
-          </div>
-        </div>
-
-        {/* Multi-selects con modo exclusivo */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <MultiSelectFilter
-            title="Canales de venta"
-            icon={<Tag size={16} className="text-[#D94854]" />}
-            selectedValues={canalesSeleccionados}
-            onSelectionChange={setCanalesSeleccionados}
-            options={filterOptions.canales}
-            placeholder="Seleccionar canales..."
-            open={openCanales}
-            onOpenChange={setOpenCanales}
-            color="#D94854"
-            modoExclusivo={modoExclusivoCanal}
-            onModoExclusivoChange={setModoExclusivoCanal}
-          />
-          
-          <MultiSelectFilter
-            title="Sucursales"
-            icon={<MapPin size={16} className="text-[#D94854]" />}
-            selectedValues={sucursalesSeleccionadas}
-            onSelectionChange={setSucursalesSeleccionadas}
-            options={filterOptions.sucursales}
-            placeholder="Seleccionar sucursales..."
-            open={openSucursales}
-            onOpenChange={setOpenSucursales}
-            color="#D94854"
-            modoExclusivo={modoExclusivoSucursal}
-            onModoExclusivoChange={setModoExclusivoSucursal}
+      {/* Filtros de fecha */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <Calendar size={16} className="text-[#D94854]" />
+            Fecha desde
+          </label>
+          <Input
+            type="date"
+            value={filters.desde}
+            onChange={(e) => setDesde(e.target.value)}
+            className="h-10"
           />
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <MultiSelectFilter
-            title="Marcas"
-            icon={<Store size={16} className="text-[#B695BF]" />}
-            selectedValues={marcasSeleccionadas}
-            onSelectionChange={setMarcasSeleccionadas}
-            options={filterOptions.marcas}
-            placeholder="Seleccionar marcas..."
-            open={openMarcas}
-            onOpenChange={setOpenMarcas}
-            color="#B695BF"
-            modoExclusivo={modoExclusivoMarca}
-            onModoExclusivoChange={setModoExclusivoMarca}
-          />
-          
-          <MultiSelectFilter
-            title="Categorías"
-            icon={<Tag size={16} className="text-[#B695BF]" />}
-            selectedValues={categoriasSeleccionadas}
-            onSelectionChange={setCategoriasSeleccionadas}
-            options={filterOptions.categorias}
-            placeholder="Seleccionar categorías..."
-            open={openCategorias}
-            onOpenChange={setOpenCategorias}
-            color="#B695BF"
-            modoExclusivo={modoExclusivoCategoria}
-            onModoExclusivoChange={setModoExclusivoCategoria}
+        
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <Calendar size={16} className="text-[#D94854]" />
+            Fecha hasta
+          </label>
+          <Input
+            type="date"
+            value={filters.hasta}
+            onChange={(e) => setHasta(e.target.value)}
+            className="h-10"
           />
         </div>
+      </div>
 
-        {/* Ordenamiento */}
-        <div className="pt-4 border-t border-gray-200">
-          <ClienteOrdenamiento
-            ordenarPor={ordenarPor}
-            onOrdenarPorChange={setOrdenarPor}
-            tieneCategoriasSeleccionadas={tieneCategoriasSeleccionadas}
-          />
-        </div>
+      {/* Filtros multi-select */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <MultiSelectFilter
+          title="Canales"
+          icon={<MapPin size={16} className="text-[#B695BF]" />}
+          selectedValues={filters.canalesSeleccionados}
+          onSelectionChange={setCanalesSeleccionados}
+          options={filterOptions.canales}
+          placeholder="Seleccionar canales..."
+          open={openCanales}
+          onOpenChange={setOpenCanales}
+          color="#B695BF"
+          modoExclusivo={filters.modoExclusivoCanal}
+          onModoExclusivoChange={setModoExclusivoCanal}
+        />
+        
+        <MultiSelectFilter
+          title="Sucursales"
+          icon={<Store size={16} className="text-[#B695BF]" />}
+          selectedValues={filters.sucursalesSeleccionadas}
+          onSelectionChange={setSucursalesSeleccionadas}
+          options={filterOptions.sucursales}
+          placeholder="Seleccionar sucursales..."
+          open={openSucursales}
+          onOpenChange={setOpenSucursales}
+          color="#B695BF"
+          modoExclusivo={filters.modoExclusivoSucursal}
+          onModoExclusivoChange={setModoExclusivoSucursal}
+        />
+        
+        <MultiSelectFilter
+          title="Marcas"
+          icon={<Store size={16} className="text-[#B695BF]" />}
+          selectedValues={filters.marcasSeleccionadas}
+          onSelectionChange={setMarcasSeleccionadas}
+          options={filterOptions.marcas}
+          placeholder="Seleccionar marcas..."
+          open={openMarcas}
+          onOpenChange={setOpenMarcas}
+          color="#B695BF"
+          modoExclusivo={filters.modoExclusivoMarca}
+          onModoExclusivoChange={setModoExclusivoMarca}
+        />
+        
+        <MultiSelectFilter
+          title="Categorías"
+          icon={<Tag size={16} className="text-[#B695BF]" />}
+          selectedValues={filters.categoriasSeleccionadas}
+          onSelectionChange={setCategoriasSeleccionadas}
+          options={filterOptions.categorias}
+          placeholder="Seleccionar categorías..."
+          open={openCategorias}
+          onOpenChange={setOpenCategorias}
+          color="#B695BF"
+          modoExclusivo={filters.modoExclusivoCategoria}
+          onModoExclusivoChange={setModoExclusivoCategoria}
+        />
+      </div>
 
-        {/* Botones */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
-          <Button 
-            type="submit" 
-            disabled={loading} 
-            className="bg-gradient-to-r from-[#D94854] to-[#F23D5E] hover:from-[#F23D5E] hover:to-[#D94854] text-white h-11 px-8 font-medium shadow-lg transition-all duration-200"
-          >
-            {loading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Buscando...
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Filter size={16} />
-                Aplicar filtros
-              </div>
-            )}
-          </Button>
+      {/* Ordenamiento */}
+      <div className="pt-4 border-t border-gray-200">
+        <ClienteOrdenamiento
+          ordenarPor={filters.ordenarPor}
+          onOrdenarPorChange={setOrdenarPor}
+          tieneCategoriasSeleccionadas={tieneCategoriasSeleccionadas}
+        />
+      </div>
 
-          <Button 
-            type="button"
-            onClick={handleExport}
-            disabled={exportLoading || !hasActiveFilters}
-            className="bg-[#51590E] hover:bg-[#465005] text-white h-11 px-6 font-medium transition-all duration-200"
-          >
-            {exportLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Exportando...
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Download size={16} />
-                Exportar Excel
-              </div>
-            )}
-          </Button>
-
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={handleReset}
-            className="h-11 px-6 border-gray-300 hover:bg-gray-50 transition-colors duration-200"
-            disabled={!hasActiveFilters}
-          >
+      {/* Botones */}
+      <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
+        <Button 
+          type="submit" 
+          disabled={loading} 
+          className="bg-gradient-to-r from-[#D94854] to-[#F23D5E] hover:from-[#F23D5E] hover:to-[#D94854] text-white h-11 px-8 font-medium shadow-lg transition-all duration-200"
+        >
+          {loading ? (
             <div className="flex items-center gap-2">
-              <X size={16} />
-              Limpiar filtros
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              Buscando...
             </div>
-          </Button>
-        </div>
-      </form>
-    </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Filter size={16} />
+              Aplicar filtros
+            </div>
+          )}
+        </Button>
+
+        <Button 
+          type="button"
+          onClick={handleExport}
+          disabled={exportLoading || !hasActiveFilters}
+          className="bg-[#51590E] hover:bg-[#465005] text-white h-11 px-6 font-medium transition-all duration-200"
+        >
+          {exportLoading ? (
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              Exportando...
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Download size={16} />
+              Exportar Excel
+            </div>
+          )}
+        </Button>
+      </div>
+    </form>
   );
 }

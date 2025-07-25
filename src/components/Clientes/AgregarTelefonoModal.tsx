@@ -36,7 +36,6 @@ export default function AgregarTelefonoModal({
       onClose();
     } catch (error) {
       console.error("Error al guardar teléfono:", error);
-      // Aquí podrías agregar tu sistema de toasts
       alert("Error al guardar el teléfono");
     } finally {
       setLoading(false);
@@ -58,7 +57,6 @@ export default function AgregarTelefonoModal({
                    data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 
                    data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
         
-        // ✅ CONFIGURACIONES PARA BLOQUEO:
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={handleClose}
@@ -85,11 +83,14 @@ export default function AgregarTelefonoModal({
                 onChange={(e) => setTelefono(e.target.value)}
                 placeholder="Ej: +549111234567 o 1123456789"
                 className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl 
-                         text-white placeholder-white/50 focus:border-[#25D366] focus:outline-none 
-                         focus:ring-2 focus:ring-[#25D366]/20 transition-all"
+                         text-white placeholder-white/50 focus:border-[#B695BF] focus:outline-none 
+                         focus:ring-2 focus:ring-[#B695BF]/20 transition-all"
                 autoFocus
               />
             </div>
+            <p className="text-xs text-white/50 mt-2">
+              💡 Formato recomendado: +54 9 11 1234-5678 (incluir código de área)
+            </p>
           </div>
 
           <div className="flex gap-3 pt-2">
@@ -104,7 +105,7 @@ export default function AgregarTelefonoModal({
             <Button
               type="submit"
               disabled={!telefono.trim() || loading}
-              className="flex-1 bg-[#25D366] hover:bg-[#128C7E] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 bg-[#B695BF] hover:bg-[#9A7BA8] text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <div className="flex items-center gap-2">
@@ -114,7 +115,7 @@ export default function AgregarTelefonoModal({
               ) : (
                 <div className="flex items-center gap-2">
                   <Save className="w-4 h-4" />
-                  Guardar y enviar
+                  Guardar teléfono
                 </div>
               )}
             </Button>

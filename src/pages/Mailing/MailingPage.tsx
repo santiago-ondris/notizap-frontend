@@ -4,7 +4,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { TrendingUp } from "lucide-react";
 import { toast } from "react-toastify";
 import { filterByTitle, filterByDateRange } from "@/utils/mailing/filters";
-import { useAnalytics } from "@/hooks/useAnalytics";
 
 // Componentes modularizados
 import { MailingHeader } from "@/components/Mailing/MailingHeader";
@@ -65,29 +64,12 @@ const MailingPage: React.FC = () => {
   const puedeSincronizar = role === "admin" || role === "superadmin";
   const puedeEditarTitulos = role === "admin" || role === "superadmin";
   const syncMutation = useSyncMailingCampaigns();
-  const { trackModuleAction } = useAnalytics('mailing');
 
   const handleSync = () => {
-    const syncStartTime = Date.now();
-    
-    // Track inicio de sincronización
-    trackModuleAction('sync-mailchimp-start', {
-      account: cuenta,
-      userRole: role || ''
-    });
+
 
     syncMutation.mutate(cuenta, {
       onSuccess: (resultado) => {
-        // Track sync exitoso
-        const syncDuration = Date.now() - syncStartTime;
-        trackModuleAction('sync-mailchimp-success', {
-          account: cuenta,
-          duration: syncDuration,
-          userRole: role || '',
-          nuevasCampañas: resultado.nuevasCampañas,
-          campañasActualizadas: resultado.campañasActualizadas,
-          totalProcesadas: resultado.totalProcesadas
-        });
 
         // Toast con información detallada
         if (resultado.nuevasCampañas > 0 || resultado.campañasActualizadas > 0) {
@@ -101,20 +83,6 @@ const MailingPage: React.FC = () => {
         } else {
           toast.info(resultado.mensaje, { autoClose: 3000 });
         }
-      },
-      onError: (err) => {
-        // Track sync fallido
-        const syncDuration = Date.now() - syncStartTime;
-        const errorMessage = err instanceof Error ? err.message : "Error al sincronizar campañas";
-        
-        trackModuleAction('sync-mailchimp-error', {
-          account: cuenta,
-          duration: syncDuration,
-          error: errorMessage,
-          userRole: role || ''
-        });
-
-        toast.error(`❌ ${errorMessage}`, { autoClose: 5000 });
       },
     });
   };

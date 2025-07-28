@@ -327,27 +327,30 @@ export const VentasVendedorasPage: React.FC = () => {
 
         {/* Contenido principal según la vista */}
         {vistaActual === 'dashboard' && (
-          <div className="space-y-6">
-            {/* Filtros */}
-            <VentasVendedorasFilters
-              filtros={filtros}
-              onFiltrosChange={handleFiltrosChange}
-              sucursales={sucursales}
-              vendedores={vendedores}
-              rangoFechasDisponible={rangoFechas ? {
-                fechaMinima: rangoFechas.fechaMinima,
-                fechaMaxima: rangoFechas.fechaMaxima
-              } : undefined}
-              loading={loading || loadingStats}
-            />
+        <div className="space-y-6">
+          {/* Filtros */}
+          <VentasVendedorasFilters
+            filtros={filtros}
+            onFiltrosChange={handleFiltrosChange}
+            sucursales={sucursales}
+            vendedores={vendedores}
+            rangoFechasDisponible={rangoFechas ? {
+              fechaMinima: rangoFechas.fechaMinima,
+              fechaMaxima: rangoFechas.fechaMaxima
+            } : undefined}
+            loading={loading || loadingStats}
+          />
 
-            {/* Estadísticas */}
-            <VentasVendedorasStats
-              stats={stats || {} as VentaVendedoraStats}
-              loading={loadingStats}
-            />
-          </div>
-        )}
+          {/* Estadísticas */}
+          <VentasVendedorasStats
+            stats={stats || {} as VentaVendedoraStats}
+            loading={loadingStats}
+            mostrarComparacionSucursales={
+              !filtros.sucursalNombre || filtros.sucursalNombre === ''
+            }
+          />
+        </div>
+      )}
 
         {vistaActual === 'upload' && modoAdmin && (
           <VentasVendedorasUpload

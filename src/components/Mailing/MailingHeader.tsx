@@ -1,5 +1,6 @@
 import React from "react";
 import { MailOpen, RefreshCw, Loader2 } from "lucide-react";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 interface MailingHeaderProps {
   cuenta: "Montella" | "Alenka";
@@ -18,6 +19,15 @@ export const MailingHeader: React.FC<MailingHeaderProps> = ({
   onSync,
   isSyncing
 }) => {
+  const { trackUserInteraction } = useAnalytics('mailing');
+  const handleSyncClick = () => {
+    trackUserInteraction('sync-button', 'click', {
+      account: cuenta,
+      isCurrentlySyncing: isSyncing
+    });
+    
+    onSync();
+  };
   return (
     <div className="mb-8">
       {/* Breadcrumb */}
@@ -67,7 +77,7 @@ export const MailingHeader: React.FC<MailingHeaderProps> = ({
           {/* Sync Button */}
           {puedeSincronizar && (
             <button
-              onClick={onSync}
+              onClick={handleSyncClick}
               disabled={isSyncing}
               className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-[#D94854] to-[#F23D5E] hover:from-[#F23D5E] hover:to-[#D94854] text-white rounded-xl shadow-lg hover:shadow-[#D94854]/25 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px] justify-center"
             >

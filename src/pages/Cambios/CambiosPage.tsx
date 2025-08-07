@@ -6,13 +6,15 @@ import CambiosEstadisticas from '@/components/Cambios/CambiosEstadisticas';
 import CambiosTabla from '@/components/Cambios/CambiosTabla';
 import CambiosFiltros from '@/components/Cambios/CambiosFiltros';
 import CambioModal from '@/components/Cambios/CambioModal';
+import SelectorMeses from '@/components/Cambios/SelectorMeses';
 import cambiosService from '@/services/cambios/cambiosService';
 import { 
   type CambioSimpleDto, 
   type CreateCambioSimpleDto,
   type CambiosFiltros as FiltrosType,
   type CambiosEstadisticasData as EstadisticasType,
-  type EstadosCambio
+  type EstadosCambio,
+  MesesUtils
 } from '@/types/cambios/cambiosTypes';
 import { useNavigate } from 'react-router';
 
@@ -38,24 +40,34 @@ const CambiosPage: React.FC = () => {
   // Estados de filtros
   const [filtros, setFiltros] = useState<FiltrosType>({});
 
+  // NUEVO: Estado para el selector de meses
+  const [mesSeleccionado, setMesSeleccionado] = useState<string>(() => {
+    return cambiosService.obtenerMesActualSelector();
+  });
+
   // Verificar permisos
   const puedeEditar = role === 'admin' || role === 'superadmin';
   const puedeVer = role === 'viewer' || role === 'admin' || role === 'superadmin';
 
   /**
-   * Cargar todos los cambios desde la API
+   * Cargar cambios del mes seleccionado
    */
-  const cargarCambios = async () => {
+  const cargarCambiosPorMes = async (valorMes: string) => {
     setCargandoDatos(true);
     setError(null);
     
     try {
-      const cambiosData = await cambiosService.obtenerTodos();
+      const [año, mes] = valorMes.split('-').map(Number);
+      console.log(`📅 Cargando cambios para ${MesesUtils.formatearMes(mes, año)}`);
+      
+      const cambiosData = await cambiosService.obtenerPorMes(mes, año);
       setCambios(cambiosData);
       
-      // Mostrar mensaje si no hay datos
+      // Mostrar mensaje informativo
       if (cambiosData.length === 0) {
-        toast.info('No hay cambios registrados en el sistema');
+        toast.info(`No hay cambios registrados en ${MesesUtils.formatearMes(mes, año)}`);
+      } else {
+        console.log(`✅ Se cargaron ${cambiosData.length} cambios para ${MesesUtils.formatearMes(mes, año)}`);
       }
       
     } catch (error) {
@@ -69,21 +81,45 @@ const CambiosPage: React.FC = () => {
   };
 
   /**
-   * Aplicar filtros a los cambios
+   * Manejar cambio en el selector de meses
+   */
+  const handleCambioMes = (nuevoMes: string) => {
+    console.log(`🗓️ Cambiando mes seleccionado: ${nuevoMes}`);
+    setMesSeleccionado(nuevoMes);
+    
+    // Limpiar filtros adicionales al cambiar de mes
+    setFiltros({});
+    
+    // Cargar datos del nuevo mes
+    cargarCambiosPorMes(nuevoMes);
+  };
+
+  /**
+   * Aplicar filtros a los cambios (sin afectar el filtro de mes principal)
    */
   const aplicarFiltros = useCallback(() => {
-    const cambiosFiltradosResult = cambiosService.filtrarCambios(cambios, filtros);
+    // Crear filtros combinados: filtros del mes + filtros adicionales
+    const filtrosMes = cambiosService.crearFiltrosDesdeMes(mesSeleccionado);
+    const filtrosCombinados: FiltrosType = {
+      ...filtrosMes,
+      ...filtros // Los filtros adicionales se superponen
+    };
+
+    console.log('🔍 Aplicando filtros combinados:', filtrosCombinados);
+    
+    const cambiosFiltradosResult = cambiosService.filtrarCambios(cambios, filtrosCombinados);
     setCambiosFiltrados(cambiosFiltradosResult);
     
     // Calcular estadísticas solo de los cambios filtrados
     const estadisticasCalculadas = cambiosService.calcularEstadisticas(cambiosFiltradosResult);
     setEstadisticas(estadisticasCalculadas);
-  }, [cambios, filtros]);
+  }, [cambios, filtros, mesSeleccionado]);
 
   /**
-   * Manejar cambio de filtros
+   * Manejar cambio de filtros adicionales
    */
   const handleFiltrosChange = (nuevosFiltros: FiltrosType) => {
+    console.log('🎛️ Actualizando filtros adicionales:', nuevosFiltros);
     setFiltros(nuevosFiltros);
   };
 
@@ -96,7 +132,7 @@ const CambiosPage: React.FC = () => {
     try {
       await cambiosService.actualizarEnvio(id, envio);
       toast.success('Envío actualizado correctamente');
-      await cargarCambios(); // Recargar datos
+      await cargarCambiosPorMes(mesSeleccionado); // Recargar datos del mes actual
       return true;
     } catch (error) {
       const mensaje = error instanceof Error ? error.message : 'Error al actualizar envío';
@@ -123,8 +159,8 @@ const CambiosPage: React.FC = () => {
         toast.success('Cambio creado exitosamente');
       }
       
-      // Recargar datos
-      await cargarCambios();
+      // Recargar datos del mes actual
+      await cargarCambiosPorMes(mesSeleccionado);
       return true;
       
     } catch (error) {
@@ -147,8 +183,8 @@ const CambiosPage: React.FC = () => {
       await cambiosService.actualizarEstados(id, estados);
       toast.success('Estado actualizado correctamente');
       
-      // Recargar datos
-      await cargarCambios();
+      // Recargar datos del mes actual
+      await cargarCambiosPorMes(mesSeleccionado);
       return true;
       
     } catch (error) {
@@ -176,8 +212,8 @@ const CambiosPage: React.FC = () => {
       await cambiosService.eliminar(id);
       toast.success('Cambio eliminado exitosamente');
       
-      // Recargar datos
-      await cargarCambios();
+      // Recargar datos del mes actual
+      await cargarCambiosPorMes(mesSeleccionado);
       return true;
       
     } catch (error) {
@@ -196,7 +232,7 @@ const CambiosPage: React.FC = () => {
     try {
       await cambiosService.actualizarEtiqueta(id, etiqueta, etiquetaDespachada);
       toast.success('Etiqueta actualizada correctamente');
-      await cargarCambios();
+      await cargarCambiosPorMes(mesSeleccionado);
       return true;
     } catch (error) {
       const mensaje = error instanceof Error ? error.message : 'Error al actualizar etiqueta';
@@ -239,22 +275,25 @@ const CambiosPage: React.FC = () => {
   };
 
   /**
-   * Recargar todos los datos
+   * Recargar datos del mes actual
    */
   const recargarDatos = () => {
-    cargarCambios();
+    cargarCambiosPorMes(mesSeleccionado);
   };
 
-  // Effect para cargar datos al montar el componente
+  // Effect para cargar datos del mes actual al montar el componente
   useEffect(() => {
     if (puedeVer) {
-      cargarCambios();
+      console.log('🚀 Componente montado, cargando mes actual:', mesSeleccionado);
+      cargarCambiosPorMes(mesSeleccionado);
     }
-  }, [puedeVer]);
+  }, [puedeVer]); // Solo depende de permisos
 
-  // Effect para aplicar filtros cuando cambian los datos o filtros
+  // Effect para aplicar filtros cuando cambian los datos o filtros adicionales
   useEffect(() => {
-    aplicarFiltros();
+    if (cambios.length > 0) {
+      aplicarFiltros();
+    }
   }, [aplicarFiltros]);
 
   // Verificar permisos de acceso
@@ -290,7 +329,7 @@ const CambiosPage: React.FC = () => {
               🔄 Gestión de Cambios
             </h1>
             <p className="text-white/60 text-sm">
-              Control de cambios de productos y seguimiento de estados
+              Control de cambios de productos y seguimiento de estados por mes
             </p>
           </div>
         </div>
@@ -342,6 +381,38 @@ const CambiosPage: React.FC = () => {
       </div>
     </div>
 
+        {/* NUEVO: Selector de Meses */}
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <SelectorMeses
+                valorSeleccionado={mesSeleccionado}
+                onCambio={handleCambioMes}
+                deshabilitado={cargandoDatos}
+              />
+              
+              <div className="text-sm text-white/70">
+                📊 Mostrando cambios de {(() => {
+                  const [año, mes] = mesSeleccionado.split('-').map(Number);
+                  return MesesUtils.formatearMes(mes, año);
+                })()}
+              </div>
+            </div>
+
+            {/* Contador de resultados del mes */}
+            <div className="flex items-center gap-4 text-sm text-white/60">
+              <span>
+                Total del mes: <strong className="text-white">{cambios.length}</strong>
+              </span>
+              {filtros && Object.keys(filtros).length > 0 && (
+                <span>
+                  Filtrados: <strong className="text-[#B695BF]">{cambiosFiltrados.length}</strong>
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Mensaje de permisos para viewers */}
         {!puedeEditar && (
           <div className="flex items-center gap-2 p-4 bg-[#FFD700]/10 border border-[#FFD700]/30 rounded-xl">
@@ -352,7 +423,7 @@ const CambiosPage: React.FC = () => {
           </div>
         )}
 
-        {/* Filtros */}
+        {/* Filtros adicionales */}
         <CambiosFiltros
           filtros={filtros}
           onFiltrosChange={handleFiltrosChange}

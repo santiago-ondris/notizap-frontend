@@ -6,6 +6,7 @@ import {
   type CambiosEstadisticasData,
   type EstadosCambio,
   type EstadoCambioFiltro,
+  MesesUtils
 } from '@/types/cambios/cambiosTypes';
 import { formatearFechaCambios } from '@/utils/envios/fechaHelpers';
 
@@ -25,6 +26,34 @@ class CambiosService {
     } catch (error) {
       console.error('Error al obtener cambios:', error);
       throw new Error('Error al cargar la lista de cambios');
+    }
+  }
+
+  /**
+   * Obtener cambios filtrados por mes (método principal para el selector)
+   */
+  async obtenerPorMes(mes: number, año: number): Promise<CambioSimpleDto[]> {
+    try {
+      // Generar filtros de fecha para el mes específico
+      const fechaDesde = new Date(año, mes - 1, 1);
+      const fechaHasta = new Date(año, mes, 0); // Último día del mes
+
+      const filtros: CambiosFiltros = {
+        fechaDesde: fechaDesde.toISOString().split('T')[0],
+        fechaHasta: fechaHasta.toISOString().split('T')[0],
+        mes,
+        año
+      };
+
+      console.log(`🗓️ Obteniendo cambios para ${MesesUtils.formatearMes(mes, año)}:`, filtros);
+
+      // Por ahora, obtenemos todos y filtramos localmente
+      // En el futuro se puede implementar un endpoint específico
+      const todosCambios = await this.obtenerTodos();
+      return this.filtrarCambios(todosCambios, filtros);
+    } catch (error) {
+      console.error('Error al obtener cambios por mes:', error);
+      throw new Error(`Error al cargar cambios de ${MesesUtils.formatearMes(mes, año)}`);
     }
   }
 
@@ -162,20 +191,29 @@ class CambiosService {
   }
 
   /**
-   * Filtrar cambios según criterios
+   * Filtrar cambios según criterios (ACTUALIZADO con filtros de mes)
    */
   filtrarCambios(cambios: CambioSimpleDto[], filtros: CambiosFiltros): CambioSimpleDto[] {
     return cambios.filter(cambio => {
-      // Filtro por fecha
+      const fechaCambio = new Date(cambio.fecha);
+
+      // Filtro por mes y año específico (NUEVA FUNCIONALIDAD)
+      if (filtros.mes && filtros.año) {
+        if (fechaCambio.getFullYear() !== filtros.año || 
+            fechaCambio.getMonth() + 1 !== filtros.mes) {
+          return false;
+        }
+      }
+
+      // Filtro por fecha (rango)
       if (filtros.fechaDesde) {
-        const fechaCambio = new Date(cambio.fecha);
         const fechaDesde = new Date(filtros.fechaDesde);
         if (fechaCambio < fechaDesde) return false;
       }
 
       if (filtros.fechaHasta) {
-        const fechaCambio = new Date(cambio.fecha);
         const fechaHasta = new Date(filtros.fechaHasta);
+        fechaHasta.setHours(23, 59, 59, 999); // Final del día
         if (fechaCambio > fechaHasta) return false;
       }
 
@@ -345,7 +383,7 @@ class CambiosService {
    */
   formatearDinero(cantidad: number | undefined): string {
     if (!cantidad || cantidad === 0) return '-';
-    return `$${cantidad.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
+    return `${cantidad.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
   }
 
   /**
@@ -368,6 +406,29 @@ class CambiosService {
     if (cambio.yaEnviado && !cambio.cambioRegistradoSistema) return 'Enviado';
     if (cambio.llegoAlDeposito && cambio.yaEnviado && cambio.cambioRegistradoSistema) return 'Completado';
     return 'Estado indefinido';
+  }
+
+  /**
+   * Crear filtros desde valor del selector de meses
+   */
+  crearFiltrosDesdeMes(valorMes: string): CambiosFiltros {
+    const { fechaDesde, fechaHasta } = MesesUtils.convertirMesAFiltros(valorMes);
+    const [año, mes] = valorMes.split('-').map(Number);
+
+    return {
+      fechaDesde,
+      fechaHasta,
+      mes,
+      año
+    };
+  }
+
+  /**
+   * Obtener valor del selector para el mes actual
+   */
+  obtenerMesActualSelector(): string {
+    const { mes, año } = MesesUtils.obtenerMesActual();
+    return `${año}-${mes.toString().padStart(2, '0')}`;
   }
 }
 

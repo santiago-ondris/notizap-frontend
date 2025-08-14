@@ -10,13 +10,15 @@ import {
   TrendingUp,
   Eye,
   Settings,
-  Building2
+  Building2,
+  Calculator
 } from 'lucide-react';
 import { VentasVendedorasUpload } from '@/components/Vendedoras/VentasVendedorasUpload';
 import { VentasVendedorasFilters } from '@/components/Vendedoras/VentasVendedorasFilters';
 import { VentasVendedorasStats } from '@/components/Vendedoras/VentasVendedorasStats';
 import { VentasVendedorasTable } from '@/components/Vendedoras/VentasVendedorasTable';
 import { VentasVendedorasChart } from '@/components/Vendedoras/VentasVendedorasChart';
+// import SincronizarPalabrasEspeciales from '@/components/Vendedoras/SincronizarPalabrasEspeciales';
 import { ventasVendedorasService } from '@/services/vendedoras/ventasVendedorasService';
 import type { 
     VentaVendedoraStats,
@@ -29,7 +31,7 @@ import type {
   } from '@/types/vendedoras/filtrosTypes';
 import { dateHelpers } from '@/utils/vendedoras/dateHelpers';
 
-type VistaActual = 'dashboard' | 'upload' | 'tabla' | 'graficos';
+type VistaActual = 'dashboard' | 'upload' | 'tabla' | 'graficos' | 'comisiones';
 
 export const VentasVendedorasPage: React.FC = () => {
   const navigate = useNavigate();
@@ -204,6 +206,14 @@ export const VentasVendedorasPage: React.FC = () => {
       descripcion: 'Análisis diario por sucursal',
       esNavegacion: true,
       ruta: '/vendedoras/rendimiento'
+    },
+    {
+      id: 'comisiones',
+      label: '💰 Comisiones',
+      icono: Calculator,
+      descripcion: 'Calcular y gestionar comisiones',
+      esNavegacion: true,
+      ruta: '/vendedoras/comisioneslocales'
     }
   ];
 
@@ -436,6 +446,8 @@ export const VentasVendedorasPage: React.FC = () => {
             )}
           </div>
         )}
+
+        {/* <SincronizarPalabrasEspeciales /> */}
       </div>
     </div>
   );

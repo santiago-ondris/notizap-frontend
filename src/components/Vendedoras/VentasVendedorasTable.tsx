@@ -42,6 +42,10 @@ export const VentasVendedorasTable: React.FC<Props> = ({
   onFiltrosChange,
   loading = false
 }) => {
+  const montoTotalCorrecto = stats.todasVendedoras?.length > 0 
+    ? stats.todasVendedoras.reduce((sum, v) => sum + v.montoTotal, 0)
+    : stats.montoTotal; // fallback al valor del backend si no hay vendedoras
+
   const handleSort = (campo: VentaVendedoraFilters['orderBy']) => {
     const nuevaDireccion = filtros.orderBy === campo && filtros.orderDesc ? false : true;
     
@@ -261,7 +265,7 @@ export const VentasVendedorasTable: React.FC<Props> = ({
               {estadisticasHelpers.formatearNumero(stats.cantidadTotal)} ventas netas encontradas
             </p>
             <p className="text-sm text-white/60">
-              {estadisticasHelpers.formatearMonedaCompacta(stats.montoTotal)} monto neto
+              {estadisticasHelpers.formatearMonedaCompleta(montoTotalCorrecto)} monto neto
             </p>
           </div>
         </div>

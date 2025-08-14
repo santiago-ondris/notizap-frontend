@@ -53,7 +53,16 @@ export const VentasVendedorasStats: React.FC<Props> = ({
     );
   }
 
-  const promedios = estadisticasHelpers.calcularPromedios(stats);
+  const montoTotalCorrecto = stats.todasVendedoras?.length > 0 
+    ? stats.todasVendedoras.reduce((sum, v) => sum + v.montoTotal, 0)
+    : stats.montoTotal; // fallback al valor del backend si no hay vendedoras
+
+  const statsCorrected = {
+    ...stats,
+    montoTotal: montoTotalCorrecto
+  };
+
+  const promedios = estadisticasHelpers.calcularPromedios(statsCorrected);
   const comparacionSucursales = estadisticasHelpers.compararSucursales(stats.ventasPorSucursal);
   
   // Análisis de turnos
@@ -75,8 +84,8 @@ export const VentasVendedorasStats: React.FC<Props> = ({
     },
     {
       titulo: 'Monto Total',
-      valor: estadisticasHelpers.formatearMonedaCompacta(stats.montoTotal),
-      subtitulo: estadisticasHelpers.formatearMonedaCompleta(stats.montoTotal),
+      valor: estadisticasHelpers.formatearMonedaCompleta(montoTotalCorrecto),
+      subtitulo: estadisticasHelpers.formatearMonedaCompleta(montoTotalCorrecto),
       icono: DollarSign,
       color: 'bg-green-500/20 text-green-400',
       emoji: '💰'
@@ -178,37 +187,6 @@ export const VentasVendedorasStats: React.FC<Props> = ({
           </div>
         ))}
       </div>
-
-
-      {/* Top vendedoras */}
-      {/* {stats.topVendedoras && stats.topVendedoras.length > 0 && (
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <Award className="w-5 h-5 text-yellow-400" />
-            🏆 Top Vendedoras
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {stats.topVendedoras.slice(0, 6).map((vendedora, index) => (
-              <div key={vendedora.vendedorNombre} className="bg-white/5 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">
-                    {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '⭐'}
-                  </span>
-                  <h4 className="font-medium text-white text-sm">{vendedora.vendedorNombre}</h4>
-                </div>
-                <div className="space-y-1 text-xs">
-                  <p className="text-white/70">
-                    {estadisticasHelpers.formatearMonedaCompacta(vendedora.montoTotal)}
-                  </p>
-                  <p className="text-white/50">
-                    {estadisticasHelpers.formatearNumero(vendedora.cantidadTotal)} productos
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )} */}
     </div>
   );
 };

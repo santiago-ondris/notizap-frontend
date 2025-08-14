@@ -20,6 +20,7 @@ import LocalesStatsPage from "@/pages/Vendedoras/LocalesStatsPage";
 import VentasOnlinePage from "@/pages/Ventas/VentasOnlinePage";
 import ComisionOnlinePage from "@/pages/Ventas/ComisionOnlinePage";
 import AnalisisLandingPage from "@/pages/Analisis/AnalisisLandingPage";
+import { ComisionesVendedorasPage } from "@/pages/Vendedoras/ComisionesVendedorasPage";
 
 export const ProtectedRoutes = (
   <>
@@ -55,6 +56,7 @@ export const ProtectedRoutes = (
     <Route path="vendedoras">
       <Route index                   element={<VentasVendedorasPage />} />
       <Route path="rendimiento"            element={<LocalesStatsPage />} />
+      <Route path="comisioneslocales"            element={<ComisionesVendedorasPage />} />
     </Route>
   </>
 );

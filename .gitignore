@@ -25,3 +25,5 @@ deprecated
 *.sw?
 
 .env
+
+src/components/Vendedoras/SincronizarPalabrasEspeciales.tsx

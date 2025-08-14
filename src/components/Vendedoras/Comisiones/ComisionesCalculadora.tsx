@@ -161,15 +161,19 @@ export const ComisionesCalculadora: React.FC<Props> = ({
 
   if (!isOpen) return null;
 
+  // 🚀 CAMBIO: Condiciones más flexibles para mostrar el footer
+  const puedeCalcular = !loading && !calculando && vendedorasSeleccionadas.length > 0;
+  const mostrarFooter = !loading; // Simplificado: siempre mostrar si no está cargando
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-[#1A1A20] border border-white/10 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-[#1A1A20] border border-white/10 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         
-        {/* Header */}
-        <div className="p-6 border-b border-white/10">
+        {/* Header - Fijo */}
+        <div className="p-6 border-b border-white/10 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Calculator className="w-6 h-6 text-green-400" />
+              <Calculator className={`w-6 h-6 ${esRecalculo ? 'text-yellow-400' : 'text-green-400'}`} />
               <div>
                 <h2 className="text-xl font-bold text-white">
                   {esRecalculo ? 'Recalcular' : 'Calcular'} comisiones
@@ -214,129 +218,103 @@ export const ComisionesCalculadora: React.FC<Props> = ({
           )}
         </div>
 
-        {/* Content */}
-        <div 
-          className="p-6 overflow-y-auto max-h-[calc(90vh-200px)] custom-scrollbar"
-          onWheel={(e) => {
-            e.stopPropagation();
-          }}
-        >
+        {/* Content - Scrolleable */}
+        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
           
-          {/* Loading */}
+          {/* Loading State */}
           {loading && (
             <div className="flex items-center justify-center py-12">
               <div className="flex items-center gap-3 text-white/60">
                 <Loader2 className="w-6 h-6 animate-spin" />
-                <span>Cargando vendedoras...</span>
+                <span>Cargando datos de vendedoras...</span>
               </div>
             </div>
           )}
 
-          {/* Error */}
+          {/* Error State */}
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-6">
               <div className="flex items-center gap-2 text-red-300">
                 <AlertTriangle className="w-5 h-5" />
-                <span>{error}</span>
+                <span className="font-medium">Error</span>
               </div>
+              <p className="text-red-300/80 text-sm mt-1">{error}</p>
               <button
                 onClick={cargarDatosVendedoras}
-                className="mt-2 px-3 py-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 rounded text-red-300 text-sm transition-colors"
+                className="mt-3 px-3 py-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 rounded text-red-300 text-sm transition-colors"
               >
                 Reintentar
               </button>
             </div>
           )}
 
-          {/* Contenido principal */}
+          {/* Main Content */}
           {datosVendedoras && !loading && (
             <div className="space-y-6">
-              
-              {/* Información de ventas */}
-              <div className="bg-white/5 rounded-xl p-5">
-                <h3 className="font-medium text-white mb-4 flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Información del día
+              {/* Resumen del día */}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-blue-400" />
+                  Resumen del turno
                 </h3>
                 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <span className="text-white/60">Monto facturado:</span>
-                    <div className="font-medium text-white">
+                    <div className="text-white/60 text-sm">Monto facturado</div>
+                    <div className="text-white font-semibold">
                       {comisionFormato.formatearMoneda(datosVendedoras.montoFacturado)}
                     </div>
                   </div>
+                  
                   <div>
-                    <span className="text-white/60">Vendedoras con ventas:</span>
-                    <div className="font-medium text-white">
+                    <div className="text-white/60 text-sm">Vendedoras con ventas</div>
+                    <div className="text-white font-semibold">
                       {datosVendedoras.vendedorasConVentas.length}
                     </div>
                   </div>
+                  
                   <div>
-                    <span className="text-white/60">Total disponibles:</span>
-                    <div className="font-medium text-white">
-                      {datosVendedoras.vendedorasDisponibles.length}
+                    <div className="text-white/60 text-sm">Comisión individual</div>
+                    <div className="text-green-400 font-semibold">
+                      {comisionFormato.formatearMoneda(previewComision)}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="text-white/60 text-sm">Total comisiones</div>
+                    <div className="text-green-400 font-semibold">
+                      {comisionFormato.formatearMoneda(previewTotal)}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Preview de cálculos */}
-              {vendedorasSeleccionadas.length > 0 && (
-                <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-5">
-                  <h3 className="font-medium text-green-300 mb-4">Preview del cálculo</h3>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <span className="text-green-300/60">Monto sin IVA:</span>
-                      <div className="font-medium text-green-300">
-                        {comisionFormato.formatearMoneda(
-                          comisionPreview.previewMontoSinIva(datosVendedoras.montoFacturado)
-                        )}
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-green-300/60">Comisión total (1%):</span>
-                      <div className="font-medium text-green-300">
-                        {comisionFormato.formatearMoneda(previewTotal)}
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-green-300/60">Por vendedora:</span>
-                      <div className="font-medium text-green-300">
-                        {comisionFormato.formatearMoneda(previewComision)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* Vendedoras seleccionadas */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-medium text-white flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-green-400" />
-                    Vendedoras seleccionadas ({vendedorasSeleccionadas.length})
-                  </h3>
-                </div>
-
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                <h3 className="font-semibold text-white mb-3">
+                  Vendedoras seleccionadas ({vendedorasSeleccionadas.length})
+                </h3>
+                
                 {vendedorasSeleccionadas.length === 0 ? (
-                  <div className="text-center py-8 text-white/60">
-                    <Users className="w-8 h-8 mx-auto mb-2 opacity-60" />
+                  <div className="text-center py-6 text-white/60">
+                    <Users className="w-8 h-8 mx-auto mb-2 text-white/40" />
                     <p>No hay vendedoras seleccionadas</p>
+                    <p className="text-sm text-white/40 mt-1">
+                      Agrega vendedoras para calcular comisiones
+                    </p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {vendedorasSeleccionadas.map(vendedora => (
-                      <div 
+                      <div
                         key={vendedora.id}
                         className="flex items-center justify-between p-3 bg-green-500/10 border border-green-500/20 rounded-lg"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                          <span className="text-white">{vendedora.nombre}</span>
+                          <CheckCircle2 className="w-4 h-4 text-green-400" />
+                          <span className="text-white/90">{vendedora.nombre}</span>
                           {vendedora.tieneVentasEnElDia && (
-                            <span className="px-2 py-0.5 bg-blue-500/20 border border-blue-500/40 rounded text-blue-300 text-xs">
+                            <span className="px-2 py-1 bg-blue-500/20 border border-blue-500/40 text-blue-300 text-xs rounded">
                               Con ventas
                             </span>
                           )}
@@ -344,9 +322,10 @@ export const ComisionesCalculadora: React.FC<Props> = ({
                         
                         <button
                           onClick={() => toggleVendedora(vendedora)}
-                          className="p-1 text-red-400 hover:bg-red-500/20 rounded transition-colors"
+                          className="p-1 hover:bg-red-500/20 rounded transition-colors"
+                          disabled={calculando}
                         >
-                          <Minus className="w-4 h-4" />
+                          <Minus className="w-4 h-4 text-red-400" />
                         </button>
                       </div>
                     ))}
@@ -355,72 +334,74 @@ export const ComisionesCalculadora: React.FC<Props> = ({
               </div>
 
               {/* Agregar vendedoras */}
-              {vendedorasParaAgregar.length > 0 && (
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-medium text-white">Agregar vendedoras</h3>
-                    <button
-                      onClick={() => setMostrarDisponibles(!mostrarDisponibles)}
-                      className="px-3 py-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded text-white text-sm transition-colors"
-                    >
-                      {mostrarDisponibles ? 'Ocultar' : 'Mostrar'} disponibles
-                    </button>
-                  </div>
-
-                  {mostrarDisponibles && (
-                    <div className="space-y-3">
-                      {/* Buscador */}
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/60" />
-                        <input
-                          type="text"
-                          placeholder="Buscar vendedora..."
-                          value={busqueda}
-                          onChange={(e) => setBusqueda(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-blue-400 transition-colors"
-                        />
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-white">
+                    Agregar vendedoras
+                  </h3>
+                  
+                  <button
+                    onClick={() => setMostrarDisponibles(!mostrarDisponibles)}
+                    className="text-blue-400 hover:text-blue-300 text-sm transition-colors"
+                  >
+                    {mostrarDisponibles ? 'Ocultar' : 'Mostrar'} disponibles
+                  </button>
+                </div>
+                
+                {mostrarDisponibles && (
+                  <div className="space-y-3">
+                    {/* Búsqueda */}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
+                      <input
+                        type="text"
+                        value={busqueda}
+                        onChange={(e) => setBusqueda(e.target.value)}
+                        placeholder="Buscar vendedora..."
+                        className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-blue-400/50"
+                        disabled={calculando}
+                      />
+                    </div>
+                    
+                    {/* Lista de vendedoras disponibles */}
+                    {vendedorasParaAgregar.length === 0 ? (
+                      <div className="text-center py-4 text-white/60">
+                        <Users className="w-6 h-6 mx-auto mb-2 text-white/40" />
+                        <p className="text-sm">
+                          {busqueda ? 'No se encontraron vendedoras' : 'Todas las vendedoras ya están seleccionadas'}
+                        </p>
                       </div>
-
-                      {/* Lista de disponibles */}
-                      <div className="max-h-40 overflow-y-auto space-y-2">
+                    ) : (
+                      <div className="max-h-32 overflow-y-auto custom-scrollbar space-y-1">
                         {vendedorasParaAgregar.map(vendedora => (
-                          <div 
+                          <button
                             key={vendedora.id}
-                            className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-lg"
+                            onClick={() => toggleVendedora(vendedora)}
+                            className="w-full flex items-center justify-between p-2 hover:bg-white/10 rounded-lg transition-colors"
+                            disabled={calculando}
                           >
-                            <div className="flex items-center gap-3">
-                              <div className="w-2 h-2 bg-white/40 rounded-full"></div>
-                              <span className="text-white">{vendedora.nombre}</span>
-                              {vendedora.tieneVentasEnElDia && (
-                                <span className="px-2 py-0.5 bg-blue-500/20 border border-blue-500/40 rounded text-blue-300 text-xs">
-                                  Con ventas
-                                </span>
-                              )}
-                            </div>
-                            
-                            <button
-                              onClick={() => toggleVendedora(vendedora)}
-                              className="p-1 text-green-400 hover:bg-green-500/20 rounded transition-colors"
-                            >
-                              <Plus className="w-4 h-4" />
-                            </button>
-                          </div>
+                            <span className="text-white/80">{vendedora.nombre}</span>
+                            <Plus className="w-4 h-4 text-green-400" />
+                          </button>
                         ))}
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
 
-        {/* Footer */}
-        {datosVendedoras && !loading && (
-          <div className="p-6 border-t border-white/10 bg-white/5">
+        {/* Footer - Siempre visible cuando no está cargando */}
+        {mostrarFooter && (
+          <div className="p-6 border-t border-white/10 bg-white/5 flex-shrink-0">
             <div className="flex items-center justify-between">
               <div className="text-xs text-white/60">
-                💡 Selecciona las vendedoras que trabajaron en este turno
+                💡 {esRecalculo 
+                  ? 'Al recalcular se sobrescribirán las comisiones existentes' 
+                  : 'Selecciona las vendedoras que trabajaron en este turno'
+                }
               </div>
               
               <div className="flex gap-3">
@@ -434,13 +415,29 @@ export const ComisionesCalculadora: React.FC<Props> = ({
                 
                 <button
                   onClick={handleCalcular}
-                  className="px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/40 rounded-lg text-green-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                  disabled={calculando || vendedorasSeleccionadas.length === 0}
+                  className={`px-4 py-2 border rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${
+                    esRecalculo 
+                      ? 'bg-yellow-500/20 hover:bg-yellow-500/30 border-yellow-500/40 text-yellow-300'
+                      : 'bg-green-500/20 hover:bg-green-500/30 border-green-500/40 text-green-300'
+                  }`}
+                  disabled={!puedeCalcular}
                 >
                   {calculando && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {esRecalculo ? 'Recalcular' : 'Calcular'} comisiones
+                  {esRecalculo ? 'Confirmar Recálculo' : 'Calcular Comisiones'}
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Loading overlay para cálculo */}
+        {calculando && (
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center rounded-2xl">
+            <div className="bg-[#1A1A20] border border-white/10 rounded-xl p-6 flex items-center gap-3">
+              <Loader2 className="w-6 h-6 animate-spin text-blue-400" />
+              <span className="text-white">
+                {esRecalculo ? 'Recalculando' : 'Calculando'} comisiones...
+              </span>
             </div>
           </div>
         )}

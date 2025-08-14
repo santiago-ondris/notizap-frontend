@@ -1,5 +1,5 @@
 import React from "react";
-import { Trash2, Crown, Shield, Eye, Users } from "lucide-react";
+import { Trash2, Shield, Eye, Users, UserCheck, User } from "lucide-react";
 
 interface UserDto {
   id: number;
@@ -10,7 +10,7 @@ interface UserDto {
 
 interface UsersTableProps {
   users: UserDto[];
-  onRoleChange: (id: number, newRole: "viewer" | "admin") => void;
+  onRoleChange: (id: number, newRole: "viewer" | "admin" | "hr") => void;
   onDeleteUser: (id: number) => void;
 }
 
@@ -22,22 +22,30 @@ export const UsersTable: React.FC<UsersTableProps> = ({
   const getRoleIcon = (role: string) => {
     switch (role) {
       case "superadmin":
-        return <Crown className="w-4 h-4" />;
-      case "admin":
         return <Shield className="w-4 h-4" />;
-      default:
+      case "admin":
+        return <UserCheck className="w-4 h-4" />;
+      case "hr":
+        return <Users className="w-4 h-4" />; // Nuevo icono para HR
+      case "viewer":
         return <Eye className="w-4 h-4" />;
+      default:
+        return <User className="w-4 h-4" />;
     }
   };
 
   const getRoleColor = (role: string) => {
     switch (role) {
       case "superadmin":
-        return "text-[#D94854] bg-[#D94854]/20 border-[#D94854]/30";
+        return "bg-[#D94854]/20 text-[#D94854] border-[#D94854]/30";
       case "admin":
-        return "text-[#51590E] bg-[#51590E]/20 border-[#51590E]/30";
+        return "bg-[#B695BF]/20 text-[#B695BF] border-[#B695BF]/30";
+      case "hr":
+        return "bg-[#51590E]/20 text-[#51590E] border-[#51590E]/30"; // Nuevo color para HR
+      case "viewer":
+        return "bg-[#F23D5E]/20 text-[#F23D5E] border-[#F23D5E]/30";
       default:
-        return "text-[#B695BF] bg-[#B695BF]/20 border-[#B695BF]/30";
+        return "bg-gray-500/20 text-gray-500 border-gray-500/30";
     }
   };
 
@@ -107,7 +115,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                       className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-sm focus:bg-white/15 focus:border-[#B695BF]/50 transition-all"
                       value={user.role}
                       onChange={(e) =>
-                        onRoleChange(user.id, e.target.value as "viewer" | "admin")
+                        onRoleChange(user.id, e.target.value as "viewer" | "admin" | "hr")
                       }
                     >
                       <option value="viewer" className="bg-[#212026] text-white">
@@ -115,6 +123,9 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                       </option>
                       <option value="admin" className="bg-[#212026] text-white">
                         admin
+                      </option>
+                      <option value="hr" className="bg-[#212026] text-white">
+                        hr
                       </option>
                     </select>
                   ) : (
@@ -180,7 +191,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                   className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-sm focus:bg-white/15 focus:border-[#B695BF]/50 transition-all"
                   value={user.role}
                   onChange={(e) =>
-                    onRoleChange(user.id, e.target.value as "viewer" | "admin")
+                    onRoleChange(user.id, e.target.value as "viewer" | "admin" | "hr")
                   }
                 >
                   <option value="viewer" className="bg-[#212026] text-white">
@@ -188,6 +199,9 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                   </option>
                   <option value="admin" className="bg-[#212026] text-white">
                     admin
+                  </option>
+                  <option value="hr" className="bg-[#212026] text-white">
+                    hr
                   </option>
                 </select>
               ) : (

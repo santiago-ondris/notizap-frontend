@@ -5,7 +5,7 @@ import { RequireAuth } from "@/routes/RequireAuth";
 
 export const ProtectedLayout: React.FC = () => (
   <AppLayout>
-    <RequireAuth allowedRoles={["admin","superadmin"]}>
+    <RequireAuth allowedRoles={["admin", "superadmin", "hr"]}>
       <Outlet />
     </RequireAuth>
   </AppLayout>

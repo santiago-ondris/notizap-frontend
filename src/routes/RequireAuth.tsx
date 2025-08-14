@@ -56,6 +56,7 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({ children, allowedRoles
     const roleNames: Record<string, string> = {
       viewer: "Visualizador",
       admin: "Administrador",
+      hr: "Recursos Humanos", // Nuevo nombre descriptivo
       superadmin: "Super Administrador"
     };
     const requiredRoles = allowedRoles

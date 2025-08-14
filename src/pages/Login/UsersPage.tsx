@@ -37,7 +37,7 @@ export const UsersPage: React.FC = () => {
     }
   };
 
-  const cambiarRol = async (id: number, nuevoRol: "viewer" | "admin") => {
+  const cambiarRol = async (id: number, nuevoRol: "viewer" | "admin" | "hr") => {
     if (!window.confirm("¿Estás seguro de cambiar el rol?")) return;
     try {
       await userService.updateUserRole(id, nuevoRol);

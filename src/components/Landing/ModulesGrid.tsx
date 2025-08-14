@@ -9,7 +9,7 @@ import {
   User,
   Grid3X3,
   Lock,
-  Fish
+  Fish,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -68,7 +68,7 @@ const modules = [
     icon: Fish,
     color: "#B695BF",
     to: "/vendedoras",
-    roles: ["admin", "superadmin"]
+    roles: ["admin", "superadmin", "hr"]
   },
   {
     title: "Ventas",

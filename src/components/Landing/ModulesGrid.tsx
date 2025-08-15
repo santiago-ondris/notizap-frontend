@@ -32,7 +32,7 @@ const modules = [
   },
   {
     title: "Clientes",
-    description: "Analisis y datos de clientes de Montella",
+    description: "Comportamientos de compra y segmentación",
     icon: User,
     color: "#F23D5E",
     to: "/clientes",
@@ -56,7 +56,7 @@ const modules = [
   },
   {
     title: "Cambios/Devoluciones",
-    description: "Gestión estructurada de cambios y devoluciones",
+    description: "Gestión de cambios y devoluciones",
     icon: Repeat,
     color: "#F23D5E",
     to: "/cambios",
@@ -64,7 +64,7 @@ const modules = [
   },
   {
     title: "Vendedoras",
-    description: "Rendimiento por sucursal y datos por vendedora",
+    description: "Rendimientos por sucursal y comisiones",
     icon: Fish,
     color: "#B695BF",
     to: "/vendedoras",
@@ -72,7 +72,7 @@ const modules = [
   },
   {
     title: "Ventas",
-    description: "Ventas mensuales online y comision",
+    description: "Ventas mensuales online y comisiones",
     icon: ShoppingCart,
     color: "#F23D5E",
     to: "/ventastienda",

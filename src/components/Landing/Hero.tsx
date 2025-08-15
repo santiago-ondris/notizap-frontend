@@ -79,12 +79,12 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 mb-8 hover:bg-white/10 transition-all cursor-default">
             <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-            <span className="text-sm text-white/80 font-medium">Gracias al team-icomers</span>
+            <span className="text-sm text-white/80 font-medium">Gracias al team E-Commerce</span>
           </div>
 
           {/* Main heading */}
           <div className="space-y-4 mb-8">
-            <h1 className="text-6xl md:text-7xl lg:text-8xl font-black tracking-tight">
+            <h1 className="text-6xl md:text-7xl lg:text-9xl font-black tracking-tight">
               <span className="block bg-gradient-to-r from-[#D94854] via-[#F23D5E] to-[#D94854] bg-clip-text text-transparent drop-shadow-2xl">
                 Notizap
               </span>
@@ -101,8 +101,8 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
 
           {/* Description */}
           <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-12 leading-relaxed">
-            Centralizacion de todos los datos de Montella, extraidos de Kiboo, Mailchimp,
-            Metricool, etc, mas funcionalidades varias utiles para el dia a dia.
+            Soluciones para el día a día de los equipos de e-commerce y marketing de Montella, más
+            análisis de datos de la empresa.
           </p>
 
           {/* CTA Buttons */}
@@ -138,7 +138,7 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
             </div>
             <div className="text-center space-y-2">
               <div className="text-3xl font-bold text-[#B695BF]">03</div>
-              <div className="text-white/60 text-sm">Gringon, team redes</div>
+              <div className="text-white/60 text-sm">Nacho, equipo redes</div>
             </div>
             <div className="text-center space-y-2">
               <div className="text-3xl font-bold text-[#51590E]">2001</div>

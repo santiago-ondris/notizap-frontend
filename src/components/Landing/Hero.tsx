@@ -101,7 +101,7 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
 
           {/* Description */}
           <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-12 leading-relaxed">
-            Soluciones para el día a día de los equipos de e-commerce y marketing de Montella, más
+            Soluciones para el equipo de e-commerce de Montella, más
             análisis de datos de la empresa.
           </p>
 

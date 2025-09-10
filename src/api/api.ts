@@ -8,7 +8,7 @@ const api = axios.create({
   }
 });
 
-// Interceptor para agregar el token automaticamente a cada request
+//  Interceptor para agregar el token automaticamente a cada request
 api.interceptors.request.use(
   (config) => {
     if (config.url?.includes("/login")) {

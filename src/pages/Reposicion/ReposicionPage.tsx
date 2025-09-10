@@ -292,7 +292,6 @@ export const ReposicionPage: React.FC = () => {
           )}
         </div>
 
-        {/* Stepper */}
         <div className="flex items-center justify-center">
           <div className="flex items-center space-x-8">
             {pasos.map((paso, index) => {

@@ -15,11 +15,11 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const modules = [
   {
-    title: "Analisis stock",
-    description: "Tasa de rotación y gráfico de evolución",
+    title: "Reposicion stock",
+    description: "Reposicion de stock por sucursal full rápido",
     icon: BarChart3,
     color: "#F23D5E",
-    to: "/analisis",
+    to: "/reposicion",
     roles: ["admin", "superadmin"]
   },
   {

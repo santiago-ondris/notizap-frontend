@@ -1,8 +1,6 @@
 import { ModuleCard } from "./ModuleCard";
 import {
-  ShoppingCart,
   Mail,
-  DollarSign,
   Repeat,
   Send,
   BarChart3,
@@ -39,14 +37,6 @@ const modules = [
     roles: ["viewer", "admin", "superadmin"]
   },
   {
-    title: "MercadoLibre",
-    description: "Estadísticas y reportes manuales de facturacion mensual",
-    icon: DollarSign,
-    color: "#B695BF",
-    to: "/mercadolibre",
-    roles: ["viewer", "admin", "superadmin"]
-  },
-  {
     title: "Envíos",
     description: "Envíos diarios y resúmenes por tipo",
     icon: Send,
@@ -69,15 +59,7 @@ const modules = [
     color: "#B695BF",
     to: "/vendedoras",
     roles: ["admin", "superadmin", "hr"]
-  },
-  {
-    title: "Ventas",
-    description: "Ventas mensuales online y comisiones",
-    icon: ShoppingCart,
-    color: "#F23D5E",
-    to: "/ventastienda",
-    roles: ["viewer", "admin", "superadmin"]
-  },
+  }
 ];
 
 export const ModulesGrid: React.FC = () => {
@@ -155,7 +137,7 @@ export const ModulesGrid: React.FC = () => {
       </div>
 
       {/* Modules grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredModules.map((module, index) => (
           <div
             key={module.title}

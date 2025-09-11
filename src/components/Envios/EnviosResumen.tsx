@@ -3,7 +3,6 @@ import {
   Truck, 
   Package, 
   Store, 
-  MapPin, 
   ShoppingCart,
   Users,
   BarChart3,
@@ -175,39 +174,6 @@ export const EnviosResumen: React.FC<EnviosResumenProps> = ({
           cargando={cargando}
         />
 
-        {/* Card de Córdoba Capital */}
-        <CardResumen
-          titulo="Córdoba Capital"
-          valor={resumen?.totalCordobaCapital || 0}
-          icono={<MapPin className="w-5 h-5" style={{ color: TIPOS_ENVIO.roberto.color }} />}
-          color={TIPOS_ENVIO.roberto.color}
-          descripcion="Roberto + Tino + Caddy"
-          cargando={cargando}
-        />
-
-        {/* Card de Roberto */}
-        <CardResumen
-          titulo={TIPOS_ENVIO.roberto.label}
-          valor={resumen?.totalRoberto || 0}
-          icono={<Users className="w-5 h-5" style={{ color: TIPOS_ENVIO.roberto.color }} />}
-          color={TIPOS_ENVIO.roberto.color}
-          descripcion="Envíos con Roberto"
-          cargando={cargando}
-        />
-
-        {/* Card de Tino */}
-        <CardResumen
-          titulo={TIPOS_ENVIO.tino.label}
-          valor={resumen?.totalTino || 0}
-          icono={<Users className="w-5 h-5" style={{ color: TIPOS_ENVIO.tino.color }} />}
-          color={TIPOS_ENVIO.tino.color}
-          descripcion="Envíos con Tino"
-          cargando={cargando}
-        />
-      </div>
-
-      {/* Card especial para Caddy */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <CardResumen
           titulo={TIPOS_ENVIO.caddy.label}
           valor={resumen?.totalCaddy || 0}
@@ -216,6 +182,10 @@ export const EnviosResumen: React.FC<EnviosResumenProps> = ({
           descripcion="Envíos con Caddy"
           cargando={cargando}
         />
+      </div>
+
+      {/* Card especial para Caddy */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
         {/* Información adicional */}
         <div className="md:col-span-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">

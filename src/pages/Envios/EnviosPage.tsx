@@ -241,12 +241,6 @@ const EnviosPage: React.FC = () => {
           cargando={cargandoDatos}
         />
 
-        {/* Cards de resumen */}
-        <EnviosResumen 
-          resumen={resumenMensual}
-          cargando={cargandoResumen}
-        />
-
         {/* Mensaje de permisos */}
         {!puedeEditar && (
           <div className="flex items-center gap-2 p-4 bg-[#FFD700]/10 border border-[#FFD700]/30 rounded-xl">
@@ -279,6 +273,12 @@ const EnviosPage: React.FC = () => {
             cargando={cargandoDatos}
           />
         )}
+
+        {/* Cards de resumen */}
+        <EnviosResumen 
+          resumen={resumenMensual}
+          cargando={cargandoResumen}
+        />
       </div>
     </div>
   );

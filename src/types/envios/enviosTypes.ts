@@ -154,8 +154,8 @@ export const TIPOS_ENVIO = {
   oca: { label: 'OCA', color: '#D94854' },
   andreani: { label: 'Andreani', color: '#B695BF' },
   retirosSucursal: { label: 'Retiros Sucursal', color: '#51590E' },
-  roberto: { label: 'Roberto', color: '#F23D5E' },
-  tino: { label: 'Tino', color: '#FFD700' },
+  // roberto: { label: 'Roberto', color: '#F23D5E' },
+  // tino: { label: 'Tino', color: '#FFD700' },
   caddy: { label: 'Caddy', color: '#00D5D5' },
   mercadoLibre: { label: 'Mercado Libre', color: '#e327c4' }
 } as const;

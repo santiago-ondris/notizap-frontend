@@ -14,6 +14,7 @@ import {
   type DevolucionesMercadoLibreFiltros as FiltrosType,
   type DevolucionesMercadoLibreEstadisticas as EstadisticasType
 } from '@/types/cambios/devolucionesMercadoLibreTypes';
+import { paginarArray, calcularTotalPaginas } from '@/utils/paginacion';
 
 const DevolucionesMercadoLibrePage: React.FC = () => {
   const navigate = useNavigate();
@@ -25,6 +26,10 @@ const DevolucionesMercadoLibrePage: React.FC = () => {
   const [devoluciones, setDevoluciones] = useState<DevolucionMercadoLibreDto[]>([]);
   const [devolucionesFiltradas, setDevolucionesFiltradas] = useState<DevolucionMercadoLibreDto[]>([]);
   const [estadisticas, setEstadisticas] = useState<EstadisticasType | null>(null);
+
+  // Estados de paginación
+  const [paginaActual, setPaginaActual] = useState<number>(1);
+  const ELEMENTOS_POR_PAGINA = 15;
 
   // Estados de UI
   const [cargandoDatos, setCargandoDatos] = useState<boolean>(false);
@@ -73,18 +78,32 @@ const DevolucionesMercadoLibrePage: React.FC = () => {
    */
   const aplicarFiltros = useCallback(() => {
     const devolucionesFiltradosResult = devolucionesMercadoLibreService.filtrarDevoluciones(devoluciones, filtros);
-    setDevolucionesFiltradas(devolucionesFiltradosResult);
     
-    // Calcular estadísticas solo de las devoluciones filtradas
+    // Calcular paginación
+    const totalPaginas = calcularTotalPaginas(devolucionesFiltradosResult.length, ELEMENTOS_POR_PAGINA);
+    
+    if (paginaActual > totalPaginas && totalPaginas > 0) {
+      setPaginaActual(1);
+    }
+    
+    const devolucionesPaginadas = paginarArray(devolucionesFiltradosResult, paginaActual, ELEMENTOS_POR_PAGINA);
+    
+    setDevolucionesFiltradas(devolucionesPaginadas);
+    
     const estadisticasCalculadas = devolucionesMercadoLibreService.calcularEstadisticas(devolucionesFiltradosResult);
     setEstadisticas(estadisticasCalculadas);
-  }, [devoluciones, filtros]);
+  }, [devoluciones, filtros, paginaActual]);
 
   /**
    * Manejar cambio de filtros
    */
   const handleFiltrosChange = (nuevosFiltros: FiltrosType) => {
     setFiltros(nuevosFiltros);
+    setPaginaActual(1); // Reset a página 1 cuando cambian filtros
+  };
+
+  const handleCambioPagina = (nuevaPagina: number) => {
+    setPaginaActual(nuevaPagina);
   };
 
   /**
@@ -413,6 +432,13 @@ const DevolucionesMercadoLibrePage: React.FC = () => {
             onEditar={handleEditarModal}
             puedeEditar={puedeEditar}
             cargando={cargandoDatos}
+            paginaActual={paginaActual}
+            totalPaginas={calcularTotalPaginas(
+              devolucionesMercadoLibreService.filtrarDevoluciones(devoluciones, filtros).length, 
+              ELEMENTOS_POR_PAGINA
+            )}
+            totalElementos={devolucionesMercadoLibreService.filtrarDevoluciones(devoluciones, filtros).length}
+            onCambioPagina={handleCambioPagina}
           />
         )}
 

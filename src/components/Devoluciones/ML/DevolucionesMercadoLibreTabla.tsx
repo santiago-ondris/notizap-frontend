@@ -18,6 +18,7 @@ import {
 import devolucionesMercadoLibreService from '@/services/cambios/devolucionesMercadoLibreService';
 import { copiarAlPortapapeles } from '@/utils/clipboard';
 import { toast } from 'react-toastify';
+import Paginacion from '@/components/ui/Paginacion';
 
 interface DevolucionesMercadoLibreTablaProps {
   devoluciones: DevolucionMercadoLibreDto[];
@@ -28,6 +29,10 @@ interface DevolucionesMercadoLibreTablaProps {
   onEditar: (devolucion: DevolucionMercadoLibreDto) => void;
   puedeEditar: boolean;
   cargando?: boolean;
+  paginaActual?: number;
+  totalPaginas?: number;
+  totalElementos?: number;
+  onCambioPagina?: (pagina: number) => void;
 }
 
 /**
@@ -299,7 +304,11 @@ export const DevolucionesMercadoLibreTabla: React.FC<DevolucionesMercadoLibreTab
   onVerDetalle,
   onEditar,
   puedeEditar,
-  cargando = false
+  cargando = false,
+  paginaActual = 1,
+  totalPaginas = 1,
+  totalElementos = 0,
+  onCambioPagina
 }) => {
 
   // Estado de carga
@@ -418,6 +427,19 @@ export const DevolucionesMercadoLibreTabla: React.FC<DevolucionesMercadoLibreTab
           </tbody>
         </table>
       </div>
+
+      {/* Paginación */}
+      {onCambioPagina && totalPaginas > 1 && (
+        <div className="p-4 border-t border-white/10">
+          <Paginacion
+            paginaActual={paginaActual}
+            totalPaginas={totalPaginas}
+            totalElementos={totalElementos}
+            elementosPorPagina={15}
+            onCambioPagina={onCambioPagina}
+          />
+        </div>
+      )}
 
       {/* Footer con estadísticas */}
       <div className="bg-white/5 border-t border-white/10 p-4">

@@ -1,8 +1,5 @@
 import { Route } from "react-router-dom";
 import { UsersPage }                 from "@/pages/Login/UsersPage";
-import VentasPage                from "@/pages/Analisis/VentasPage";
-import GraficoEvolucionPage      from "@/pages/Analisis/GraficoEvolucionPage";
-import VentasResumenPage         from "@/pages/Analisis/VentasResumenPage";
 import MailingPage               from "@/pages/Mailing/MailingPage";
 import MercadoLibreReportsPage   from "@/pages/MercadoLibre/MercadoLibreReportsPage";
 import AdminMercadoLibrePage     from "@/pages/MercadoLibre/AdminMercadoLibrePage";
@@ -19,7 +16,6 @@ import { VentasVendedorasPage } from "@/pages/Vendedoras/VentasVendedorasPage";
 import LocalesStatsPage from "@/pages/Vendedoras/LocalesStatsPage";
 import VentasOnlinePage from "@/pages/Ventas/VentasOnlinePage";
 import ComisionOnlinePage from "@/pages/Ventas/ComisionOnlinePage";
-import AnalisisLandingPage from "@/pages/Analisis/AnalisisLandingPage";
 import { ComisionesVendedorasPage } from "@/pages/Vendedoras/ComisionesVendedorasPage";
 import { ReposicionPage } from "@/pages/Reposicion/ReposicionPage";
 
@@ -27,12 +23,6 @@ export const ProtectedRoutes = (
   <>
     <Route path="usuarios"          element={<UsersPage />} />
     <Route path="reposicion"          element={<ReposicionPage />} />
-    <Route path="analisis">
-      <Route index                   element={<AnalisisLandingPage />} />
-      <Route path="ventas-resumen"   element={<VentasResumenPage />} />
-      <Route path="ventas"           element={<VentasPage />} />
-      <Route path="grafico"          element={<GraficoEvolucionPage />} />
-    </Route>
     <Route path="mailing"           element={<MailingPage />} />
     <Route path="ventastienda">
       <Route index                   element={<VentasOnlinePage />} />

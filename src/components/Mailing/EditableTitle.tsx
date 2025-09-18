@@ -7,7 +7,7 @@ interface EditableTitleProps {
   campaignId: number;
   currentTitle: string;
   cuenta: "Montella" | "Alenka";
-  canEdit: boolean; // Para verificar permisos
+  canEdit: boolean; 
 }
 
 export const EditableTitle: React.FC<EditableTitleProps> = ({
@@ -21,7 +21,6 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const updateMutation = useUpdateCampaignTitle();
 
-  // Focus input cuando entra en modo edición
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
@@ -63,7 +62,6 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
         onError: (error) => {
           const errorMessage = error instanceof Error ? error.message : "Error al actualizar título";
           toast.error(errorMessage);
-          // Mantener en modo edición para que el usuario pueda corregir
         }
       }
     );

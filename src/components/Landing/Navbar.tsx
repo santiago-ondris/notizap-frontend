@@ -20,14 +20,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
-      // Detectar si se ha scrolleado
       setIsScrolled(currentScrollY > 20);
       
-      // Mostrar/ocultar navbar basado en dirección del scroll
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsVisible(false); // Scrolling down
+        setIsVisible(false);
       } else {
-        setIsVisible(true); // Scrolling up
+        setIsVisible(true); 
       }
       
       setLastScrollY(currentScrollY);
@@ -37,7 +35,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  // Cerrar menu de usuario al hacer click fuera
   useEffect(() => {
     const handleClickOutside = () => setShowUserMenu(false);
     if (showUserMenu) {

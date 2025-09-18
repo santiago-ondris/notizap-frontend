@@ -47,11 +47,10 @@ class DevolucionesService {
 
   async crear(devolucion: CreateDevolucionDto): Promise<number> {
     try {
-      // Validar datos antes de enviar
       this.validarDevolucion(devolucion);
       
       const response = await api.post('/api/v1/Devolucion', devolucion);
-      return response.data; // Retorna el ID creado
+      return response.data; 
     } catch (error) {
       console.error('Error al crear devolución:', error);
       throw new Error('No se pudo crear la devolución');
@@ -60,7 +59,6 @@ class DevolucionesService {
 
   async actualizar(id: number, devolucion: DevolucionDto): Promise<void> {
     try {
-      // Validar datos antes de enviar
       this.validarDevolucion(devolucion);
       
       await api.put(`/api/v1/Devolucion/${id}`, devolucion);
@@ -97,32 +95,26 @@ class DevolucionesService {
 
   filtrarDevoluciones(devoluciones: DevolucionDto[], filtros: DevolucionesFiltros): DevolucionDto[] {
     return devoluciones.filter(devolucion => {
-      // Filtro por pedido
       if (filtros.pedido && !devolucion.pedido.toLowerCase().includes(filtros.pedido.toLowerCase())) {
         return false;
       }
 
-      // Filtro por celular
       if (filtros.celular && !devolucion.celular.includes(filtros.celular)) {
         return false;
       }
 
-      // Filtro por modelo
       if (filtros.modelo && !devolucion.modelo.toLowerCase().includes(filtros.modelo.toLowerCase())) {
         return false;
       }
 
-      // Filtro por responsable
       if (filtros.responsable && !devolucion.responsable.toLowerCase().includes(filtros.responsable.toLowerCase())) {
         return false;
       }
 
-      // Filtro por motivo
       if (filtros.motivo && devolucion.motivo !== filtros.motivo) {
         return false;
       }
 
-      // Filtro por estado
       if (filtros.estado && filtros.estado !== 'todos') {
         const estadoDevolucion = this.obtenerEstadoDevolucion(devolucion);
         if (estadoDevolucion !== filtros.estado) {
@@ -130,7 +122,6 @@ class DevolucionesService {
         }
       }
 
-      // Filtro por rango de fechas
       if (filtros.fechaDesde) {
         const fechaDevolucion = new Date(devolucion.fecha);
         const fechaDesde = new Date(filtros.fechaDesde);
@@ -142,13 +133,12 @@ class DevolucionesService {
       if (filtros.fechaHasta) {
         const fechaDevolucion = new Date(devolucion.fecha);
         const fechaHasta = new Date(filtros.fechaHasta);
-        fechaHasta.setHours(23, 59, 59, 999); // Final del día
+        fechaHasta.setHours(23, 59, 59, 999);
         if (fechaDevolucion > fechaHasta) {
           return false;
         }
       }
 
-      // Filtro por rango de montos
       if (filtros.montoMinimo && devolucion.monto && devolucion.monto < filtros.montoMinimo) {
         return false;
       }
@@ -164,32 +154,26 @@ class DevolucionesService {
   obtenerEstadoDevolucion(devolucion: DevolucionDto): EstadoDevolucionFiltro {
     const { llegoAlDeposito, dineroDevuelto, notaCreditoEmitida } = devolucion;
 
-    // Completado: todos los procesos finalizados
     if (llegoAlDeposito && dineroDevuelto && notaCreditoEmitida) {
       return 'completado';
     }
 
-    // Dinero devuelto pero sin nota
     if (llegoAlDeposito && dineroDevuelto && !notaCreditoEmitida) {
       return 'dinero_devuelto';
     }
 
-    // Nota emitida pero sin dinero
     if (llegoAlDeposito && !dineroDevuelto && notaCreditoEmitida) {
       return 'nota_emitida';
     }
 
-    // Llegó al depósito pero sin procesar
     if (llegoAlDeposito && !dineroDevuelto && !notaCreditoEmitida) {
       return 'llegado_sin_procesar';
     }
 
-    // No llegó al depósito
     if (!llegoAlDeposito) {
       return 'pendiente_llegada';
     }
 
-    // Estado por defecto
     return 'sin_llegar';
   }
 
@@ -211,7 +195,6 @@ class DevolucionesService {
   calcularEstadisticas(devoluciones: DevolucionDto[]): DevolucionesEstadisticasData {
     const total = devoluciones.length;
     
-    // Contadores por estado
     let pendientesLlegada = 0;
     let llegadosSinProcesar = 0;
     let completados = 0;
@@ -219,22 +202,18 @@ class DevolucionesService {
     let notasEmitidas = 0;
     let sinProcesar = 0;
 
-    // Montos
     let montoTotalDevoluciones = 0;
     let montoTotalPagosEnvio = 0;
     let contadorMontos = 0;
 
-    // Devoluciones del mes actual
     const fechaActual = new Date();
     const mesActual = fechaActual.getMonth();
     const añoActual = fechaActual.getFullYear();
     let devolucionesMesActual = 0;
 
-    // Procesar cada devolución
     devoluciones.forEach(devolucion => {
       const estado = this.obtenerEstadoDevolucion(devolucion);
       
-      // Contar por estado
       switch (estado) {
         case 'pendiente_llegada':
         case 'sin_llegar':
@@ -254,12 +233,10 @@ class DevolucionesService {
           break;
       }
 
-      // Estados sin procesar
       if (!devolucion.llegoAlDeposito || (!devolucion.dineroDevuelto && !devolucion.notaCreditoEmitida)) {
         sinProcesar++;
       }
 
-      // Sumar montos
       if (devolucion.monto) {
         montoTotalDevoluciones += devolucion.monto;
         contadorMontos++;
@@ -268,14 +245,12 @@ class DevolucionesService {
         montoTotalPagosEnvio += devolucion.pagoEnvio;
       }
 
-      // Devoluciones del mes actual
       const fechaDevolucion = new Date(devolucion.fecha);
       if (fechaDevolucion.getMonth() === mesActual && fechaDevolucion.getFullYear() === añoActual) {
         devolucionesMesActual++;
       }
     });
 
-    // Calcular promedios y porcentajes
     const montoPromedioDevolucion = contadorMontos > 0 ? montoTotalDevoluciones / contadorMontos : 0;
     const porcentajeCompletadas = total > 0 ? (completados / total) * 100 : 0;
 
@@ -359,13 +334,12 @@ class DevolucionesService {
   }
 
   obtenerPrioridad(devolucion: DevolucionDto): number {
-    if (!devolucion.llegoAlDeposito) return 1; // Alta prioridad: no llegó
-    if (devolucion.llegoAlDeposito && !devolucion.dineroDevuelto && !devolucion.notaCreditoEmitida) return 2; // Media: llegó sin procesar
-    if (this.estaCompleta(devolucion)) return 4; // Baja: completado
-    return 3; // Media-baja: parcialmente procesado
+    if (!devolucion.llegoAlDeposito) return 1;
+    if (devolucion.llegoAlDeposito && !devolucion.dineroDevuelto && !devolucion.notaCreditoEmitida) return 2;
+    if (this.estaCompleta(devolucion)) return 4; 
+    return 3; 
   }
 }
 
-// Exportar instancia singleton
 const devolucionesService = new DevolucionesService();
 export default devolucionesService;

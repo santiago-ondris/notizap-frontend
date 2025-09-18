@@ -9,7 +9,6 @@ interface Props {
   loading?: boolean;
 }
 
-// Colores temáticos para cada sucursal
 const coloresSucursales = [
   'bg-blue-500/20 text-blue-400 border-blue-500/30',
   'bg-green-500/20 text-green-400 border-green-500/30', 
@@ -45,7 +44,6 @@ export const SucursalesComparison: React.FC<Props> = ({
     );
   }
 
-  // Si no hay datos, no mostrar nada
   if (!ventasPorSucursal || ventasPorSucursal.length === 0) {
     return null;
   }

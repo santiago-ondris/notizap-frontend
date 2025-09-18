@@ -3,43 +3,37 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface TablaConIndicadoresProps {
   children: React.ReactNode;
-  minWidth: string; // ej: "1620px"
+  minWidth: string; 
   className?: string;
-  onScrollStateChange?: (hasScroll: boolean) => void; // ← NUEVA PROP
+  onScrollStateChange?: (hasScroll: boolean) => void; 
 }
 
 export const TablaConIndicadores: React.FC<TablaConIndicadoresProps> = ({
   children,
   minWidth,
   className = '',
-  onScrollStateChange // ← NUEVA PROP
+  onScrollStateChange 
 }) => {
   const [mostrarIndicadorIzquierdo, setMostrarIndicadorIzquierdo] = useState(false);
   const [mostrarIndicadorDerecho, setMostrarIndicadorDerecho] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Verificar si hay scroll y actualizar indicadores
   const verificarScroll = () => {
     if (!scrollRef.current) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
     
-    // Mostrar indicador izquierdo si no estamos al inicio
     setMostrarIndicadorIzquierdo(scrollLeft > 10);
     
-    // Mostrar indicador derecho si no estamos al final
     setMostrarIndicadorDerecho(scrollLeft < scrollWidth - clientWidth - 10);
     
-    // Notificar al componente padre si hay scroll disponible
     const hasScroll = scrollWidth > clientWidth;
     onScrollStateChange?.(hasScroll);
   };
 
-  // Verificar al montar y cuando cambie el contenido
   useEffect(() => {
     verificarScroll();
     
-    // Observer para detectar cambios en el contenido
     const observer = new ResizeObserver(() => {
       verificarScroll();
     });
@@ -51,11 +45,10 @@ export const TablaConIndicadores: React.FC<TablaConIndicadoresProps> = ({
     return () => observer.disconnect();
   }, [children]);
 
-  // Scroll suave hacia la dirección indicada
   const scrollHacia = (direccion: 'izquierda' | 'derecha') => {
     if (!scrollRef.current) return;
 
-    const scrollAmount = 300; // Cantidad de scroll en px
+    const scrollAmount = 300; 
     const currentScroll = scrollRef.current.scrollLeft;
     const targetScroll = direccion === 'izquierda' 
       ? currentScroll - scrollAmount 

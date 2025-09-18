@@ -29,9 +29,7 @@ interface DevolucionesFiltrosProps {
   cargando?: boolean;
 }
 
-/**
- * Componente de filtro desplegable
- */
+
 const FilterDropdown: React.FC<{
   label: string;
   value: string;
@@ -141,9 +139,7 @@ const FilterDropdown: React.FC<{
   );
 };
 
-/**
- * Componente principal de filtros de devoluciones
- */
+
 export const DevolucionesFiltros: React.FC<DevolucionesFiltrosProps> = ({
   filtros,
   onFiltrosChange,
@@ -154,12 +150,10 @@ export const DevolucionesFiltros: React.FC<DevolucionesFiltrosProps> = ({
   const [mostrarFiltrosAvanzados, setMostrarFiltrosAvanzados] = useState(false);
   const [filtrosLocales, setFiltrosLocales] = useState<FiltrosType>(filtros);
 
-  // Sincronizar con props
   useEffect(() => {
     setFiltrosLocales(filtros);
   }, [filtros]);
 
-  // Actualizar filtros con debounce para campos de texto
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       onFiltrosChange(filtrosLocales);
@@ -168,7 +162,6 @@ export const DevolucionesFiltros: React.FC<DevolucionesFiltrosProps> = ({
     return () => clearTimeout(timeoutId);
   }, [filtrosLocales, onFiltrosChange]);
 
-  // Manejar cambio de filtro
   const handleFiltroChange = (campo: keyof FiltrosType, valor: any) => {
     setFiltrosLocales(prev => ({
       ...prev,
@@ -176,7 +169,6 @@ export const DevolucionesFiltros: React.FC<DevolucionesFiltrosProps> = ({
     }));
   };
 
-  // Limpiar todos los filtros
   const limpiarFiltros = () => {
     const filtrosVacios: FiltrosType = {};
     setFiltrosLocales(filtrosVacios);
@@ -184,12 +176,10 @@ export const DevolucionesFiltros: React.FC<DevolucionesFiltrosProps> = ({
     setMostrarFiltrosAvanzados(false);
   };
 
-  // Verificar si hay filtros activos
   const hayFiltrosActivos = Object.values(filtrosLocales).some(valor => 
     valor !== undefined && valor !== '' && valor !== 'todos'
   );
 
-  // Opciones para el dropdown de estados
   const opcionesEstado: Array<{ value: EstadoDevolucionFiltro; label: string; color?: string }> = [
     { value: 'todos', label: LABELS_ESTADO_DEVOLUCION.todos },
     { value: 'pendiente_llegada', label: LABELS_ESTADO_DEVOLUCION.pendiente_llegada, color: COLORES_ESTADO_DEVOLUCION.pendiente_llegada },
@@ -200,7 +190,6 @@ export const DevolucionesFiltros: React.FC<DevolucionesFiltrosProps> = ({
     { value: 'sin_llegar', label: LABELS_ESTADO_DEVOLUCION.sin_llegar, color: COLORES_ESTADO_DEVOLUCION.sin_llegar }
   ];
 
-  // Opciones para el dropdown de motivos
   const opcionesMotivo = [
     { value: '', label: 'Todos los motivos' },
     ...MOTIVOS_DEVOLUCION.map(motivo => ({ value: motivo, label: motivo }))

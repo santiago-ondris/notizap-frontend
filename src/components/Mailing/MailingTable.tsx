@@ -21,7 +21,7 @@ interface MailingTableProps {
   totalCampaigns?: number;
   currentPage?: number;
   itemsPerPage?: number;
-  canEditTitles?: boolean; // Nuevo prop para permisos
+  canEditTitles?: boolean; 
 }
 
 export const MailingTable: React.FC<MailingTableProps> = ({

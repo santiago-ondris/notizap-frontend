@@ -1,8 +1,5 @@
 import { type CampaignMailchimp } from "@/types/mailing/mailingTypes";
 
-/**
- * Filtra campañas por un string en el título (case-insensitive)
- */
 export function filterByTitle(campañas: CampaignMailchimp[], search: string): CampaignMailchimp[] {
   if (!search.trim()) return campañas;
   return campañas.filter(c =>
@@ -10,10 +7,6 @@ export function filterByTitle(campañas: CampaignMailchimp[], search: string): C
   );
 }
 
-/**
- * Filtra campañas por rango de fechas (inclusive)
- * Las fechas deben venir en formato Date o string ISO válido
- */
 export function filterByDateRange(
   campañas: CampaignMailchimp[],
   from?: Date | null,

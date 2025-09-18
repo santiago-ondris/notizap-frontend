@@ -18,9 +18,7 @@ interface DevolucionesMercadoLibreFiltrosProps {
   cargando?: boolean;
 }
 
-/**
- * Componente principal de filtros de devoluciones de MercadoLibre
- */
+
 export const DevolucionesMercadoLibreFiltros: React.FC<DevolucionesMercadoLibreFiltrosProps> = ({
   filtros,
   onFiltrosChange,
@@ -31,12 +29,10 @@ export const DevolucionesMercadoLibreFiltros: React.FC<DevolucionesMercadoLibreF
   const [mostrarFiltrosAvanzados, setMostrarFiltrosAvanzados] = useState(false);
   const [filtrosLocales, setFiltrosLocales] = useState<FiltrosType>(filtros);
 
-  // Sincronizar con props
   useEffect(() => {
     setFiltrosLocales(filtros);
   }, [filtros]);
 
-  // Actualizar filtros con debounce para campos de texto
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       onFiltrosChange(filtrosLocales);
@@ -45,7 +41,6 @@ export const DevolucionesMercadoLibreFiltros: React.FC<DevolucionesMercadoLibreF
     return () => clearTimeout(timeoutId);
   }, [filtrosLocales]); 
 
-  // Manejar cambio de filtro
   const handleFiltroChange = (campo: keyof FiltrosType, valor: any) => {
     setFiltrosLocales(prev => ({
       ...prev,
@@ -53,7 +48,6 @@ export const DevolucionesMercadoLibreFiltros: React.FC<DevolucionesMercadoLibreF
     }));
   };
 
-  // Limpiar todos los filtros
   const limpiarFiltros = () => {
     const filtrosVacios: FiltrosType = {};
     setFiltrosLocales(filtrosVacios);
@@ -61,7 +55,6 @@ export const DevolucionesMercadoLibreFiltros: React.FC<DevolucionesMercadoLibreF
     setMostrarFiltrosAvanzados(false);
   };
 
-  // Verificar si hay filtros activos
   const hayFiltrosActivos = Object.values(filtrosLocales).some(valor => 
     valor !== undefined && valor !== '' && valor !== 'todos'
   );

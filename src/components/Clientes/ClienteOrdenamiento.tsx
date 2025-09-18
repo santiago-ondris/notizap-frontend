@@ -17,10 +17,9 @@ import {
 interface Props {
   ordenarPor: string;
   onOrdenarPorChange: (ordenarPor: string) => void;
-  tieneCategoriasSeleccionadas: boolean; // Para mostrar opciones específicas
+  tieneCategoriasSeleccionadas: boolean;
 }
 
-// Opciones de ordenamiento
 const opcionesOrdenamiento = [
   {
     value: "montoTotal",
@@ -81,7 +80,6 @@ export default function ClienteOrdenamiento({
 }: Props) {
   const [open, setOpen] = useState(false);
 
-  // Filtrar opciones según si hay categorías seleccionadas
   const opcionesDisponibles = opcionesOrdenamiento.filter(opcion => 
     !opcion.requiresCategoria || tieneCategoriasSeleccionadas
   );

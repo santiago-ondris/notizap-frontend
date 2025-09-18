@@ -61,10 +61,8 @@ const OPCIONES_VISTA: OpcionVista[] = [
 export const ComisionesVendedorasPage: React.FC = () => {
   const navigate = useNavigate();
   
-  // Estados principales
   const [vistaActual, setVistaActual] = useState<VistaActual>('por-vendedora');
   
-  // Estados de modales
   const [modalDiaAbierto, setModalDiaAbierto] = useState(false);
   const [diaSeleccionado, setDiaSeleccionado] = useState<DiaCalendario | null>(null);
   const [calculadoraAbierta, setCalculadoraAbierta] = useState(false);
@@ -75,7 +73,6 @@ export const ComisionesVendedorasPage: React.FC = () => {
     esRecalculo: boolean;
   } | null>(null);
 
-  // Estados para tabla general
   const [comisionesGenerales, setComisionesGenerales] = useState<ComisionesResponse | null>(null);
   const [datosMaestros, setDatosMaestros] = useState<DatosMaestrosComisiones | null>(null);
   const [loadingTablaGeneral, setLoadingTablaGeneral] = useState(false);
@@ -91,7 +88,6 @@ export const ComisionesVendedorasPage: React.FC = () => {
     pageSize: 50
   });
 
-  // Cargar datos maestros cuando se selecciona tabla general
   React.useEffect(() => {
     if (vistaActual === 'tabla-general') {
       cargarDatosMaestros();
@@ -99,7 +95,6 @@ export const ComisionesVendedorasPage: React.FC = () => {
     }
   }, [vistaActual]);
 
-  // Cargar tabla general cuando cambian filtros
   React.useEffect(() => {
     if (vistaActual === 'tabla-general' && datosMaestros) {
       cargarTablaGeneral();
@@ -107,7 +102,7 @@ export const ComisionesVendedorasPage: React.FC = () => {
   }, [filtrosGenerales, vistaActual, datosMaestros]);
 
   const cargarDatosMaestros = async () => {
-    if (datosMaestros) return; // Ya cargados
+    if (datosMaestros) return; 
     
     try {
       const datos = await comisionesVendedorasService.obtenerDatosMaestros();
@@ -160,8 +155,6 @@ export const ComisionesVendedorasPage: React.FC = () => {
 
   const handleCalculadoraSuccess = () => {
     toast.success('¡Comisiones calculadas correctamente!');
-    // La calculadora ya maneja el cierre y los toasts
-    // Aquí podrías agregar lógica adicional como refrescar el calendario
   };
 
   const handleFiltrosGeneralesChange = (filtros: Partial<ComisionVendedoraFilters>) => {

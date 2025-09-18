@@ -10,10 +10,6 @@ interface SelectorMesesProps {
   className?: string;
 }
 
-/**
- * Componente selector de meses con Radix UI
- * Permite seleccionar un mes específico para filtrar datos
- */
 export const SelectorMeses: React.FC<SelectorMesesProps> = ({
   valorSeleccionado,
   onCambio,
@@ -22,13 +18,11 @@ export const SelectorMeses: React.FC<SelectorMesesProps> = ({
 }) => {
   const [opciones, setOpciones] = useState<OpcionMes[]>([]);
 
-  // Generar opciones de meses al montar el componente
   useEffect(() => {
     const opcionesMeses = MesesUtils.generarOpcionesMeses(24); // Últimos 24 meses
     setOpciones(opcionesMeses);
   }, []);
 
-  // Obtener la opción actualmente seleccionada
   const opcionSeleccionada = opciones.find(opcion => opcion.valor === valorSeleccionado);
 
   return (

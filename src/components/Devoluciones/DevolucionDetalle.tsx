@@ -24,9 +24,6 @@ interface DevolucionDetalleProps {
   devolucion: DevolucionDto | null;
 }
 
-/**
- * Componente de campo de detalle
- */
 const CampoDetalle: React.FC<{
   label: string;
   valor: string | number | null | undefined;
@@ -39,7 +36,6 @@ const CampoDetalle: React.FC<{
     if (valor && copiable) {
       try {
         await navigator.clipboard.writeText(valor.toString());
-        // Aquí podrías agregar un toast de confirmación
       } catch (error) {
         console.error('Error al copiar:', error);
       }
@@ -83,9 +79,6 @@ const CampoDetalle: React.FC<{
   );
 };
 
-/**
- * Componente de estado individual
- */
 const EstadoDetalle: React.FC<{
   titulo: string;
   activo: boolean;
@@ -132,25 +125,19 @@ const EstadoDetalle: React.FC<{
   </div>
 );
 
-/**
- * Componente principal del modal de detalle
- */
 export const DevolucionDetalle: React.FC<DevolucionDetalleProps> = ({
   isOpen,
   onClose,
   devolucion
 }) => {
 
-  // No renderizar si no está abierto o no hay devolución
   if (!isOpen || !devolucion) return null;
 
-  // Obtener información del estado
   const colorEstado = devolucionesService.obtenerColorEstado(devolucion);
   const descripcionEstado = devolucionesService.obtenerDescripcionEstado(devolucion);
   const iconoEstado = devolucionesService.obtenerIconoEstado(devolucion);
   const estaCompleta = devolucionesService.estaCompleta(devolucion);
 
-  // Calcular costo total
   const costoTotal = (devolucion.monto || 0) + (devolucion.pagoEnvio || 0);
 
   return (

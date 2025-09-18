@@ -31,7 +31,6 @@ const MESES = [
   { valor: 12, nombre: 'Diciembre' }
 ];
 
-// Generar años (desde 2020 hasta 2030)
 const AÑOS = Array.from({ length: 11 }, (_, i) => 2020 + i);
 
 export const EnviosSelectorMes: React.FC<EnviosSelectorMesProps> = ({

@@ -1,8 +1,5 @@
-/**
- * DTO para crear un nuevo cambio (versión simplificada)
- */
 export interface CreateCambioSimpleDto {
-  fecha: string; // ISO string
+  fecha: string;
   pedido: string;
   celular: string;
   nombre: string;
@@ -19,9 +16,6 @@ export interface CreateCambioSimpleDto {
   etiqueta?: string;
 }
 
-/**
- * DTO completo del cambio (incluye ID y estados)
- */
 export interface CambioSimpleDto extends CreateCambioSimpleDto {
   id: number;
   llegoAlDeposito: boolean;
@@ -30,9 +24,6 @@ export interface CambioSimpleDto extends CreateCambioSimpleDto {
   etiquetaDespachada: boolean;
 }
 
-/**
- * Estados posibles de un cambio
- */
 export interface EstadosCambio {
   llegoAlDeposito: boolean;
   yaEnviado: boolean;
@@ -40,9 +31,6 @@ export interface EstadosCambio {
   parPedido : boolean;
 }
 
-/**
- * Filtros para la tabla de cambios
- */
 export interface CambiosFiltros {
   fechaDesde?: string;
   fechaHasta?: string;
@@ -52,37 +40,26 @@ export interface CambiosFiltros {
   motivo?: string;
   estado?: EstadoCambioFiltro;
   envio?: string;
-  // Nuevo: filtro por mes y año
   mes?: number;
   año?: number;
 }
 
-/**
- * Opciones para el selector de meses
- */
 export interface OpcionMes {
-  valor: string; // "2024-01"
-  etiqueta: string; // "Enero 2024"
-  mes: number; // 1
-  año: number; // 2024
-  nombre: string; // "Enero"
+  valor: string;
+  etiqueta: string; 
+  mes: number; 
+  año: number; 
+  nombre: string; 
 }
 
-/**
- * Tipos de filtro por estado
- */
 export type EstadoCambioFiltro = 
   | 'todos'
-  | 'pendiente_llegada'     // !llegoAlDeposito
-  | 'listo_envio'          // llegoAlDeposito && !yaEnviado
-  | 'enviado'              // yaEnviado
-  | 'completado'           // llegoAlDeposito && yaEnviado && cambioRegistradoSistema
+  | 'pendiente_llegada'    
+  | 'listo_envio'          
+  | 'enviado'            
+  | 'completado'           
   | 'sin_registrar';  
-         // !cambioRegistradoSistema
 
-/**
- * Estadísticas del módulo de cambios
- */
 export interface CambiosEstadisticasData {
   totalCambios: number;
   pendientesLlegada: number;
@@ -92,12 +69,9 @@ export interface CambiosEstadisticasData {
   sinRegistrar: number;
   diferenciaAbonada: number;
   diferenciaAFavor: number;
-  diferencianNeta: number; // diferenciaAbonada - diferenciaAFavor
+  diferencianNeta: number; 
 }
 
-/**
- * Motivos comunes de cambio (para dropdown)
- */
 export const MOTIVOS_CAMBIO = [
   'Talle',
   'Modelo',
@@ -108,21 +82,15 @@ export const MOTIVOS_CAMBIO = [
 
 export type MotivoCambio = typeof MOTIVOS_CAMBIO[number];
 
-/**
- * Configuración de colores para estados
- */
 export const COLORES_ESTADO = {
-  pendiente_llegada: '#FFD700',     // Dorado
-  listo_envio: '#B695BF',          // Violeta
-  enviado: '#51590E',              // Verde oliva
-  completado: '#51590E',           // Verde oliva
-  sin_registrar: '#D94854',        // Rojo
-  todos: '#FFFFFF'                 // Blanco
+  pendiente_llegada: '#FFD700',     
+  listo_envio: '#B695BF',         
+  enviado: '#51590E',            
+  completado: '#51590E',          
+  sin_registrar: '#D94854',     
+  todos: '#FFFFFF'                 
 } as const;
 
-/**
- * Labels para estados
- */
 export const LABELS_ESTADO = {
   pendiente_llegada: 'Pendiente llegada',
   listo_envio: 'Listo para envío',
@@ -132,45 +100,31 @@ export const LABELS_ESTADO = {
   todos: 'Todos los estados'
 } as const;
 
-/**
- * DTO para actualizar solo etiqueta y estado de despacho
- */
 export interface ActualizarEtiquetaDto {
   etiqueta: string;
   etiquetaDespachada: boolean;
 }
 
-/**
- * Estados de etiqueta para el componente
- */
 export interface EstadoEtiqueta {
   valor: string;
   despachada: boolean;
 }
 
-/**
- * Utilidades para manejo de meses
- */
 export class MesesUtils {
   private static readonly NOMBRES_MESES = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ];
 
-  /**
-   * Obtiene el mes y año actual
-   */
+
   static obtenerMesActual(): { mes: number; año: number } {
     const fecha = new Date();
     return {
-      mes: fecha.getMonth() + 1, // JavaScript usa 0-11, necesitamos 1-12
+      mes: fecha.getMonth() + 1, 
       año: fecha.getFullYear()
     };
   }
 
-  /**
-   * Genera opciones de meses para los últimos N meses
-   */
   static generarOpcionesMeses(cantidadMeses = 12): OpcionMes[] {
     const opciones: OpcionMes[] = [];
     const fechaActual = new Date();
@@ -193,13 +147,10 @@ export class MesesUtils {
     return opciones;
   }
 
-  /**
-   * Convierte valor de selector a filtros de fecha
-   */
   static convertirMesAFiltros(valorMes: string): { fechaDesde: string; fechaHasta: string } {
     const [año, mes] = valorMes.split('-').map(Number);
     const fechaDesde = new Date(año, mes - 1, 1);
-    const fechaHasta = new Date(año, mes, 0); // Último día del mes
+    const fechaHasta = new Date(año, mes, 0); 
 
     return {
       fechaDesde: fechaDesde.toISOString().split('T')[0],
@@ -207,9 +158,6 @@ export class MesesUtils {
     };
   }
 
-  /**
-   * Formatea un valor de mes para mostrar
-   */
   static formatearMes(mes: number, año: number): string {
     const nombre = this.NOMBRES_MESES[mes - 1];
     return `${nombre} ${año}`;

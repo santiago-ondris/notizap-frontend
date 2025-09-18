@@ -5,7 +5,6 @@ import { TrendingUp } from "lucide-react";
 import { toast } from "react-toastify";
 import { filterByTitle, filterByDateRange } from "@/utils/mailing/filters";
 
-// Componentes modularizados
 import { MailingHeader } from "@/components/Mailing/MailingHeader";
 import { MailingHighlights } from "@/components/Mailing/MailingHighlights";
 import { MailingFilters } from "@/components/Mailing/MailingFilters";
@@ -15,7 +14,6 @@ import { MailingPagination } from "@/components/Mailing/MailingPagination";
 const CUENTAS = ["Montella", "Alenka"] as const;
 const ITEMS_PER_PAGE = 15;
 
-// Función para calcular highlights dinámicos basados en campañas filtradas
 function calculateDynamicHighlights(campaigns: any[]) {
   if (!campaigns || campaigns.length === 0) {
     return {
@@ -57,7 +55,6 @@ const MailingPage: React.FC = () => {
   const [toDate, setToDate] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Datos y estados
   const { data: campañas, isLoading: loadingCampañas, error: errorCampañas } = useMailingCampaigns(cuenta);
   const { data: highlights, isLoading: loadingHighlights } = useMailingHighlights(cuenta);
   const { role } = useAuth();
@@ -71,7 +68,6 @@ const MailingPage: React.FC = () => {
     syncMutation.mutate(cuenta, {
       onSuccess: (resultado) => {
 
-        // Toast con información detallada
         if (resultado.nuevasCampañas > 0 || resultado.campañasActualizadas > 0) {
           toast.success(
             `✅ Sincronización completada: ${resultado.mensaje}`,
@@ -87,7 +83,6 @@ const MailingPage: React.FC = () => {
     });
   };
 
-  // Filtrar campañas y calcular highlights dinámicos
   const { campañasFiltradas, highlightsDinamicos, totalPages, campañasPaginadas } = useMemo(() => {
     let filtered = campañas || [];
     filtered = filterByTitle(filtered, search);
@@ -97,10 +92,8 @@ const MailingPage: React.FC = () => {
       toDate ? new Date(toDate + "T23:59:59") : null
     );
 
-    // Calcular highlights basados en campañas filtradas
     const dynamicHighlights = calculateDynamicHighlights(filtered);
 
-    // Calcular paginación
     const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
@@ -114,12 +107,10 @@ const MailingPage: React.FC = () => {
     };
   }, [campañas, search, fromDate, toDate, currentPage]);
 
-  // Resetear página cuando cambien los filtros
   React.useEffect(() => {
     setCurrentPage(1);
   }, [search, fromDate, toDate, cuenta]);
 
-  // Determinar qué highlights mostrar: dinámicos si hay filtros activos, estáticos si no
   const hayFiltrosActivos = !!(search || fromDate || toDate);
   const highlightsAMostrar = hayFiltrosActivos ? highlightsDinamicos : highlights;
   const cargandoHighlights = hayFiltrosActivos ? loadingCampañas : loadingHighlights;

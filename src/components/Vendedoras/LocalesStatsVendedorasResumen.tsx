@@ -6,7 +6,7 @@ export function LocalesStatsVendedorasResumen({
   metricaComparar,
   onVendedoraClick,
 }: {
-  resumenVendedoras: any[]; // RendimientoVendedoraResumen[]
+  resumenVendedoras: any[]; 
   metricaComparar: 'monto' | 'cantidad';
   onVendedoraClick?: (nombre: string) => void;
 }) {

@@ -28,9 +28,6 @@ interface CambiosFiltrosProps {
   cargando?: boolean;
 }
 
-/**
- * Dropdown con Radix UI - Sin problemas de recorte
- */
 const RadixDropdown: React.FC<{
   label: string;
   value: string;
@@ -100,9 +97,6 @@ const RadixDropdown: React.FC<{
   );
 };
 
-/**
- * Componente principal de filtros con Radix UI
- */
 export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
   filtros,
   onFiltrosChange,
@@ -132,12 +126,10 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
     setMostrarFiltrosAvanzados(false);
   };
 
-  // Verificar si hay filtros activos
   const hayFiltrosActivos = Object.values(filtros).some(valor => 
     valor !== undefined && valor !== '' && valor !== 'todos'
   );
 
-  // Opciones para dropdowns - ASEGURAR VALORES NO VACÍOS
   const opcionesEstado: Array<{ value: string; label: string; color?: string }> = [
     { value: 'todos', label: LABELS_ESTADO.todos },
     { value: 'pendiente_llegada', label: LABELS_ESTADO.pendiente_llegada, color: COLORES_ESTADO.pendiente_llegada },

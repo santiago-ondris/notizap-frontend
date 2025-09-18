@@ -2,15 +2,14 @@ export interface CampaignMailchimp {
   id: number;
   campaignId: string;
   title: string;
-  sendTime: string;        // ISO String
+  sendTime: string;     
   emailsSent: number;
-  openRate: number;        // 0.45 = 45%
-  clickRate: number;       // 0.23 = 23%
+  openRate: number;        
+  clickRate: number;       
   conversions: number;
   cuenta: "Montella" | "Alenka";
 }
 
-// Tipo para el resumen de highlights
 export interface CampaignHighlights {
   bestOpenRateCampaign: string;
   bestOpenRate: number;
@@ -20,7 +19,6 @@ export interface CampaignHighlights {
   bestConversions: number;
 }
 
-// Tipo para los detalles de una campaña específica
 export interface CampaignStats {
   campaignTitle: string;
   sendTime: string;
@@ -30,7 +28,6 @@ export interface CampaignStats {
   conversions: number;
 }
 
-// Tipo para el resultado de la sincronización
 export interface MailchimpSyncResult {
   nuevasCampañas: number;
   campañasActualizadas: number;

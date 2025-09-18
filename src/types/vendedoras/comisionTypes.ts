@@ -1,6 +1,6 @@
 export interface ComisionVendedora {
     id: number;
-    fecha: string; // ISO string
+    fecha: string; 
     sucursalNombre: string;
     turno: 'Mañana' | 'Tarde';
     vendedorNombre: string;
@@ -8,9 +8,9 @@ export interface ComisionVendedora {
     montoSinIva: number;
     totalVendedoras: number;
     montoComision: number;
-    fechaCalculado: string; // ISO string
+    fechaCalculado: string; 
     calculadoPorNombre: string;
-    fechaCreacion: string; // ISO string
+    fechaCreacion: string; 
   }
   
   export interface VendedoraDisponible {
@@ -21,7 +21,7 @@ export interface ComisionVendedora {
   }
   
   export interface VendedorasDisponiblesResponse {
-    fecha: string; // ISO string
+    fecha: string;
     sucursalNombre: string;
     turno: string;
     montoFacturado: number;
@@ -57,7 +57,7 @@ export interface ComisionVendedora {
   }
   
   export interface EstadoCalculoComision {
-    fecha: string; // ISO string
+    fecha: string; 
     sucursalNombre: string;
     turno: string;
     tieneVentas: boolean;
@@ -68,7 +68,7 @@ export interface ComisionVendedora {
   }
   
   export interface CalendarioComisiones {
-    fecha: string; // ISO string
+    fecha: string; 
     estadosPorSucursalTurno: EstadoCalculoComision[];
   }
   
@@ -77,8 +77,8 @@ export interface ComisionVendedora {
     totalComisiones: number;
     diasConComisiones: number;
     promedioComisionPorDia: number;
-    primeraComision: string; // ISO string
-    ultimaComision: string; // ISO string
+    primeraComision: string; 
+    ultimaComision: string; 
     sucursalesQueTrabaja: string[];
   }
   
@@ -91,28 +91,25 @@ export interface ComisionVendedora {
     };
   }
   
-  // Tipos para el estado del calendario
   export type EstadoDia = 'completo' | 'parcial' | 'pendiente' | 'sin-datos';
   
   export interface DiaCalendario {
-    fecha: string; // ISO string (solo fecha, sin hora)
+    fecha: string; 
     dia: number;
     estado: EstadoDia;
     estadosPorSucursalTurno: EstadoCalculoComision[];
     esHoy: boolean;
     esDomingo: boolean;
-    esDelMes: boolean; // para días que se muestran de meses anteriores/siguientes
+    esDelMes: boolean; 
   }
   
-  // Request types
   export interface CalcularComisionRequest {
-    fecha: string; // ISO string
+    fecha: string;
     sucursalNombre: string;
     turno: 'Mañana' | 'Tarde';
     vendedorasNombres: string[];
   }
   
-  // Tipos para estadísticas (opcional, por si los necesitas después)
   export interface ComisionesStats {
     totalComisionesPagadas: number;
     totalDiasCalculados: number;

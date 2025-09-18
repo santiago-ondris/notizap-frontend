@@ -33,16 +33,13 @@ interface CeldaEditando {
   valorTemporal: string;
 }
 
-/**
- * Componente de celda editable CON estado local (no auto-save)
- */
 const CeldaEditable: React.FC<{
   
   valor: number | null;
-  valorLocal?: number | null; // Valor modificado localmente
+  valorLocal?: number | null; 
   esEditable: boolean;
   estaEditando: boolean;
-  tieneModificacion: boolean; // Indica si fue modificada localmente
+  tieneModificacion: boolean; 
   onIniciarEdicion: () => void;
   onGuardarLocal: (nuevoValor: number | null) => void;
   onCancelar: () => void;
@@ -65,7 +62,6 @@ const CeldaEditable: React.FC<{
   );
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-focus cuando entra en edición
   useEffect(() => {
     if (estaEditando && inputRef.current) {
       inputRef.current.focus();
@@ -73,7 +69,6 @@ const CeldaEditable: React.FC<{
     }
   }, [estaEditando]);
 
-  // Si cambia el valor externo, lo reflejamos
   useEffect(() => {
     setValorTemporal(valorAMostrar !== null && valorAMostrar !== undefined ? valorAMostrar.toString() : '');
   }, [valorAMostrar]);
@@ -87,7 +82,6 @@ const CeldaEditable: React.FC<{
   };
 
   const handleGuardarLocal = () => {
-    // Si dejó el campo vacío, interpretamos como null
     if (valorTemporal.trim() === '') {
       onGuardarLocal(null);
       return;
@@ -170,36 +164,29 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
   puedeEditar,
   cargando = false
 }) => {
-  // Estados para edición local
   const [celdaEditando, setCeldaEditando] = useState<CeldaEditando | null>(null);
   const [cambiosPendientes, setCambiosPendientes] = useState<Map<string, CambioEnvio>>(new Map());
   const [filasModificadas, setFilasModificadas] = useState<Set<number>>(new Set());
   
-  // Estados para acciones
   const [guardandoLote, setGuardandoLote] = useState(false);
   const [eliminando, setEliminando] = useState<number | null>(null);
 
-  // Calcular si hay cambios pendientes
   const tieneChangesPendientes = cambiosPendientes.size > 0;
 
-  // Función para generar key única para cada cambio
   const generarCambioKey = (dia: number, campo: TipoEnvio): string => {
     return `${dia}-${campo}`;
   };
 
-  // Función para obtener valor local de una celda
   const obtenerValorLocal = (dia: number, campo: TipoEnvio): number | null | undefined => {
     const key = generarCambioKey(dia, campo);
     return cambiosPendientes.get(key)?.valorNuevo;
   };
 
-  // Función para verificar si una celda tiene modificaciones
   const tieneModificacionLocal = (dia: number, campo: TipoEnvio): boolean => {
     const key = generarCambioKey(dia, campo);
     return cambiosPendientes.has(key);
   };
 
-  // Manejar inicio de edición
   const handleIniciarEdicion = (dia: number, campo: TipoEnvio) => {
     if (!puedeEditar) return;
     
@@ -213,7 +200,6 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
     });
   };
 
-  // Manejar guardado local de celda (NO envía al servidor)
   const handleGuardarLocal = (dia: number, campo: TipoEnvio, nuevoValor: number | null) => {
     const envio = envios[dia - 1];
     if (!envio) return;
@@ -221,18 +207,15 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
     const valorOriginal = envio[campo];
     const key = generarCambioKey(dia, campo);
 
-    // Si el nuevo valor es igual al original, remover del mapa de cambios
     if (nuevoValor === valorOriginal) {
       const nuevosCambios = new Map(cambiosPendientes);
       nuevosCambios.delete(key);
       setCambiosPendientes(nuevosCambios);
       
-      // Actualizar filas modificadas
       const filasConCambios = new Set<number>();
       nuevosCambios.forEach(cambio => filasConCambios.add(cambio.dia));
       setFilasModificadas(filasConCambios);
     } else {
-      // Agregar/actualizar cambio
       const cambio: CambioEnvio = {
         dia,
         fecha: envio.fecha,
@@ -248,12 +231,10 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
     setCeldaEditando(null);
   };
 
-  // Manejar cancelación de edición
   const handleCancelarEdicion = () => {
     setCeldaEditando(null);
   };
 
-  // Manejar guardado de todos los cambios (BATCH SAVE)
   const handleGuardarTodos = async () => {
     if (!tieneChangesPendientes) return;
 
@@ -261,7 +242,6 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
     try {
       const exito = await onGuardarLote(cambiosPendientes);
       if (exito) {
-        // Limpiar cambios pendientes solo si fue exitoso
         setCambiosPendientes(new Map());
         setFilasModificadas(new Set());
       }
@@ -272,14 +252,12 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
     }
   };
 
-  // Manejar descarte de todos los cambios
   const handleDescartarCambios = () => {
     setCambiosPendientes(new Map());
     setFilasModificadas(new Set());
     setCeldaEditando(null);
   };
 
-  // Manejar eliminación de envío
   const handleEliminar = async (envio: EnvioDiario) => {
     if (!puedeEditar || envio.id === 0) return;
     setEliminando(envio.id);
@@ -292,7 +270,6 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
     }
   };
 
-  // Totales (considerando cambios locales)
   const calcularTotales = () => {
     const totales = {
       oca: 0, andreani: 0, retirosSucursal: 0, roberto: 0, 
@@ -315,7 +292,6 @@ export const EnviosTabla: React.FC<EnviosTablaProps> = ({
 
   const totales = calcularTotales();
   const filaConDatos = (envio: EnvioDiario, dia: number) => {
-    // Una fila tiene datos si tiene valores originales O modificaciones locales
     const tieneValoresOriginales = envio.totalEnvios > 0;
     const tieneModificacionesLocales = filasModificadas.has(dia);
     return tieneValoresOriginales || tieneModificacionesLocales;

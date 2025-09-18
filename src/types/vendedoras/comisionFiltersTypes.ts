@@ -1,6 +1,6 @@
 export interface ComisionVendedoraFilters {
-    fechaInicio?: string; // ISO string
-    fechaFin?: string; // ISO string
+    fechaInicio?: string; 
+    fechaFin?: string; 
     sucursalNombre?: string;
     vendedorNombre?: string;
     turno?: 'Mañana' | 'Tarde' | '';
@@ -15,32 +15,31 @@ export interface ComisionVendedoraFilters {
   
   export interface FiltrosCalendario {
     año: number;
-    mes: number; // 1-12
+    mes: number; 
     sucursalNombre?: string;
     turno?: 'Mañana' | 'Tarde' | '';
   }
   
   export interface FiltrosVendedora {
     vendedorNombre: string;
-    fechaInicio?: string; // ISO string
-    fechaFin?: string; // ISO string
+    fechaInicio?: string; 
+    fechaFin?: string; 
   }
   
   export interface FiltrosSucursalTurno {
     sucursalNombre: string;
     turno: 'Mañana' | 'Tarde';
-    fechaInicio?: string; // ISO string
-    fechaFin?: string; // ISO string
+    fechaInicio?: string; 
+    fechaFin?: string; 
   }
   
   export interface FiltrosEstadoCalculo {
-    fechaInicio: string; // ISO string
-    fechaFin: string; // ISO string
+    fechaInicio: string; 
+    fechaFin: string; 
     sucursalNombre?: string;
     turno?: 'Mañana' | 'Tarde';
   }
   
-  // Configuraciones de ordenamiento y paginación
   export interface OrdenamientoComisiones {
     campo: 'fecha' | 'vendedor' | 'sucursal' | 'comision' | 'montoFacturado';
     direccion: 'asc' | 'desc';
@@ -53,7 +52,6 @@ export interface ComisionVendedoraFilters {
     totalRegistros: number;
   }
   
-  // Constantes para los filtros
   export const TURNOS_COMISIONES = [
     { value: '', label: 'Todos los turnos' },
     { value: 'Mañana', label: '🌅 Mañana (8:00-14:30)' },
@@ -75,7 +73,6 @@ export interface ComisionVendedoraFilters {
     { value: 200, label: '200 por página' }
   ] as const;
   
-  // Filtros predefinidos para rangos de tiempo
   export const RANGOS_PREDEFINIDOS = {
     ultimaSemana: {
       nombre: '📊 Última semana',
@@ -91,10 +88,9 @@ export interface ComisionVendedoraFilters {
     }
   } as const;
   
-  // Tipos para el estado de los filtros en el frontend
   export interface EstadoFiltros {
     aplicados: boolean;
-    contador: number; // cantidad de filtros activos
+    contador: number; 
   }
   
   export interface FiltrosForm {
@@ -108,12 +104,11 @@ export interface ComisionVendedoraFilters {
     excluirDomingos: boolean;
   }
   
-  // Tipos para vista de comisiones
   export type VistaComision = 'calendario' | 'por-vendedora' | 'por-sucursal' | 'calcular' | 'tabla';
   
   export interface OpcionVista {
     key: VistaComision;
     label: string;
-    icono: string; // nombre del icono de lucide-react
+    icono: string; 
     descripcion: string;
   }

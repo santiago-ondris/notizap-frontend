@@ -79,7 +79,6 @@ export const VentasVendedorasChart: React.FC<Props> = ({
     return null;
   };
 
-  // ------------------- GRAFICO DE TENDENCIA (LineChart) ------------------
   const renderTendenciaChart = () => {
     const datosFormateados = ventasPorDia.map(dia => ({
       fecha: dateHelpers.formatearFechaCorta(dia.fecha),
@@ -206,7 +205,6 @@ export const VentasVendedorasChart: React.FC<Props> = ({
   };
 
   const renderSucursalesChart = () => {
-    // Preparar datos para barras y pie Nivo
     const datosBarras = ventasPorSucursal.map((sucursal, index) => ({
       nombre: sucursal.sucursalNombre,
       'Monto Total': sucursal.montoTotal,
@@ -215,7 +213,6 @@ export const VentasVendedorasChart: React.FC<Props> = ({
       abreSabadoTarde: sucursal.abreSabadoTarde
     }));
 
-    // Pie Nivo
     const datosPie = ventasPorSucursal.map((sucursal, index) => ({
       id: sucursal.sucursalNombre,
       label: sucursal.sucursalNombre.split(' ')[0],

@@ -1,6 +1,6 @@
 export interface RendimientoLocalesDia {
     sucursalNombre: string;
-    fecha: string; // ISO
+    fecha: string; 
     turno: 'Mañana' | 'Tarde';
     montoTotal: number;
     cantidadTotal: number;
@@ -38,8 +38,8 @@ export interface RendimientoLocalesDia {
   }
   
   export interface RendimientoLocalesFilters {
-    fechaInicio: string; // ISO
-    fechaFin: string; // ISO
+    fechaInicio: string; 
+    fechaFin: string;
     sucursalNombre: string;
     turno?: 'Mañana' | 'Tarde' | '';
     metricaComparar: 'monto' | 'cantidad';

@@ -6,37 +6,24 @@ import type {
   } from '@/types/vendedoras/comisionTypes';
   import { comisionEstados } from './comisionHelpers';
   
-  // ============================================
-  // HELPERS PARA GENERACIÓN DEL CALENDARIO
-  // ============================================
-  
   export const calendarioGeneracion = {
-    /**
-     * Genera la estructura básica del calendario para un mes
-     */
     generarDiasDelMes(año: number, mes: number): DiaCalendario[] {
       const primerDia = new Date(año, mes - 1, 1);
       const ultimoDia = new Date(año, mes, 0);
       const diasEnMes = ultimoDia.getDate();
       
-      // Agregar días del mes anterior para completar la primera semana
       const diasAnteriores = this.obtenerDiasAnteriores(primerDia);
       
-      // Generar días del mes actual
       const diasActuales = Array.from({ length: diasEnMes }, (_, i) => {
         const fecha = new Date(año, mes - 1, i + 1);
         return this.crearDiaCalendario(fecha, true);
       });
       
-      // Agregar días del mes siguiente para completar la última semana
       const diasSiguientes = this.obtenerDiasSiguientes(ultimoDia);
       
       return [...diasAnteriores, ...diasActuales, ...diasSiguientes];
     },
   
-    /**
-     * Crea un objeto DiaCalendario
-     */
     crearDiaCalendario(fecha: Date, esDelMes: boolean = true): DiaCalendario {
       return {
         fecha: this.formatearFechaParaApi(fecha),
@@ -49,12 +36,9 @@ import type {
       };
     },
   
-    /**
-     * Obtiene días del mes anterior para completar la primera semana
-     */
     obtenerDiasAnteriores(primerDia: Date): DiaCalendario[] {
       const diaSemana = primerDia.getDay();
-      const diasAMostrar = diaSemana === 0 ? 6 : diaSemana - 1; // Lunes = 0
+      const diasAMostrar = diaSemana === 0 ? 6 : diaSemana - 1; 
       
       const dias: DiaCalendario[] = [];
       for (let i = diasAMostrar; i > 0; i--) {
@@ -66,12 +50,9 @@ import type {
       return dias;
     },
   
-    /**
-     * Obtiene días del mes siguiente para completar la última semana
-     */
     obtenerDiasSiguientes(ultimoDia: Date): DiaCalendario[] {
       const diaSemana = ultimoDia.getDay();
-      const diasAMostrar = diaSemana === 0 ? 0 : 7 - diaSemana; // Completar hasta domingo
+      const diasAMostrar = diaSemana === 0 ? 0 : 7 - diaSemana; 
       
       const dias: DiaCalendario[] = [];
       for (let i = 1; i <= diasAMostrar; i++) {
@@ -83,50 +64,32 @@ import type {
       return dias;
     },
   
-    /**
-     * Formatea fecha para API (YYYY-MM-DD)
-     */
     formatearFechaParaApi(fecha: Date): string {
       return fecha.toISOString().split('T')[0];
     },
   
-    /**
-     * Verifica si es hoy
-     */
     esHoy(fecha: Date): boolean {
       const hoy = new Date();
       return fecha.toDateString() === hoy.toDateString();
     },
   
-    /**
-     * Verifica si es domingo
-     */
     esDomingo(fecha: Date): boolean {
       return fecha.getDay() === 0;
     }
   };
   
-  // ============================================
-  // HELPERS PARA ACTUALIZACIÓN DEL CALENDARIO
-  // ============================================
-  
   export const calendarioActualizacion = {
-    /**
-     * Actualiza los días del calendario con datos del backend
-     */
     actualizarConDatos(
       diasCalendario: DiaCalendario[],
       datosBackend: CalendarioComisiones[]
     ): DiaCalendario[] {
       const mapaEstados = new Map<string, EstadoCalculoComision[]>();
       
-      // Crear mapa de fechas -> estados
       datosBackend.forEach(item => {
         const fechaSinHora = item.fecha.split('T')[0];
         mapaEstados.set(fechaSinHora, item.estadosPorSucursalTurno);
       });
       
-      // Actualizar cada día
       return diasCalendario.map(dia => ({
         ...dia,
         estadosPorSucursalTurno: mapaEstados.get(dia.fecha) || [],
@@ -134,9 +97,6 @@ import type {
       }));
     },
   
-    /**
-     * Filtra días según los filtros aplicados
-     */
     aplicarFiltros(
       dias: DiaCalendario[],
       sucursalNombre?: string,
@@ -168,14 +128,7 @@ import type {
     }
   };
   
-  // ============================================
-  // HELPERS PARA NAVEGACIÓN DEL CALENDARIO
-  // ============================================
-  
   export const calendarioNavegacion = {
-    /**
-     * Obtiene el mes anterior
-     */
     mesAnterior(año: number, mes: number): { año: number; mes: number } {
       if (mes === 1) {
         return { año: año - 1, mes: 12 };
@@ -183,9 +136,6 @@ import type {
       return { año, mes: mes - 1 };
     },
   
-    /**
-     * Obtiene el mes siguiente
-     */
     mesSiguiente(año: number, mes: number): { año: number; mes: number } {
       if (mes === 12) {
         return { año: año + 1, mes: 1 };
@@ -193,13 +143,10 @@ import type {
       return { año, mes: mes + 1 };
     },
   
-    /**
-     * Obtiene el mes anterior como fecha
-     */
     fechaMesAnterior(): { año: number; mes: number } {
       const hoy = new Date();
       const año = hoy.getFullYear();
-      const mes = hoy.getMonth(); // 0-11
+      const mes = hoy.getMonth(); 
       
       if (mes === 0) {
         return { año: año - 1, mes: 12 };
@@ -207,9 +154,6 @@ import type {
       return { año, mes };
     },
   
-    /**
-     * Formatea título del mes
-     */
     formatearTituloMes(año: number, mes: number): string {
       const nombres = [
         'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -218,9 +162,6 @@ import type {
       return `${nombres[mes - 1]} ${año}`;
     },
   
-    /**
-     * Verifica si un mes está en el futuro
-     */
     esEnElFuturo(año: number, mes: number): boolean {
       const hoy = new Date();
       const fechaMes = new Date(año, mes - 1, 1);
@@ -229,22 +170,12 @@ import type {
       return fechaMes > fechaHoy;
     },
   
-    /**
-     * Verifica si se puede navegar hacia adelante
-     */
     puedeAvanzar(año: number, mes: number): boolean {
       return !this.esEnElFuturo(año, mes + 1);
     }
   };
   
-  // ============================================
-  // HELPERS PARA ANÁLISIS DEL CALENDARIO
-  // ============================================
-  
   export const calendarioAnalisis = {
-    /**
-     * Cuenta días por estado
-     */
     contarPorEstado(dias: DiaCalendario[]): {
       completo: number;
       parcial: number;
@@ -270,9 +201,6 @@ import type {
       return contadores;
     },
   
-    /**
-     * Calcula porcentaje de completitud
-     */
     porcentajeCompletitud(dias: DiaCalendario[]): number {
       const diasDelMes = dias.filter(d => d.esDelMes);
       const diasConDatos = diasDelMes.filter(d => d.estado !== 'sin-datos');
@@ -283,9 +211,6 @@ import type {
       return Math.round((diasCompletos.length / diasConDatos.length) * 100);
     },
   
-    /**
-     * Obtiene estadísticas del mes
-     */
     estadisticasMes(dias: DiaCalendario[]): {
       totalDias: number;
       diasConDatos: number;
@@ -305,9 +230,6 @@ import type {
       };
     },
   
-    /**
-     * Identifica días que necesitan atención
-     */
     diasQueNecesitanAtencion(dias: DiaCalendario[]): DiaCalendario[] {
       return dias
         .filter(d => d.esDelMes && (d.estado === 'pendiente' || d.estado === 'parcial'))
@@ -315,14 +237,7 @@ import type {
     }
   };
   
-  // ============================================
-  // HELPERS PARA DETALLE DE DÍAS
-  // ============================================
-  
   export const calendarioDetalle = {
-    /**
-     * Obtiene resumen de un día específico
-     */
     resumenDia(dia: DiaCalendario): {
       fecha: string;
       estado: EstadoDia;
@@ -352,9 +267,6 @@ import type {
       };
     },
   
-    /**
-     * Agrupa estados por sucursal
-     */
     agruparPorSucursal(estados: EstadoCalculoComision[]): Map<string, EstadoCalculoComision[]> {
       const grupos = new Map<string, EstadoCalculoComision[]>();
       
@@ -369,9 +281,6 @@ import type {
       return grupos;
     },
   
-    /**
-     * Calcula totales por sucursal
-     */
     totalesPorSucursal(estados: EstadoCalculoComision[]): Array<{
       sucursal: string;
       montoTotal: number;

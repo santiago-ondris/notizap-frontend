@@ -16,7 +16,6 @@ import type { VentaVendedoraFilters } from '@/types/vendedoras/filtrosTypes';
 const BASE_URL = '/api/v1/ventas-vendedoras';
 
 export const ventasVendedorasService = {
-  // Upload y gestión de archivos
   async subirArchivo(uploadData: VentaVendedoraUpload): Promise<UploadResult> {
     const formData = new FormData();
     formData.append('archivo', uploadData.archivo);
@@ -49,7 +48,6 @@ export const ventasVendedorasService = {
     return response.data;
   },
 
-  // Consultas principales
   async obtenerVentas(filtros: VentaVendedoraFilters): Promise<VentasResponse> {
     const response = await api.get(`${BASE_URL}`, { params: filtros });
     return response.data;
@@ -60,7 +58,6 @@ export const ventasVendedorasService = {
     return response.data;
   },
 
-  // Datos maestros
   async obtenerSucursales(): Promise<string[]> {
     const response = await api.get(`${BASE_URL}/sucursales`);
     return response.data;
@@ -76,7 +73,6 @@ export const ventasVendedorasService = {
     return response.data;
   },
 
-  // Análisis específicos
   async obtenerVentasPorDia(filtros: Partial<VentaVendedoraFilters>): Promise<VentaPorDia[]> {
     const response = await api.get(`${BASE_URL}/por-dia`, { params: filtros });
     return response.data;
@@ -99,7 +95,6 @@ export const ventasVendedorasService = {
     return response.data;
   },
 
-  // Validaciones y utilidades
   async verificarDatos(fechaInicio: string, fechaFin: string): Promise<{ existenDatos: boolean }> {
     const response = await api.get(`${BASE_URL}/verificar-datos`, {
       params: { fechaInicio, fechaFin }
@@ -113,7 +108,6 @@ export const ventasVendedorasService = {
   },
 };
 
-// Helpers para manejo de fechas
 export const dateHelpers = {
   formatearFecha(fecha: Date): string {
     return fecha.toISOString().split('T')[0];
@@ -172,7 +166,6 @@ export const dateHelpers = {
   }
 };
 
-// Helpers para formateo de moneda
 export const moneyHelpers = {
   formatear(monto: number): string {
     return new Intl.NumberFormat('es-AR', {
@@ -194,10 +187,8 @@ export const moneyHelpers = {
   }
 };
 
-// Helpers para validación
 export const validationHelpers = {
   esArchivoValido(archivo: File): { valido: boolean; mensaje?: string } {
-    // Validar extensión
     if (!archivo.name.toLowerCase().endsWith('.xlsx')) {
       return { 
         valido: false, 
@@ -205,7 +196,6 @@ export const validationHelpers = {
       };
     }
 
-    // Validar tamaño (máximo 10MB)
     if (archivo.size > 10 * 1024 * 1024) {
       return { 
         valido: false, 
@@ -218,7 +208,7 @@ export const validationHelpers = {
 
   validarRangoFechas(inicio?: Date, fin?: Date): { valido: boolean; mensaje?: string } {
     if (!inicio || !fin) {
-      return { valido: true }; // Opcional
+      return { valido: true };
     }
 
     if (inicio > fin) {
@@ -228,7 +218,6 @@ export const validationHelpers = {
       };
     }
 
-    // Validar que no sea más de 1 año
     const unAno = 365 * 24 * 60 * 60 * 1000;
     if (fin.getTime() - inicio.getTime() > unAno) {
       return { 

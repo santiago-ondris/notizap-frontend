@@ -20,34 +20,25 @@ import {
 const DevolucionesPage: React.FC = () => {
   const navigate = useNavigate();
   
-  // Context de autenticación
   const { role } = useAuth();
 
-  // Estados principales
   const [devoluciones, setDevoluciones] = useState<DevolucionDto[]>([]);
   const [devolucionesFiltradas, setDevolucionesFiltradas] = useState<DevolucionDto[]>([]);
   const [estadisticas, setEstadisticas] = useState<EstadisticasType | null>(null);
 
-  // Estados de UI
   const [cargandoDatos, setCargandoDatos] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Estados de modales
   const [modalCrearAbierto, setModalCrearAbierto] = useState<boolean>(false);
   const [modalEditarAbierto, setModalEditarAbierto] = useState<boolean>(false);
   const [modalDetalleAbierto, setModalDetalleAbierto] = useState<boolean>(false);
   const [devolucionSeleccionada, setDevolucionSeleccionada] = useState<DevolucionDto | null>(null);
 
-  // Estados de filtros
   const [filtros, setFiltros] = useState<FiltrosType>({});
 
-  // Verificar permisos
   const puedeEditar = role === 'admin' || role === 'superadmin';
   const puedeVer = role === 'viewer' || role === 'admin' || role === 'superadmin';
 
-  /**
-   * Cargar todas las devoluciones desde la API
-   */
   const cargarDevoluciones = async () => {
     setCargandoDatos(true);
     setError(null);
@@ -56,7 +47,6 @@ const DevolucionesPage: React.FC = () => {
       const devolucionesData = await devolucionesService.obtenerTodos();
       setDevoluciones(devolucionesData);
       
-      // Mostrar mensaje si no hay datos
       if (devolucionesData.length === 0) {
         toast.info('No hay devoluciones registradas en el sistema');
       }
@@ -71,28 +61,18 @@ const DevolucionesPage: React.FC = () => {
     }
   };
 
-  /**
-   * Aplicar filtros a las devoluciones
-   */
   const aplicarFiltros = useCallback(() => {
     const devolucionesFiltradosResult = devolucionesService.filtrarDevoluciones(devoluciones, filtros);
     setDevolucionesFiltradas(devolucionesFiltradosResult);
     
-    // Calcular estadísticas solo de las devoluciones filtradas
     const estadisticasCalculadas = devolucionesService.calcularEstadisticas(devolucionesFiltradosResult);
     setEstadisticas(estadisticasCalculadas);
   }, [devoluciones, filtros]);
 
-  /**
-   * Manejar cambio de filtros
-   */
   const handleFiltrosChange = (nuevosFiltros: FiltrosType) => {
     setFiltros(nuevosFiltros);
   };
 
-  /**
-   * Manejar guardado de devolución (crear/editar)
-   */
   const handleGuardarDevolucion = async (devolucionData: DevolucionDto | CreateDevolucionDto): Promise<boolean> => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para modificar devoluciones');
@@ -100,18 +80,14 @@ const DevolucionesPage: React.FC = () => {
     }
   
     try {
-      // Verificar si es edición (tiene id) o creación
       if ('id' in devolucionData && devolucionData.id) {
-        // Es edición
         await devolucionesService.actualizar(devolucionData.id, devolucionData);
         toast.success('Devolución actualizada exitosamente');
       } else {
-        // Es creación
         await devolucionesService.crear(devolucionData as CreateDevolucionDto);
         toast.success('Devolución creada exitosamente');
       }
       
-      // Recargar datos
       await cargarDevoluciones();
       return true;
       
@@ -122,9 +98,6 @@ const DevolucionesPage: React.FC = () => {
     }
   };
 
-  /**
-   * Manejar actualización de estados (checkboxes inline)
-   */
   const handleActualizarEstados = async (id: number, estados: EstadosDevolucion): Promise<boolean> => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para actualizar estados');
@@ -135,7 +108,6 @@ const DevolucionesPage: React.FC = () => {
       await devolucionesService.actualizarEstados(id, estados);
       toast.success('Estado actualizado correctamente');
       
-      // Recargar datos
       await cargarDevoluciones();
       return true;
       
@@ -146,16 +118,12 @@ const DevolucionesPage: React.FC = () => {
     }
   };
 
-  /**
-   * Manejar eliminación de una devolución
-   */
   const handleEliminarDevolucion = async (id: number): Promise<boolean> => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para eliminar devoluciones');
       return false;
     }
 
-    // Confirmación antes de eliminar
     if (!window.confirm('¿Estás seguro de que quieres eliminar esta devolución? Esta acción no se puede deshacer.')) {
       return false;
     }
@@ -164,7 +132,6 @@ const DevolucionesPage: React.FC = () => {
       await devolucionesService.eliminar(id);
       toast.success('Devolución eliminada exitosamente');
       
-      // Recargar datos
       await cargarDevoluciones();
       return true;
       
@@ -175,9 +142,6 @@ const DevolucionesPage: React.FC = () => {
     }
   };
 
-  /**
-   * Manejar apertura del modal de creación
-   */
   const handleNuevaDevolucion = () => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para crear devoluciones');
@@ -187,9 +151,6 @@ const DevolucionesPage: React.FC = () => {
     setModalCrearAbierto(true);
   };
 
-  /**
-   * Manejar apertura del modal de edición
-   */
   const handleEditarModal = (devolucion: DevolucionDto) => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para editar devoluciones');
@@ -199,17 +160,11 @@ const DevolucionesPage: React.FC = () => {
     setModalEditarAbierto(true);
   };
 
-  /**
-   * Manejar apertura del modal de detalle
-   */
   const handleVerDetalle = (devolucion: DevolucionDto) => {
     setDevolucionSeleccionada(devolucion);
     setModalDetalleAbierto(true);
   };
 
-  /**
-   * Cerrar todos los modales
-   */
   const cerrarModales = () => {
     setModalCrearAbierto(false);
     setModalEditarAbierto(false);
@@ -217,33 +172,24 @@ const DevolucionesPage: React.FC = () => {
     setDevolucionSeleccionada(null);
   };
 
-  /**
-   * Recargar todos los datos
-   */
   const recargarDatos = () => {
     cargarDevoluciones();
   };
 
-  /**
-   * Volver a la página de cambios
-   */
   const volverACambios = () => {
     navigate('/cambios');
   };
 
-  // Effect para cargar datos al montar el componente
   useEffect(() => {
     if (puedeVer) {
       cargarDevoluciones();
     }
   }, [puedeVer]);
 
-  // Effect para aplicar filtros cuando cambian los datos o filtros
   useEffect(() => {
     aplicarFiltros();
   }, [aplicarFiltros]);
 
-  // Verificar permisos de acceso
   if (!puedeVer) {
     return (
       <div className="min-h-screen bg-[#1A1A20] flex items-center justify-center p-6">

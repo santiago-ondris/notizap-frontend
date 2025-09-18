@@ -28,13 +28,10 @@ interface DevolucionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (devolucion: DevolucionDto | CreateDevolucionDto) => Promise<boolean>;
-  devolucion: DevolucionDto | null; // null = crear, objeto = editar
+  devolucion: DevolucionDto | null; 
   cargando?: boolean;
 }
 
-/**
- * Componente de dropdown para motivos con portal
- */
 const MotivoDropdown: React.FC<{
   value: string;
   onChange: (value: string) => void;
@@ -81,10 +78,9 @@ const MotivoDropdown: React.FC<{
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
-        // Verificar si el clic fue en el dropdown portal
         const dropdownElement = document.querySelector('[data-dropdown-portal="motivo-dropdown"]');
         if (dropdownElement && dropdownElement.contains(event.target as Node)) {
-          return; // No cerrar si el clic fue dentro del dropdown
+          return; 
         }
         
         setIsOpen(false);
@@ -134,7 +130,7 @@ const MotivoDropdown: React.FC<{
             maxHeight: '280px'
           }}
           onWheel={(e) => e.stopPropagation()}
-          onClick={(e) => e.stopPropagation()} // Evitar que el clic cierre el modal
+          onClick={(e) => e.stopPropagation()} 
         >
           {MOTIVOS_DEVOLUCION.map((motivo) => (
             <button
@@ -156,9 +152,6 @@ const MotivoDropdown: React.FC<{
   );
 };
 
-/**
- * Componente principal del modal de devolución
- */
 export const DevolucionModal: React.FC<DevolucionModalProps> = ({
   isOpen,
   onClose,
@@ -166,12 +159,11 @@ export const DevolucionModal: React.FC<DevolucionModalProps> = ({
   devolucion,
   cargando = false
 }) => {
-  // Estados del formulario - CAMBIADO: modelo ahora es string para múltiples productos
   const [formData, setFormData] = useState<Partial<CreateDevolucionDto>>({
     fecha: '',
     pedido: '',
     celular: '',
-    modelo: '', // Ahora manejará múltiples productos como string separado por comas
+    modelo: '', 
     motivo: '',
     monto: undefined,
     pagoEnvio: undefined,
@@ -181,27 +173,23 @@ export const DevolucionModal: React.FC<DevolucionModalProps> = ({
   const [errors, setErrors] = useState<DevolucionFormErrors>({});
   const [guardando, setGuardando] = useState(false);
 
-  // Determinar si es edición o creación
   const esEdicion = devolucion !== null;
   const titulo = esEdicion ? 'Editar Devolución' : 'Nueva Devolución';
 
-  // Cargar datos al abrir el modal
   useEffect(() => {
     if (isOpen) {
       if (esEdicion && devolucion) {
-        // Cargar datos para edición
         setFormData({
           fecha: fechaISOAInput(devolucion.fecha),
           pedido: devolucion.pedido,
           celular: devolucion.celular,
-          modelo: devolucion.modelo, // Ya viene como string con múltiples productos
+          modelo: devolucion.modelo, 
           motivo: devolucion.motivo,
           monto: devolucion.monto,
           pagoEnvio: devolucion.pagoEnvio,
           responsable: devolucion.responsable
         });
       } else {
-        // Resetear para creación
         const fechaHoy = new Date().toISOString().split('T')[0];
         setFormData({
           fecha: fechaHoy,
@@ -261,14 +249,12 @@ export const DevolucionModal: React.FC<DevolucionModalProps> = ({
     return Object.keys(nuevosErrores).length === 0;
   };
 
-  // Manejar cambio en campos del formulario
   const handleInputChange = (campo: keyof CreateDevolucionDto, valor: string | number | undefined) => {
     setFormData(prev => ({
       ...prev,
       [campo]: valor
     }));
 
-    // Limpiar error del campo si existe
     if (errors[campo]) {
       setErrors(prev => ({
         ...prev,
@@ -277,7 +263,6 @@ export const DevolucionModal: React.FC<DevolucionModalProps> = ({
     }
   };
 
-  // Manejar envío del formulario
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -288,7 +273,6 @@ export const DevolucionModal: React.FC<DevolucionModalProps> = ({
     setGuardando(true);
 
     try {
-      // Preparar datos para envío con fecha correcta
       const datosCompletos: CreateDevolucionDto = {
         ...formData as CreateDevolucionDto,
         fecha: fechaInputAISO(formData.fecha!)
@@ -297,14 +281,12 @@ export const DevolucionModal: React.FC<DevolucionModalProps> = ({
       let resultado: boolean;
     
       if (esEdicion && devolucion) {
-        // Actualizar devolución existente
         const devolucionActualizada: DevolucionDto = {
           ...devolucion,
           ...datosCompletos
         };
         resultado = await onSave(devolucionActualizada);
       } else {
-        // Crear nueva devolución
         resultado = await onSave(datosCompletos);
       }
 
@@ -318,14 +300,12 @@ export const DevolucionModal: React.FC<DevolucionModalProps> = ({
     }
   };
 
-  // Manejar cierre del modal
   const handleClose = () => {
     if (!guardando) {
       onClose();
     }
   };
 
-  // No renderizar si no está abierto
   if (!isOpen) return null;
 
   return (

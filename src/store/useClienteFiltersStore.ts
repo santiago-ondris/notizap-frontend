@@ -1,6 +1,5 @@
 import { create } from "zustand";
 
-// Tipos para los filtros de clientes
 export interface ClienteFilters {
   desde: string;
   hasta: string;
@@ -15,7 +14,6 @@ export interface ClienteFilters {
   modoExclusivoCategoria: boolean;
 }
 
-// Filtros aplicados para el backend (formato que se envía a la API)
 export interface ClienteFiltrosAplicados {
   desde?: string;
   hasta?: string;
@@ -30,7 +28,6 @@ export interface ClienteFiltrosAplicados {
   modoExclusivoCategoria: boolean;
 }
 
-// Estado inicial de los filtros
 const initialFilters: ClienteFilters = {
   desde: "",
   hasta: "",
@@ -46,12 +43,10 @@ const initialFilters: ClienteFilters = {
 };
 
 interface ClienteFiltersStore {
-  // Estado
   filters: ClienteFilters;
   hasActiveFilters: boolean;
   lastAppliedFilters: ClienteFiltrosAplicados | null;
   
-  // Acciones para actualizar filtros individuales
   setDesde: (desde: string) => void;
   setHasta: (hasta: string) => void;
   setCanalesSeleccionados: (canales: string[]) => void;
@@ -64,23 +59,19 @@ interface ClienteFiltersStore {
   setModoExclusivoMarca: (modo: boolean) => void;
   setModoExclusivoCategoria: (modo: boolean) => void;
   
-  // Acciones para gestionar filtros
   applyFilters: () => ClienteFiltrosAplicados;
   clearFilters: () => void;
   restoreFilters: (filters: ClienteFilters) => void;
   setLastAppliedFilters: (filters: ClienteFiltrosAplicados) => void;
   
-  // Helpers
   checkHasActiveFilters: () => void;
 }
 
 export const useClienteFiltersStore = create<ClienteFiltersStore>((set, get) => ({
-  // Estado inicial
   filters: initialFilters,
   hasActiveFilters: false,
   lastAppliedFilters: null,
   
-  // Acciones para actualizar filtros individuales
   setDesde: (desde) => set((state) => {
     const newFilters = { ...state.filters, desde };
     return { filters: newFilters };
@@ -136,7 +127,6 @@ export const useClienteFiltersStore = create<ClienteFiltersStore>((set, get) => 
     return { filters: newFilters };
   }),
   
-  // Aplicar filtros - convierte el estado actual a formato para API
   applyFilters: () => {
     const { filters } = get();
     
@@ -154,31 +144,26 @@ export const useClienteFiltersStore = create<ClienteFiltersStore>((set, get) => 
       modoExclusivoCategoria: filters.modoExclusivoCategoria,
     };
     
-    // Guardar los filtros aplicados
     set({ lastAppliedFilters: filtrosAplicados });
     get().checkHasActiveFilters();
     
     return filtrosAplicados;
   },
   
-  // Limpiar todos los filtros
   clearFilters: () => set(() => ({
     filters: initialFilters,
     hasActiveFilters: false,
     lastAppliedFilters: null,
   })),
   
-  // Restaurar filtros desde un estado específico
   restoreFilters: (filters) => set(() => ({
     filters,
   })),
   
-  // Establecer los últimos filtros aplicados
   setLastAppliedFilters: (filters) => set(() => ({
     lastAppliedFilters: filters,
   })),
   
-  // Verificar si hay filtros activos
   checkHasActiveFilters: () => set((state) => {
     const { filters } = state;
     const hasFilters = !!(
@@ -194,7 +179,6 @@ export const useClienteFiltersStore = create<ClienteFiltersStore>((set, get) => 
   }),
 }));
 
-// Hook para verificar si hay filtros activos (para usar en componentes)
 export const useHasActiveClienteFilters = () => {
   const hasActiveFilters = useClienteFiltersStore((state) => state.hasActiveFilters);
   const lastAppliedFilters = useClienteFiltersStore((state) => state.lastAppliedFilters);

@@ -27,7 +27,6 @@ interface Props {
   onFiltersApplied: (filters: any) => void;
 }
 
-// Tipos para las opciones de filtro
 interface FilterOptions {
   canales: string[];
   sucursales: string[];
@@ -36,7 +35,6 @@ interface FilterOptions {
 }
 
 export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
-  // Estado del store de filtros
   const {
     filters,
     setDesde,
@@ -58,18 +56,15 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
 
   const hasActiveFilters = useHasActiveClienteFilters();
 
-  // Estados locales para UI
   const [loading, setLoading] = useState(false);
   const [loadingOptions, setLoadingOptions] = useState(true);
   const [exportLoading, setExportLoading] = useState(false);
 
-  // Estados para los popover
   const [openCanales, setOpenCanales] = useState(false);
   const [openSucursales, setOpenSucursales] = useState(false);
   const [openMarcas, setOpenMarcas] = useState(false);
   const [openCategorias, setOpenCategorias] = useState(false);
 
-  // Opciones disponibles
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     canales: [],
     sucursales: [],
@@ -77,7 +72,6 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
     categorias: []
   });
 
-  // Cargar opciones al montar el componente
   useEffect(() => {
     const cargarOpciones = async () => {
       try {
@@ -91,7 +85,6 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
       } catch (error) {
         console.error("Error cargando opciones:", error);
         
-        // Valores por defecto en caso de error total
         setFilterOptions({
           canales: ['KIBOO', 'WOOCOMMERCE', 'MERCADOLIBRE', 'E-COMMERCE'],
           sucursales: ['Centro', 'Nueva Córdoba', 'General Paz', 'Peatonal', 'Dean Funes'],
@@ -108,15 +101,12 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
     cargarOpciones();
   }, []);
 
-  // Aplicar filtros automáticamente si hay filtros guardados
   useEffect(() => {
     if (lastAppliedFilters && !loading) {
-      // Solo aplicar automáticamente si hay resultados guardados
       handleAutoApplyFilters();
     }
   }, [lastAppliedFilters, loadingOptions]);
 
-  // Actualizar el estado de filtros activos cuando cambian los filtros
   useEffect(() => {
     checkHasActiveFilters();
   }, [filters, checkHasActiveFilters]);
@@ -131,11 +121,9 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
       onResult(resultadoPaginado);
       onFiltersApplied(lastAppliedFilters);
 
-      // Toast más sutil para auto-aplicación
       console.log(`Filtros restaurados: ${resultadoPaginado.totalRecords || resultadoPaginado.items.length} clientes`);
     } catch (error) {
       console.error("Error al auto-aplicar filtros:", error);
-      // En caso de error, limpiar los filtros guardados
       clearFilters();
     } finally {
       setLoading(false);
@@ -147,7 +135,6 @@ export default function ClienteFilters({ onResult, onFiltersApplied }: Props) {
     setLoading(true);
     
     try {
-      // Verificar si hay filtros
       const hasFilters = filters.desde || filters.hasta || 
         filters.canalesSeleccionados.length > 0 || 
         filters.sucursalesSeleccionadas.length > 0 || 

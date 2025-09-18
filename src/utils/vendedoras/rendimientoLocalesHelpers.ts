@@ -1,6 +1,5 @@
 import { type RendimientoVendedoraDia, type RendimientoVendedoraResumen } from '@/types/vendedoras/rendimientoLocalesTypes';
 
-// Formatea cumplimiento para mostrar chip de color, emoji, texto
 export function getCumplimientoBadge(cumplio: boolean, metrica: 'monto' | 'cantidad') {
   if (cumplio) {
     return {
@@ -16,7 +15,6 @@ export function getCumplimientoBadge(cumplio: boolean, metrica: 'monto' | 'canti
   };
 }
 
-// Devuelve emoji según % de cumplimiento
 export function getRendimientoEmoji(porcentaje: number) {
   if (porcentaje >= 90) return '🔥';
   if (porcentaje >= 70) return '✅';
@@ -24,7 +22,6 @@ export function getRendimientoEmoji(porcentaje: number) {
   return '⚠️';
 }
 
-// Formatea resumen de cumplimiento para un badge visual
 export function formatResumenCumplimiento(resumen: RendimientoVendedoraResumen, metrica: 'monto' | 'cantidad') {
   const porcentaje = metrica === 'monto'
     ? resumen.porcentajeCumplimientoMonto
@@ -41,7 +38,6 @@ export function formatResumenCumplimiento(resumen: RendimientoVendedoraResumen, 
   };
 }
 
-// Ordena vendedoras por rendimiento en el período
 export function ordenarResumenPorCumplimiento(
   resumenes: RendimientoVendedoraResumen[],
   metrica: 'monto' | 'cantidad'
@@ -53,13 +49,11 @@ export function ordenarResumenPorCumplimiento(
   });
 }
 
-// Tooltip rápido de comparación diaria
 export function buildComparacionTooltip(v: RendimientoVendedoraDia, promedio: number, metrica: 'monto' | 'cantidad') {
   const valor = metrica === 'monto' ? v.monto : v.cantidad;
   return `${valor} (${v.cumplioMontoPromedio ? '≥' : '<'} ${Math.round(promedio)})`;
 }
 
-// Helper para destacar top cumplimiento
 export function getTopCumplidoras(resumenes: RendimientoVendedoraResumen[], metrica: 'monto' | 'cantidad') {
   const max = Math.max(
     ...resumenes.map(r => metrica === 'monto' ? r.porcentajeCumplimientoMonto : r.porcentajeCumplimientoCantidad)
@@ -105,7 +99,6 @@ export function generarInsightsRendimiento(
       insights.push('📈 Excelente promedio grupal de cumplimiento (>80%).');
     }
   
-    // Extra: destacar la(s) top cumplidora(s)
     const topCumplidoras = resumenes
       .filter(r => porcentajeProm(r) === top)
       .map(r => r.vendedoraNombre);

@@ -6,7 +6,6 @@ import type {
 } from '@/types/vendedoras/ventaVendedoraTypes';
 
 export const estadisticasHelpers = {
-  // Formateo de moneda
   formatearMoneda(monto: number): string {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -16,7 +15,6 @@ export const estadisticasHelpers = {
     }).format(monto);
   },
 
-  // Formateo de moneda sin decimales para números grandes
   formatearMonedaCompleta(monto: number): string {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -36,7 +34,6 @@ export const estadisticasHelpers = {
     return this.formatearMonedaCompleta(monto);
   },
 
-  // Formateo de números
   formatearNumero(numero: number): string {
     return new Intl.NumberFormat('es-AR').format(numero);
   },
@@ -45,7 +42,6 @@ export const estadisticasHelpers = {
     return `${valor.toFixed(1)}%`;
   },
 
-  // Calculadores de rendimiento
   calcularCrecimiento(valorActual: number, valorAnterior: number): {
     porcentaje: number;
     tendencia: 'up' | 'down' | 'stable';
@@ -79,12 +75,10 @@ export const estadisticasHelpers = {
         montoTotal / numVendedoras : 0,
       eficienciaDiaria: diasConVentas > 0 ? 
         (montoTotal / diasConVentas) / (numVendedoras || 1) : 0,
-      // Nueva función para promedio de cantidad neta vendida por día
       ventasNetasPorDia: diasConVentas > 0 ? stats.cantidadTotal / diasConVentas : 0
     };
   },
 
-  // Ranking y comparaciones
   generarRankingVendedoras(vendedoras: VentaPorVendedora[]): VentaPorVendedora[] {
     return vendedoras
       .sort((a, b) => b.montoTotal - a.montoTotal)
@@ -104,7 +98,6 @@ export const estadisticasHelpers = {
     return emojis[posicion as keyof typeof emojis] || '🏅';
   },
 
-  // Análisis de tendencias
   analizarTendenciaSemanal(ventasPorDia: VentaPorDia[]): {
     tendencia: 'creciente' | 'decreciente' | 'estable';
     fuerza: 'fuerte' | 'moderada' | 'débil';
@@ -151,7 +144,6 @@ export const estadisticasHelpers = {
     };
   },
 
-  // Detección de anomalías
   detectarAnomalias(ventasPorDia: VentaPorDia[]): {
     diasAtipicos: VentaPorDia[];
     alertas: string[];
@@ -183,7 +175,6 @@ export const estadisticasHelpers = {
       }
     });
 
-    // Detectar domingos con ventas (no deberían tener)
     const domingoConVentas = ventasPorDia.filter(dia => dia.esDomingo && dia.montoTotal > 0);
     domingoConVentas.forEach(dia => {
       alertas.push(`🤔 ${dia.fecha}: Ventas registradas en domingo`);
@@ -192,7 +183,6 @@ export const estadisticasHelpers = {
     return { diasAtipicos, alertas };
   },
 
-  // Comparaciones entre sucursales
   compararSucursales(sucursales: VentaPorSucursal[] = []): {
     lider: VentaPorSucursal | null;
     rezagada: VentaPorSucursal | null;
@@ -211,7 +201,6 @@ export const estadisticasHelpers = {
     const diferenciaPorcentual = totalGeneral > 0 && ordenadas.length > 1 ?
       ((lider.montoTotal - rezagada.montoTotal) / totalGeneral) * 100 : 0;
 
-    // Colores temáticos de la guía
     const colores = ['#D94854', '#B695BF', '#51590E', '#F23D5E', '#e327c4'];
     
     const distribucion = sucursales.map((sucursal, index) => ({
@@ -223,12 +212,10 @@ export const estadisticasHelpers = {
     return { lider, rezagada, diferenciaPorcentual, distribucion };
   },
 
-  // Insights automáticos
   generarInsights(stats: VentaVendedoraStats): string[] {
     const insights: string[] = [];
     const promedios = this.calcularPromedios(stats);
 
-    // Insight sobre vendedoras top
     if (stats.topVendedoras && stats.topVendedoras.length >= 3) {
       const top3 = stats.topVendedoras.slice(0, 3);
       const totalTop3 = top3.reduce((sum, v) => sum + v.montoTotal, 0);
@@ -239,7 +226,6 @@ export const estadisticasHelpers = {
       }
     }
 
-    // Insight sobre días de venta
     if (stats.diasConVentas > 0) {
       const eficiencia = promedios.ventaPorDia;
       if (eficiencia > 500000) {
@@ -249,7 +235,6 @@ export const estadisticasHelpers = {
       }
     }
 
-    // Insight sobre distribución por turnos
     const turnoStats = stats.ventasPorTurno || [];
     if (turnoStats.length === 2) {
       const [turno1, turno2] = turnoStats.sort((a, b) => b.montoTotal - a.montoTotal);

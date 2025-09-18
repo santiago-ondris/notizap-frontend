@@ -53,15 +53,11 @@ const StatCard: React.FC<{
   </div>
 );
 
-/**
- * Componente principal de estadísticas de devoluciones
- */
 export const DevolucionesEstadisticas: React.FC<DevolucionesEstadisticasProps> = ({
   estadisticas,
   cargando = false
 }) => {
 
-  // Estado de carga
   if (cargando) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

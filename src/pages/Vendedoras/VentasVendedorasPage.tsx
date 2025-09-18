@@ -18,7 +18,6 @@ import { VentasVendedorasFilters } from '@/components/Vendedoras/VentasVendedora
 import { VentasVendedorasStats } from '@/components/Vendedoras/VentasVendedorasStats';
 import { VentasVendedorasTable } from '@/components/Vendedoras/VentasVendedorasTable';
 import { VentasVendedorasChart } from '@/components/Vendedoras/VentasVendedorasChart';
-// import SincronizarPalabrasEspeciales from '@/components/Vendedoras/SincronizarPalabrasEspeciales';
 import { ventasVendedorasService } from '@/services/vendedoras/ventasVendedorasService';
 import type { 
     VentaVendedoraStats,
@@ -36,23 +35,19 @@ type VistaActual = 'dashboard' | 'upload' | 'tabla' | 'graficos' | 'comisiones';
 export const VentasVendedorasPage: React.FC = () => {
   const navigate = useNavigate();
   
-  // Estados principales
   const [vistaActual, setVistaActual] = useState<VistaActual>('dashboard');
   const [modoAdmin, setModoAdmin] = useState(false);
   
-  // Estados de datos
   const [stats, setStats] = useState<VentaVendedoraStats | null>(null);
   const [ventasData, setVentasData] = useState<VentasResponse | null>(null);
   const [sucursales, setSucursales] = useState<string[]>([]);
   const [vendedores, setVendedores] = useState<string[]>([]);
   const [rangoFechas, setRangoFechas] = useState<RangoFechas | null>(null);
 
-  // Estados de carga
   const [loading, setLoading] = useState(false);
   const [loadingStats, setLoadingStats] = useState(false);
   const [loadingInicial, setLoadingInicial] = useState(true);
 
-  // Estados de filtros
   const [filtros, setFiltros] = useState<VentaVendedoraFilters>({
     incluirProductosDescuento: true,
     excluirDomingos: true,
@@ -62,12 +57,10 @@ export const VentasVendedorasPage: React.FC = () => {
     pageSize: 50
   });
 
-  // Cargar datos iniciales
   useEffect(() => {
     cargarDatosIniciales();
   }, []);
 
-  // Cargar datos cuando cambien los filtros
   useEffect(() => {
     if (!loadingInicial) {
       cargarVentas();
@@ -79,7 +72,6 @@ export const VentasVendedorasPage: React.FC = () => {
     try {
       setLoadingInicial(true);
 
-      // Cargar datos maestros en paralelo
       const [sucursalesRes, vendedoresRes, rangoFechasRes] = await Promise.all([
         ventasVendedorasService.obtenerSucursales(),
         ventasVendedorasService.obtenerVendedores(),
@@ -90,7 +82,6 @@ export const VentasVendedorasPage: React.FC = () => {
       setVendedores(vendedoresRes);
       setRangoFechas(rangoFechasRes);
 
-      // Si hay datos disponibles, configurar filtro por defecto a la última semana
       if (rangoFechasRes.ultimaSemana.fechaInicio && rangoFechasRes.ultimaSemana.fechaFin) {
         const filtrosConFechas: VentaVendedoraFilters = {
           ...filtros,
@@ -149,7 +140,6 @@ export const VentasVendedorasPage: React.FC = () => {
       icon: <CheckCircle2 className="text-green-500" />
     });
     
-    // Recargar todos los datos
     await cargarDatosIniciales();
     setVistaActual('dashboard');
   };
@@ -447,7 +437,6 @@ export const VentasVendedorasPage: React.FC = () => {
           </div>
         )}
 
-        {/* <SincronizarPalabrasEspeciales /> */}
       </div>
     </div>
   );

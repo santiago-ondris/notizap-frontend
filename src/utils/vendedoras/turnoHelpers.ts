@@ -1,5 +1,4 @@
 export const turnoHelpers = {
-    // Determinar turno basado en la hora (útil para validaciones)
     determinarTurno(fecha: Date): 'Mañana' | 'Tarde' {
       const hora = fecha.getHours();
       const minutos = fecha.getMinutes();
@@ -19,14 +18,13 @@ export const turnoHelpers = {
       return 'Mañana';
     },
   
-    // Información de turnos
     obtenerInfoTurno(turno: 'Mañana' | 'Tarde') {
       const info = {
         Mañana: {
           emoji: '🌅',
           horario: '8:00 - 14:30',
           descripcion: 'Turno Mañana',
-          color: '#51590E', // Verde oliva de la guía
+          color: '#51590E', 
           horaInicio: '08:00',
           horaFin: '14:30'
         },
@@ -34,7 +32,7 @@ export const turnoHelpers = {
           emoji: '🌆',
           horario: '15:00 - 22:00',
           descripcion: 'Turno Tarde',
-          color: '#D94854', // Rojo principal de la guía
+          color: '#D94854', 
           horaInicio: '15:00',
           horaFin: '22:00'
         }
@@ -43,7 +41,6 @@ export const turnoHelpers = {
       return info[turno];
     },
   
-    // Formateo para displays
     formatearTurno(turno: 'Mañana' | 'Tarde'): string {
       const info = this.obtenerInfoTurno(turno);
       return `${info.emoji} ${info.descripcion} (${info.horario})`;
@@ -54,11 +51,9 @@ export const turnoHelpers = {
       return `${info.emoji} ${turno}`;
     },
   
-    // Validaciones específicas de negocio
     puedeVenderEnSabadoTarde(sucursal: string, turno: 'Mañana' | 'Tarde'): boolean {
       const sucursalesEspeciales = ['25 de mayo', 'DEAN FUNES'];
       
-      // Si es sábado tarde y la sucursal tiene horario especial
       if (turno === 'Tarde' && sucursalesEspeciales.includes(sucursal)) {
         return false;
       }
@@ -77,7 +72,6 @@ export const turnoHelpers = {
       return null;
     },
   
-    // Análisis de rendimiento por turno
     compararTurnos(datosManana: any[], datosTarde: any[]) {
       const calcularTotal = (datos: any[]) => 
         datos.reduce((sum, item) => sum + (item.montoTotal || item.total || 0), 0);
@@ -105,7 +99,6 @@ export const turnoHelpers = {
       };
     },
   
-    // Configuración para gráficos
     obtenerConfigTurnoParaGrafico(turno: 'Mañana' | 'Tarde') {
       const info = this.obtenerInfoTurno(turno);
       return {
@@ -116,13 +109,11 @@ export const turnoHelpers = {
       };
     },
   
-    // Filtros rápidos por turno
     aplicarFiltroTurno(datos: any[], turno: 'Mañana' | 'Tarde' | 'Todos'): any[] {
       if (turno === 'Todos') return datos;
       return datos.filter(item => item.turno === turno);
     },
   
-    // Helpers para alertas y notificaciones
     obtenerAlertaRendimientoTurno(datos: any[]): string | null {
       if (datos.length < 2) return null;
       

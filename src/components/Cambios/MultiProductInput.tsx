@@ -11,10 +11,6 @@ interface MultiProductInputProps {
   required?: boolean;
 }
 
-/**
- * Componente para manejar múltiples productos como chips
- * Internamente maneja array, externamente expone string concatenado
- */
 export const MultiProductInput: React.FC<MultiProductInputProps> = ({
   label,
   value,
@@ -27,7 +23,6 @@ export const MultiProductInput: React.FC<MultiProductInputProps> = ({
   const [productos, setProductos] = useState<string[]>([]);
   const [inputActual, setInputActual] = useState('');
 
-  // Convertir string a array al cargar
   useEffect(() => {
     if (value && value.trim()) {
       const productosArray = value.split(' | ').filter(p => p.trim());
@@ -37,7 +32,6 @@ export const MultiProductInput: React.FC<MultiProductInputProps> = ({
     }
   }, [value]);
 
-  // Convertir array a string y notificar cambio
   const actualizarProductos = (nuevosProductos: string[]) => {
     setProductos(nuevosProductos);
     const stringConcatenado = nuevosProductos.join(' | ');

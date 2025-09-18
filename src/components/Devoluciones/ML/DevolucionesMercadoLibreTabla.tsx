@@ -35,9 +35,6 @@ interface DevolucionesMercadoLibreTablaProps {
   onCambioPagina?: (pagina: number) => void;
 }
 
-/**
- * Componente de checkbox editable inline
- */
 const CheckboxNotaCredito: React.FC<{
   valor: boolean;
   onCambio: (nuevoValor: boolean) => void;
@@ -125,9 +122,6 @@ const CheckboxTrasladado: React.FC<{
   );
 };
 
-/**
- * Componente de fila de devolución
- */
 const FilaDevolucion: React.FC<{
   devolucion: DevolucionMercadoLibreDto;
   onActualizarNotaCredito: (id: number, notaCreditoEmitida: boolean) => Promise<boolean>;
@@ -147,7 +141,6 @@ const FilaDevolucion: React.FC<{
 }) => {
   const [eliminando, setEliminando] = useState(false);
 
-  // Manejar actualización de nota de crédito
   const handleActualizarNotaCredito = async (nuevoValor: boolean) => {
     return await onActualizarNotaCredito(devolucion.id, nuevoValor);
   };
@@ -156,7 +149,6 @@ const FilaDevolucion: React.FC<{
     return await onActualizarTrasladado(devolucion.id, nuevoValor);
   };
 
-  // Manejar eliminación
   const handleEliminar = async () => {
     if (!puedeEditar) return;
     

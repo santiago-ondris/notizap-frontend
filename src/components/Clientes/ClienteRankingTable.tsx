@@ -25,17 +25,17 @@ import {
 } from "@/components/ui/select";
 
 interface Props {
-  initialOrdenarPor?: "montoTotal" | "cantidadTotal"; // 🔧 CORREGIDO
+  initialOrdenarPor?: "montoTotal" | "cantidadTotal"; 
   initialTop?: number;
   filtros?: any;
 }
 
 export default function ClienteRankingTable({ 
-  initialOrdenarPor = "montoTotal", // 🔧 CORREGIDO
+  initialOrdenarPor = "montoTotal", 
   initialTop = 10, 
   filtros 
 }: Props) {
-  const [ordenarPor, setOrdenarPor] = useState<"montoTotal" | "cantidadTotal">(initialOrdenarPor); // 🔧 CORREGIDO
+  const [ordenarPor, setOrdenarPor] = useState<"montoTotal" | "cantidadTotal">(initialOrdenarPor); 
   const [top, setTop] = useState(initialTop);
   const [clientes, setClientes] = useState<ClienteResumenDto[] | null>(null);
   const [loading, setLoading] = useState(true);

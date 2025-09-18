@@ -1,5 +1,4 @@
 export const dateHelpers = {
-  // Formateo para display
   formatearFechaCorta(fechaISO: string): string {
     const fecha = new Date(fechaISO);
     return fecha.toLocaleDateString('es-AR', {
@@ -39,7 +38,6 @@ export const dateHelpers = {
     });
   },
 
-  // Formateo para inputs y API
   formatearParaInput(fecha: Date): string {
     return fecha.toISOString().split('T')[0];
   },
@@ -48,7 +46,6 @@ export const dateHelpers = {
     return fecha.toISOString();
   },
 
-  // Detectores de días especiales
   esSabado(fechaISO: string): boolean {
     const fecha = new Date(fechaISO);
     return fecha.getDay() === 6;
@@ -63,7 +60,6 @@ export const dateHelpers = {
     return this.esSabado(fechaISO) || this.esDomingo(fechaISO);
   },
 
-  // Generadores de rangos comunes
   obtenerUltimaSemana(): { inicio: Date; fin: Date } {
     const hoy = new Date();
     const hace7Dias = new Date();
@@ -108,10 +104,9 @@ export const dateHelpers = {
     };
   },
 
-  // Validaciones
   validarRangoFechas(inicio?: Date, fin?: Date): { valido: boolean; mensaje?: string } {
     if (!inicio || !fin) {
-      return { valido: true }; // Rangos opcionales son válidos
+      return { valido: true }; 
     }
 
     if (inicio > fin) {
@@ -121,7 +116,6 @@ export const dateHelpers = {
       };
     }
 
-    // Validar que no sea más de 1 año
     const unAno = 365 * 24 * 60 * 60 * 1000;
     if (fin.getTime() - inicio.getTime() > unAno) {
       return { 
@@ -130,7 +124,6 @@ export const dateHelpers = {
       };
     }
 
-    // Validar que no sea en el futuro (más de 1 día)
     const mañana = new Date();
     mañana.setDate(mañana.getDate() + 1);
     if (inicio > mañana || fin > mañana) {
@@ -143,14 +136,12 @@ export const dateHelpers = {
     return { valido: true };
   },
 
-  // Helpers para análisis
   calcularDiasHabiles(fechaInicio: Date, fechaFin: Date): number {
     let dias = 0;
     const fecha = new Date(fechaInicio);
     
     while (fecha <= fechaFin) {
       const diaSemana = fecha.getDay();
-      // Excluir domingos (0)
       if (diaSemana !== 0) {
         dias++;
       }
@@ -165,13 +156,13 @@ export const dateHelpers = {
     const dia = fecha.getDay();
     
     const emojis = {
-      0: '🌙', // Domingo
-      1: '💼', // Lunes
-      2: '💼', // Martes
-      3: '💼', // Miércoles
-      4: '💼', // Jueves
-      5: '💼', // Viernes
-      6: '🎯'  // Sábado
+      0: '🌙', 
+      1: '💼', 
+      2: '💼', 
+      3: '💼', 
+      4: '💼', 
+      5: '💼', 
+      6: '🎯' 
     };
     
     return emojis[dia as keyof typeof emojis] || '📅';

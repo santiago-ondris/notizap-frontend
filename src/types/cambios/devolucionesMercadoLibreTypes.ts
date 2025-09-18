@@ -28,7 +28,6 @@ export interface DevolucionMercadoLibreDto {
     pedido: string;
   }
   
-  // Interfaces para filtros
   export interface DevolucionesMercadoLibreFiltros {
     año?: number;
     mes?: number;
@@ -38,7 +37,6 @@ export interface DevolucionMercadoLibreDto {
     pedido?: string;
   }
   
-  // Interfaces para estadísticas
   export interface DevolucionesMercadoLibreEstadisticas {
     totalDevoluciones: number;
     notasCreditoEmitidas: number;
@@ -57,16 +55,14 @@ export interface DevolucionMercadoLibreDto {
     notasCreditoPendientes: number;
   }
   
-  // Interface para meses disponibles
   export interface MesDisponible {
     año: number;
     mes: number;
     nombreMes: string;
-    valor: string; // "2024-06"
-    etiqueta: string; // "Junio 2024"
+    valor: string; 
+    etiqueta: string; 
   }
   
-  // Interface para errores de formulario
   export interface DevolucionMercadoLibreFormErrors {
     fecha?: string;
     cliente?: string;
@@ -74,24 +70,20 @@ export interface DevolucionMercadoLibreDto {
     pedido?: string;
   }
   
-  // Estados del filtro de notas de crédito
   export type FiltroNotaCredito = 'todos' | 'emitidas' | 'pendientes';
   
-  // Labels para el filtro de notas de crédito
   export const LABELS_FILTRO_NOTA_CREDITO: Record<FiltroNotaCredito, string> = {
     todos: 'Todas las devoluciones',
     emitidas: 'Notas de crédito emitidas',
     pendientes: 'Notas de crédito pendientes'
   };
   
-  // Colores para estados de nota de crédito
   export const COLORES_NOTA_CREDITO = {
-    emitida: '#51590E', // Verde oliva
-    pendiente: '#D94854', // Rojo principal
-    neutral: '#B695BF'  // Violeta
+    emitida: '#51590E', 
+    pendiente: '#D94854', 
+    neutral: '#B695BF'  
   };
   
-  // Opciones para el selector de año
   export const obtenerOpcionesAño = (): Array<{ value: number; label: string }> => {
     const añoActual = new Date().getFullYear();
     const años = [];
@@ -106,7 +98,6 @@ export interface DevolucionMercadoLibreDto {
     return años;
   };
   
-  // Opciones para el selector de mes
   export const OPCIONES_MES = [
     { value: 1, label: 'Enero' },
     { value: 2, label: 'Febrero' },

@@ -14,26 +14,19 @@ import {
 } from '@/types/envios/enviosTypes';
 
 const EnviosPage: React.FC = () => {
-  // Context de autenticación
   const { role } = useAuth();
   
-  // Estados principales
   const [enviosMensuales, setEnviosMensuales] = useState<EnvioDiario[]>([]);
   const [resumenMensual, setResumenMensual] = useState<EnvioResumenMensual | null>(null);
   
-  // Estados de UI
   const [añoActual, setAñoActual] = useState<number>(new Date().getFullYear());
   const [mesActual, setMesActual] = useState<number>(new Date().getMonth() + 1);
   const [cargandoDatos, setCargandoDatos] = useState<boolean>(false);
   const [cargandoResumen, setCargandoResumen] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Verificar si el usuario puede editar
   const puedeEditar = role === 'admin' || role === 'superadmin';
 
-  /**
-   * Cargar envíos mensuales desde la API
-   */
   const cargarEnviosMensuales = async (año: number, mes: number) => {
     setCargandoDatos(true);
     setError(null);
@@ -41,12 +34,10 @@ const EnviosPage: React.FC = () => {
     try {
       const envios = await enviosService.getEnviosMensuales({ year: año, month: mes });
       
-      // Generar días completos del mes (incluye días sin registro)
       const enviosCompletos = enviosService.generarDiasCompletos(envios, año, mes);
       
       setEnviosMensuales(enviosCompletos);
       
-      // Mostrar mensaje si no hay datos
       if (envios.length === 0) {
         toast.info(`No hay registros de envíos para ${mes}/${año}`);
       }
@@ -61,9 +52,6 @@ const EnviosPage: React.FC = () => {
     }
   };
 
-  /**
-   * Cargar resumen mensual desde la API
-   */
   const cargarResumenMensual = async (año: number, mes: number) => {
     setCargandoResumen(true);
     
@@ -72,25 +60,17 @@ const EnviosPage: React.FC = () => {
       setResumenMensual(resumen);
     } catch (error) {
       console.error('Error al cargar resumen:', error);
-      // No mostramos toast para el resumen, solo console.error
       setResumenMensual(null);
     } finally {
       setCargandoResumen(false);
     }
   };
 
-  /**
-   * Manejar cambio de mes/año desde el selector
-   */
   const handleCambioFecha = (año: number, mes: number) => {
     setAñoActual(año);
     setMesActual(mes);
   };
 
-  /**
-   * NUEVA FUNCIÓN: Manejar guardado en lote (BATCH SAVE)
-   * Esta es la función principal que reemplaza al auto-save
-   */
   const handleGuardarLote = async (cambios: Map<string, CambioEnvio>): Promise<boolean> => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para editar registros');
@@ -103,17 +83,13 @@ const EnviosPage: React.FC = () => {
     }
 
     try {
-      // Debug: mostrar cambios que se van a guardar
       enviosService.debugCambios(cambios);
 
-      // Llamar al servicio para guardar en lote
       const resultado: ResultadoLoteDto = await enviosService.guardarEnviosLote(cambios);
       
       if (resultado.todosExitosos) {
-        // ÉXITO: Todos los registros se guardaron
         toast.success(resultado.mensaje);
         
-        // Recargar datos para mostrar los cambios guardados
         await cargarEnviosMensuales(añoActual, mesActual);
         await cargarResumenMensual(añoActual, mesActual);
         
@@ -138,7 +114,7 @@ const EnviosPage: React.FC = () => {
               💡 Intenta guardando celda por celda para encontrar el error específico
             </p>
           </div>,
-          { autoClose: 8000 } // Toast más largo para leer los errores
+          { autoClose: 8000 }
         );
         
         return false;
@@ -162,9 +138,6 @@ const EnviosPage: React.FC = () => {
     }
   };
 
-  /**
-   * Manejar eliminación de un envío (sin cambios)
-   */
   const handleEliminarEnvio = async (id: number): Promise<boolean> => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para eliminar registros');
@@ -174,7 +147,6 @@ const EnviosPage: React.FC = () => {
     try {
       await enviosService.eliminarEnvio(id);
       
-      // Recargar datos completos para asegurar sincronización
       await cargarEnviosMensuales(añoActual, mesActual);
       await cargarResumenMensual(añoActual, mesActual);
       
@@ -188,15 +160,11 @@ const EnviosPage: React.FC = () => {
     }
   };
 
-  /**
-   * Recargar todos los datos
-   */
   const recargarDatos = () => {
     cargarEnviosMensuales(añoActual, mesActual);
     cargarResumenMensual(añoActual, mesActual);
   };
 
-  // Effect para cargar datos cuando cambia el mes/año
   useEffect(() => {
     cargarEnviosMensuales(añoActual, mesActual);
     cargarResumenMensual(añoActual, mesActual);

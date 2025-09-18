@@ -28,7 +28,6 @@ export interface PlantillaWhatsAppDto {
     [categoria: string]: PlantillaWhatsAppDto[];
   }
   
-  // Categorías predefinidas para el frontend
   export const CATEGORIAS_PLANTILLAS = [
     "General",
     "Seguimiento", 

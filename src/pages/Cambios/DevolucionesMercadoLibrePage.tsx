@@ -19,37 +19,27 @@ import { paginarArray, calcularTotalPaginas } from '@/utils/paginacion';
 const DevolucionesMercadoLibrePage: React.FC = () => {
   const navigate = useNavigate();
   
-  // Context de autenticación
   const { role } = useAuth();
 
-  // Estados principales
   const [devoluciones, setDevoluciones] = useState<DevolucionMercadoLibreDto[]>([]);
   const [devolucionesFiltradas, setDevolucionesFiltradas] = useState<DevolucionMercadoLibreDto[]>([]);
   const [estadisticas, setEstadisticas] = useState<EstadisticasType | null>(null);
 
-  // Estados de paginación
   const [paginaActual, setPaginaActual] = useState<number>(1);
   const ELEMENTOS_POR_PAGINA = 15;
 
-  // Estados de UI
   const [cargandoDatos, setCargandoDatos] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Estados de modales
   const [modalCrearAbierto, setModalCrearAbierto] = useState<boolean>(false);
   const [modalEditarAbierto, setModalEditarAbierto] = useState<boolean>(false);
   const [devolucionSeleccionada, setDevolucionSeleccionada] = useState<DevolucionMercadoLibreDto | null>(null);
 
-  // Estados de filtros
   const [filtros, setFiltros] = useState<FiltrosType>({});
 
-  // Verificar permisos
   const puedeEditar = role === 'admin' || role === 'superadmin';
   const puedeVer = role === 'viewer' || role === 'admin' || role === 'superadmin';
 
-  /**
-   * Cargar todas las devoluciones desde la API
-   */
   const cargarDevoluciones = async () => {
     setCargandoDatos(true);
     setError(null);
@@ -58,7 +48,6 @@ const DevolucionesMercadoLibrePage: React.FC = () => {
       const devolucionesData = await devolucionesMercadoLibreService.obtenerTodos();
       setDevoluciones(devolucionesData);
       
-      // Mostrar mensaje si no hay datos
       if (devolucionesData.length === 0) {
         toast.info('No hay devoluciones de MercadoLibre registradas en el sistema');
       }
@@ -73,13 +62,9 @@ const DevolucionesMercadoLibrePage: React.FC = () => {
     }
   };
 
-  /**
-   * Aplicar filtros a las devoluciones
-   */
   const aplicarFiltros = useCallback(() => {
     const devolucionesFiltradosResult = devolucionesMercadoLibreService.filtrarDevoluciones(devoluciones, filtros);
     
-    // Calcular paginación
     const totalPaginas = calcularTotalPaginas(devolucionesFiltradosResult.length, ELEMENTOS_POR_PAGINA);
     
     if (paginaActual > totalPaginas && totalPaginas > 0) {
@@ -94,21 +79,15 @@ const DevolucionesMercadoLibrePage: React.FC = () => {
     setEstadisticas(estadisticasCalculadas);
   }, [devoluciones, filtros, paginaActual]);
 
-  /**
-   * Manejar cambio de filtros
-   */
   const handleFiltrosChange = (nuevosFiltros: FiltrosType) => {
     setFiltros(nuevosFiltros);
-    setPaginaActual(1); // Reset a página 1 cuando cambian filtros
+    setPaginaActual(1); 
   };
 
   const handleCambioPagina = (nuevaPagina: number) => {
     setPaginaActual(nuevaPagina);
   };
 
-  /**
-   * Manejar guardado de devolución (crear/editar)
-   */
   const handleGuardarDevolucion = async (devolucionData: DevolucionMercadoLibreDto | CreateDevolucionMercadoLibreDto): Promise<boolean> => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para modificar devoluciones de MercadoLibre');
@@ -116,18 +95,14 @@ const DevolucionesMercadoLibrePage: React.FC = () => {
     }
   
     try {
-      // Verificar si es edición (tiene id) o creación
       if ('id' in devolucionData && devolucionData.id) {
-        // Es edición
         await devolucionesMercadoLibreService.actualizar(devolucionData.id, devolucionData);
         toast.success('Devolución ML actualizada exitosamente');
       } else {
-        // Es creación
         await devolucionesMercadoLibreService.crear(devolucionData as CreateDevolucionMercadoLibreDto);
         toast.success('Devolución ML creada exitosamente');
       }
       
-      // Recargar datos
       await cargarDevoluciones();
       return true;
       
@@ -138,9 +113,6 @@ const DevolucionesMercadoLibrePage: React.FC = () => {
     }
   };
 
-  /**
-   * Manejar actualización de nota de crédito (checkbox inline)
-   */
   const handleActualizarNotaCredito = async (id: number, notaCreditoEmitida: boolean): Promise<boolean> => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para actualizar notas de crédito');
@@ -151,7 +123,6 @@ const DevolucionesMercadoLibrePage: React.FC = () => {
       await devolucionesMercadoLibreService.actualizarNotaCredito(id, notaCreditoEmitida);
       toast.success(`Nota de crédito ${notaCreditoEmitida ? 'marcada como emitida' : 'marcada como pendiente'}`);
       
-      // Recargar datos
       await cargarDevoluciones();
       return true;
       
@@ -183,16 +154,12 @@ const DevolucionesMercadoLibrePage: React.FC = () => {
     }
   };
 
-  /**
-   * Manejar eliminación de una devolución
-   */
   const handleEliminarDevolucion = async (id: number): Promise<boolean> => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para eliminar devoluciones de MercadoLibre');
       return false;
     }
 
-    // Confirmación antes de eliminar
     if (!window.confirm('¿Estás seguro de que quieres eliminar esta devolución de MercadoLibre? Esta acción no se puede deshacer.')) {
       return false;
     }
@@ -201,7 +168,6 @@ const DevolucionesMercadoLibrePage: React.FC = () => {
       await devolucionesMercadoLibreService.eliminar(id);
       toast.success('Devolución ML eliminada exitosamente');
       
-      // Recargar datos
       await cargarDevoluciones();
       return true;
       
@@ -212,9 +178,6 @@ const DevolucionesMercadoLibrePage: React.FC = () => {
     }
   };
 
-  /**
-   * Manejar apertura del modal de creación
-   */
   const handleNuevaDevolucion = () => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para crear devoluciones de MercadoLibre');
@@ -224,9 +187,6 @@ const DevolucionesMercadoLibrePage: React.FC = () => {
     setModalCrearAbierto(true);
   };
 
-  /**
-   * Manejar apertura del modal de edición
-   */
   const handleEditarModal = (devolucion: DevolucionMercadoLibreDto) => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para editar devoluciones de MercadoLibre');
@@ -236,9 +196,7 @@ const DevolucionesMercadoLibrePage: React.FC = () => {
     setModalEditarAbierto(true);
   };
 
-  /**
-   * Manejar "ver detalle" (por ahora solo muestra toast con info)
-   */
+
   const handleVerDetalle = (devolucion: DevolucionMercadoLibreDto) => {
     const info = [
       `📅 Fecha: ${devolucionesMercadoLibreService.formatearFecha(devolucion.fecha)}`,
@@ -254,42 +212,32 @@ const DevolucionesMercadoLibrePage: React.FC = () => {
     });
   };
 
-  /**
-   * Cerrar todos los modales
-   */
+
   const cerrarModales = () => {
     setModalCrearAbierto(false);
     setModalEditarAbierto(false);
     setDevolucionSeleccionada(null);
   };
 
-  /**
-   * Recargar todos los datos
-   */
   const recargarDatos = () => {
     cargarDevoluciones();
   };
 
-  /**
-   * Volver a la página de cambios
-   */
+
   const volverACambios = () => {
     navigate('/cambios');
   };
 
-  // Effect para cargar datos al montar el componente
   useEffect(() => {
     if (puedeVer) {
       cargarDevoluciones();
     }
   }, [puedeVer]);
 
-  // Effect para aplicar filtros cuando cambian los datos o filtros
   useEffect(() => {
     aplicarFiltros();
   }, [aplicarFiltros]);
 
-  // Verificar permisos de acceso
   if (!puedeVer) {
     return (
       <div className="min-h-screen bg-[#1A1A20] flex items-center justify-center p-6">

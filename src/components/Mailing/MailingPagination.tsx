@@ -16,13 +16,11 @@ export const MailingPagination: React.FC<MailingPaginationProps> = ({
   totalItems,
   itemsPerPage
 }) => {
-  // Calcular rango de páginas a mostrar
   const getVisiblePages = () => {
-    const delta = 2; // Número de páginas a mostrar a cada lado de la actual
+    const delta = 2;
     const range = [];
     const rangeWithDots = [];
 
-    // Calcular el rango de páginas
     const start = Math.max(1, currentPage - delta);
     const end = Math.min(totalPages, currentPage + delta);
 
@@ -30,7 +28,6 @@ export const MailingPagination: React.FC<MailingPaginationProps> = ({
       range.push(i);
     }
 
-    // Agregar primera página si no está incluida
     if (start > 1) {
       rangeWithDots.push(1);
       if (start > 2) {
@@ -38,10 +35,8 @@ export const MailingPagination: React.FC<MailingPaginationProps> = ({
       }
     }
 
-    // Agregar rango principal
     rangeWithDots.push(...range);
 
-    // Agregar última página si no está incluida
     if (end < totalPages) {
       if (end < totalPages - 1) {
         rangeWithDots.push('...');

@@ -19,39 +19,29 @@ import {
 import { useNavigate } from 'react-router';
 
 const CambiosPage: React.FC = () => {
-  // Context de autenticación
   const { role } = useAuth();
   const navigate = useNavigate();
 
-  // Estados principales
   const [cambios, setCambios] = useState<CambioSimpleDto[]>([]);
   const [cambiosFiltrados, setCambiosFiltrados] = useState<CambioSimpleDto[]>([]);
   const [estadisticas, setEstadisticas] = useState<EstadisticasType | null>(null);
 
-  // Estados de UI
   const [cargandoDatos, setCargandoDatos] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Estados de modales
   const [modalCrearAbierto, setModalCrearAbierto] = useState<boolean>(false);
   const [modalEditarAbierto, setModalEditarAbierto] = useState<boolean>(false);
   const [cambioSeleccionado, setCambioSeleccionado] = useState<CambioSimpleDto | null>(null);
 
-  // Estados de filtros
   const [filtros, setFiltros] = useState<FiltrosType>({});
 
-  // NUEVO: Estado para el selector de meses
   const [mesSeleccionado, setMesSeleccionado] = useState<string>(() => {
     return cambiosService.obtenerMesActualSelector();
   });
 
-  // Verificar permisos
   const puedeEditar = role === 'admin' || role === 'superadmin';
   const puedeVer = role === 'viewer' || role === 'admin' || role === 'superadmin';
 
-  /**
-   * Cargar cambios del mes seleccionado
-   */
   const cargarCambiosPorMes = async (valorMes: string) => {
     setCargandoDatos(true);
     setError(null);
@@ -63,7 +53,6 @@ const CambiosPage: React.FC = () => {
       const cambiosData = await cambiosService.obtenerPorMes(mes, año);
       setCambios(cambiosData);
       
-      // Mostrar mensaje informativo
       if (cambiosData.length === 0) {
         toast.info(`No hay cambios registrados en ${MesesUtils.formatearMes(mes, año)}`);
       } else {
@@ -80,29 +69,21 @@ const CambiosPage: React.FC = () => {
     }
   };
 
-  /**
-   * Manejar cambio en el selector de meses
-   */
+
   const handleCambioMes = (nuevoMes: string) => {
     console.log(`🗓️ Cambiando mes seleccionado: ${nuevoMes}`);
     setMesSeleccionado(nuevoMes);
     
-    // Limpiar filtros adicionales al cambiar de mes
     setFiltros({});
     
-    // Cargar datos del nuevo mes
     cargarCambiosPorMes(nuevoMes);
   };
 
-  /**
-   * Aplicar filtros a los cambios (sin afectar el filtro de mes principal)
-   */
   const aplicarFiltros = useCallback(() => {
-    // Crear filtros combinados: filtros del mes + filtros adicionales
     const filtrosMes = cambiosService.crearFiltrosDesdeMes(mesSeleccionado);
     const filtrosCombinados: FiltrosType = {
       ...filtrosMes,
-      ...filtros // Los filtros adicionales se superponen
+      ...filtros 
     };
 
     console.log('🔍 Aplicando filtros combinados:', filtrosCombinados);
@@ -110,14 +91,11 @@ const CambiosPage: React.FC = () => {
     const cambiosFiltradosResult = cambiosService.filtrarCambios(cambios, filtrosCombinados);
     setCambiosFiltrados(cambiosFiltradosResult);
     
-    // Calcular estadísticas solo de los cambios filtrados
     const estadisticasCalculadas = cambiosService.calcularEstadisticas(cambiosFiltradosResult);
     setEstadisticas(estadisticasCalculadas);
   }, [cambios, filtros, mesSeleccionado]);
 
-  /**
-   * Manejar cambio de filtros adicionales
-   */
+
   const handleFiltrosChange = (nuevosFiltros: FiltrosType) => {
     console.log('🎛️ Actualizando filtros adicionales:', nuevosFiltros);
     setFiltros(nuevosFiltros);
@@ -132,7 +110,7 @@ const CambiosPage: React.FC = () => {
     try {
       await cambiosService.actualizarEnvio(id, envio);
       toast.success('Envío actualizado correctamente');
-      await cargarCambiosPorMes(mesSeleccionado); // Recargar datos del mes actual
+      await cargarCambiosPorMes(mesSeleccionado); 
       return true;
     } catch (error) {
       const mensaje = error instanceof Error ? error.message : 'Error al actualizar envío';
@@ -148,18 +126,14 @@ const CambiosPage: React.FC = () => {
     }
   
     try {
-      // Verificar si es edición (tiene id) o creación
       if ('id' in cambioData && cambioData.id) {
-        // Es edición
         await cambiosService.actualizar(cambioData.id, cambioData);
         toast.success('Cambio actualizado exitosamente');
       } else {
-        // Es creación
         await cambiosService.crear(cambioData as CreateCambioSimpleDto);
         toast.success('Cambio creado exitosamente');
       }
       
-      // Recargar datos del mes actual
       await cargarCambiosPorMes(mesSeleccionado);
       return true;
       
@@ -170,9 +144,6 @@ const CambiosPage: React.FC = () => {
     }
   };
 
-  /**
-   * Manejar actualización de estados (checkboxes inline)
-   */
   const handleActualizarEstados = async (id: number, estados: EstadosCambio): Promise<boolean> => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para actualizar estados');
@@ -183,7 +154,6 @@ const CambiosPage: React.FC = () => {
       await cambiosService.actualizarEstados(id, estados);
       toast.success('Estado actualizado correctamente');
       
-      // Recargar datos del mes actual
       await cargarCambiosPorMes(mesSeleccionado);
       return true;
       
@@ -194,16 +164,12 @@ const CambiosPage: React.FC = () => {
     }
   };
 
-  /**
-   * Manejar eliminación de un cambio
-   */
   const handleEliminarCambio = async (id: number): Promise<boolean> => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para eliminar cambios');
       return false;
     }
 
-    // Confirmación antes de eliminar
     if (!window.confirm('¿Estás seguro de que quieres eliminar este cambio? Esta acción no se puede deshacer.')) {
       return false;
     }
@@ -212,7 +178,6 @@ const CambiosPage: React.FC = () => {
       await cambiosService.eliminar(id);
       toast.success('Cambio eliminado exitosamente');
       
-      // Recargar datos del mes actual
       await cargarCambiosPorMes(mesSeleccionado);
       return true;
       
@@ -241,9 +206,6 @@ const CambiosPage: React.FC = () => {
     }
   };
 
-  /**
-   * Manejar apertura del modal de creación
-   */
   const handleNuevoCambio = () => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para crear cambios');
@@ -253,9 +215,6 @@ const CambiosPage: React.FC = () => {
     setModalCrearAbierto(true);
   };
 
-  /**
-   * Manejar apertura del modal de edición
-   */
   const handleEditarModal = (cambio: CambioSimpleDto) => {
     if (!puedeEditar) {
       toast.error('No tienes permisos para editar cambios');
@@ -265,38 +224,30 @@ const CambiosPage: React.FC = () => {
     setModalEditarAbierto(true);
   };
 
-  /**
-   * Cerrar todos los modales
-   */
   const cerrarModales = () => {
     setModalCrearAbierto(false);
     setModalEditarAbierto(false);
     setCambioSeleccionado(null);
   };
 
-  /**
-   * Recargar datos del mes actual
-   */
+
   const recargarDatos = () => {
     cargarCambiosPorMes(mesSeleccionado);
   };
 
-  // Effect para cargar datos del mes actual al montar el componente
   useEffect(() => {
     if (puedeVer) {
       console.log('🚀 Componente montado, cargando mes actual:', mesSeleccionado);
       cargarCambiosPorMes(mesSeleccionado);
     }
-  }, [puedeVer]); // Solo depende de permisos
+  }, [puedeVer]);
 
-  // Effect para aplicar filtros cuando cambian los datos o filtros adicionales
   useEffect(() => {
     if (cambios.length > 0) {
       aplicarFiltros();
     }
   }, [aplicarFiltros]);
 
-  // Verificar permisos de acceso
   if (!puedeVer) {
     return (
       <div className="min-h-screen bg-[#1A1A20] flex items-center justify-center p-6">

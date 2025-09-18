@@ -2,12 +2,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCampaigns, getHighlights, syncCampaigns, updateCampaignTitle } from "@/services/mailing/mailingService";
 import type { CampaignMailchimp, CampaignHighlights, MailchimpSyncResult } from "@/types/mailing/mailingTypes";
 
-// Hook para obtener campañas
 export function useMailingCampaigns(cuenta: "Montella" | "Alenka") {
   return useQuery<CampaignMailchimp[], Error>({
     queryKey: ["mailing-campaigns", cuenta],
     queryFn: () => getCampaigns(cuenta),
-    staleTime: 5 * 60 * 1000, // 5 minutos
+    staleTime: 5 * 60 * 1000, 
   });
 }
 
@@ -16,7 +15,7 @@ export function useMailingHighlights(cuenta: "Montella" | "Alenka") {
   return useQuery<CampaignHighlights, Error>({
     queryKey: ["mailing-highlights", cuenta],
     queryFn: () => getHighlights(cuenta),
-    staleTime: 5 * 60 * 1000, // 5 minutos
+    staleTime: 5 * 60 * 1000, 
   });
 }
 

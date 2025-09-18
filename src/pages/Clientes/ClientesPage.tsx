@@ -17,22 +17,19 @@ export default function ClientesPage() {
   const navigate = useNavigate();
   const { role } = useAuth();
   
-  // Usar el store de filtros
   const { 
     lastAppliedFilters, 
     clearFilters  } = useClienteFiltersStore();
   
   const hasActiveFiltersHook = useHasActiveClienteFilters();
 
-  // Sincronizar con el store al montar y cuando cambien los filtros
   useEffect(() => {
     if (lastAppliedFilters) {
       setActiveFilters(lastAppliedFilters);
-      setShowFilters(true); // Mostrar automáticamente si hay filtros activos
+      setShowFilters(true); 
     }
   }, [lastAppliedFilters]);
 
-  // Mostrar filtros automáticamente si hay filtros activos
   useEffect(() => {
     if (hasActiveFiltersHook && !showFilters) {
       setShowFilters(true);
@@ -47,7 +44,7 @@ export default function ClientesPage() {
   };
 
   const handleClearFilters = () => {
-    clearFilters(); // Limpiar desde el store
+    clearFilters(); 
     setActiveFilters(null);
     setClientes(null);
     setShowFilters(false);

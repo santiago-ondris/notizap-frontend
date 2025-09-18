@@ -39,9 +39,6 @@ interface CambiosTablaProps {
   cargando?: boolean;
 }
 
-/**
- * Componente de checkbox editable inline
- */
 const CheckboxInline: React.FC<{
   valor: boolean;
   onCambio: (nuevoValor: boolean) => void;
@@ -89,9 +86,6 @@ const CheckboxInline: React.FC<{
   );
 };
 
-/**
- * Componente de campo de envío editable inline
- */
 const CampoEnvioEditable: React.FC<{
   valor: string;
   onCambio: (nuevoValor: string) => Promise<boolean>;

@@ -1,6 +1,6 @@
 export interface VentaVendedoraFilters {
-    fechaInicio?: string; // ISO string
-    fechaFin?: string; // ISO string
+    fechaInicio?: string; 
+    fechaFin?: string; 
     sucursalNombre?: string;
     vendedorNombre?: string;
     turno?: 'Mañana' | 'Tarde' | '';
@@ -42,7 +42,6 @@ export interface VentaVendedoraFilters {
     totalRegistros: number;
   }
   
-  // Constantes para los filtros
   export const TURNOS_OPTIONS = [
     { value: '', label: 'Todos los turnos' },
     { value: 'Mañana', label: '🌅 Mañana (8:00-14:30)' },
@@ -64,7 +63,6 @@ export interface VentaVendedoraFilters {
     { value: 200, label: '200 por página' }
   ] as const;
   
-  // Filtros predefinidos para análisis rápido
   export const FILTROS_PREDEFINIDOS = {
     ultimaSemana: {
       nombre: '📊 Última semana',

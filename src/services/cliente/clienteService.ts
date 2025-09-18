@@ -5,7 +5,6 @@ import type {
   PagedResult,
 } from "@/types/cliente/cliente";
 
-// Obtener todos los clientes (listado paginado)
 export const getAllClientes = async (
   pageNumber: number = 1,
   pageSize: number = 20
@@ -16,7 +15,6 @@ export const getAllClientes = async (
   return res.data;
 };
 
-// Obtener el detalle de un cliente por ID
 export const getClienteDetalle = async (id: number): Promise<ClienteDetalleDto> => {
   const res = await api.get(`/api/v1/clientes/${id}`);
   return res.data;
@@ -81,7 +79,6 @@ export const filtrarClientes = async (
 
   const query = new URLSearchParams();
   
-  // Parámetros existentes
   if (params.desde) query.append("desde", params.desde);
   if (params.hasta) query.append("hasta", params.hasta);
   if (params.canal) query.append("canal", params.canal);
@@ -103,9 +100,6 @@ export const filtrarClientes = async (
   return res.data;
 };
 
-// ====== NUEVOS ENDPOINTS PARA FILTROS ======
-
-// Obtener canales disponibles
 export const getCanalesDisponibles = async (): Promise<string[]> => {
   try {
     const res = await api.get("/api/v1/clientes/filtros/canales");
@@ -116,7 +110,6 @@ export const getCanalesDisponibles = async (): Promise<string[]> => {
   }
 };
 
-// Obtener sucursales disponibles
 export const getSucursalesDisponibles = async (): Promise<string[]> => {
   try {
     const res = await api.get("/api/v1/clientes/filtros/sucursales");
@@ -127,7 +120,6 @@ export const getSucursalesDisponibles = async (): Promise<string[]> => {
   }
 };
 
-// Obtener marcas disponibles
 export const getMarcasDisponibles = async (): Promise<string[]> => {
   try {
     const res = await api.get("/api/v1/clientes/filtros/marcas");
@@ -138,7 +130,6 @@ export const getMarcasDisponibles = async (): Promise<string[]> => {
   }
 };
 
-// Obtener categorías disponibles
 export const getCategoriasDisponibles = async (): Promise<string[]> => {
   try {
     const res = await api.get("/api/v1/clientes/filtros/categorias");
@@ -149,7 +140,6 @@ export const getCategoriasDisponibles = async (): Promise<string[]> => {
   }
 };
 
-// Función híbrida que intenta usar los endpoints específicos, pero hace fallback
 export const getFilterOptionsHybrid = async () => {
   const options = {
     canales: [] as string[],
@@ -159,7 +149,6 @@ export const getFilterOptionsHybrid = async () => {
   };
 
   try {
-    // Intentar endpoints específicos primero
     const [canales, sucursales, marcas, categorias] = await Promise.allSettled([
       getCanalesDisponibles(),
       getSucursalesDisponibles(), 
@@ -176,7 +165,6 @@ export const getFilterOptionsHybrid = async () => {
     console.warn("Endpoints específicos no disponibles, usando fallback con getAllClientes");
   }
 
-  // Si algunos fallaron, hacer fallback usando getAllClientes
   if (options.canales.length === 0 || options.sucursales.length === 0) {
     try {
       const clientesData = await getAllClientes(1, 1000);
@@ -213,7 +201,6 @@ export const getFilterOptionsHybrid = async () => {
     }
   }
 
-  // Valores por defecto si todo falla
   if (options.canales.length === 0) {
     options.canales = ['KIBOO', 'WOOCOMMERCE', 'MERCADOLIBRE', 'E-COMMERCE'];
   }

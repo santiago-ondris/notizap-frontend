@@ -151,9 +151,6 @@ const MiniChart: React.FC<{
   );
 };
 
-/**
- * Componente principal de estadísticas de devoluciones de MercadoLibre
- */
 export const DevolucionesMercadoLibreEstadisticasComp: React.FC<DevolucionesMercadoLibreEstadisticasProps> = ({
   estadisticas,
   cargando = false

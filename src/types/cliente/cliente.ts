@@ -56,7 +56,6 @@ export interface TopMarcaDto {
   totalGastado: number;
 }
 
-// Nuevo: tipo para paginación
 export interface PagedResult<T> {
   totalRecords: ReactNode;
   items: T[];

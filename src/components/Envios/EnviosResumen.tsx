@@ -24,9 +24,6 @@ interface CardResumenProps {
   cargando?: boolean;
 }
 
-/**
- * Componente individual para cada card de resumen
- */
 const CardResumen: React.FC<CardResumenProps> = ({ 
   titulo, 
   valor, 
@@ -85,14 +82,11 @@ const CardResumen: React.FC<CardResumenProps> = ({
   );
 };
 
-/**
- * Componente principal que muestra el resumen mensual en cards
- */
+
 export const EnviosResumen: React.FC<EnviosResumenProps> = ({ 
   resumen, 
   cargando = false 
 }) => {
-  // Si no hay datos y no está cargando, mostrar estado vacío
   if (!resumen && !cargando) {
     return (
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-8">

@@ -25,9 +25,6 @@ interface DevolucionMercadoLibreModalProps {
   cargando?: boolean;
 }
 
-/**
- * Componente principal del modal de devolución de MercadoLibre
- */
 export const DevolucionMercadoLibreModal: React.FC<DevolucionMercadoLibreModalProps> = ({
   isOpen,
   onClose,
@@ -35,7 +32,6 @@ export const DevolucionMercadoLibreModal: React.FC<DevolucionMercadoLibreModalPr
   devolucion,
   cargando = false
 }) => {
-  // Estados del formulario
   const [formData, setFormData] = useState<Partial<CreateDevolucionMercadoLibreDto>>({
     fecha: '',
     cliente: '',
@@ -47,27 +43,23 @@ export const DevolucionMercadoLibreModal: React.FC<DevolucionMercadoLibreModalPr
   const [errors, setErrors] = useState<DevolucionMercadoLibreFormErrors>({});
   const [guardando, setGuardando] = useState(false);
 
-  // Determinar si es edición o creación
   const esEdicion = devolucion !== null;
   const titulo = esEdicion ? 'Editar Devolución ML' : 'Nueva Devolución ML';
   const subtitulo = esEdicion 
     ? 'Modifica los datos de la devolución de MercadoLibre'
     : 'Completa la información de la nueva devolución de MercadoLibre';
 
-  // Cargar datos al abrir el modal
   useEffect(() => {
     if (isOpen) {
       if (esEdicion && devolucion) {
-        // Cargar datos para edición
         setFormData({
-          fecha: devolucion.fecha.split('T')[0], // Extraer solo la fecha
+          fecha: devolucion.fecha.split('T')[0], 
           cliente: devolucion.cliente,
           pedido: devolucion.pedido,
           modelo: devolucion.modelo,
           notaCreditoEmitida: devolucion.notaCreditoEmitida
         });
       } else {
-        // Resetear para creación
         const fechaHoy = new Date().toISOString().split('T')[0];
         setFormData({
           fecha: fechaHoy,
@@ -81,7 +73,6 @@ export const DevolucionMercadoLibreModal: React.FC<DevolucionMercadoLibreModalPr
     }
   }, [isOpen, esEdicion, devolucion]);
 
-  // Validar formulario
   const validarFormulario = (): boolean => {
     const nuevosErrores: DevolucionMercadoLibreFormErrors = {};
 
@@ -111,14 +102,12 @@ export const DevolucionMercadoLibreModal: React.FC<DevolucionMercadoLibreModalPr
     return Object.keys(nuevosErrores).length === 0;
   };
 
-  // Manejar cambio en campos del formulario
   const handleInputChange = (campo: keyof CreateDevolucionMercadoLibreDto, valor: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       [campo]: valor
     }));
 
-    // Limpiar error del campo si existe
     if (errors[campo as keyof DevolucionMercadoLibreFormErrors]) {
       setErrors(prev => ({
         ...prev,
@@ -127,7 +116,6 @@ export const DevolucionMercadoLibreModal: React.FC<DevolucionMercadoLibreModalPr
     }
   };
 
-  // Manejar envío del formulario
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -138,7 +126,6 @@ export const DevolucionMercadoLibreModal: React.FC<DevolucionMercadoLibreModalPr
     setGuardando(true);
 
     try {
-      // Preparar datos para envío
       const datosCompletos: CreateDevolucionMercadoLibreDto = {
         fecha: formData.fecha!,
         cliente: formData.cliente!.trim(),
@@ -150,14 +137,12 @@ export const DevolucionMercadoLibreModal: React.FC<DevolucionMercadoLibreModalPr
       let resultado: boolean;
 
       if (esEdicion && devolucion) {
-        // Actualizar devolución existente
         const devolucionActualizada: DevolucionMercadoLibreDto = {
           ...devolucion,
           ...datosCompletos
         };
         resultado = await onSave(devolucionActualizada);
       } else {
-        // Crear nueva devolución
         resultado = await onSave(datosCompletos);
       }
 
@@ -171,14 +156,12 @@ export const DevolucionMercadoLibreModal: React.FC<DevolucionMercadoLibreModalPr
     }
   };
 
-  // Manejar cierre del modal
   const handleClose = () => {
     if (!guardando) {
       onClose();
     }
   };
 
-  // No renderizar si no está abierto
   if (!isOpen) return null;
 
   return (

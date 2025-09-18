@@ -13,7 +13,7 @@ interface HighlightsData {
 interface MailingHighlightsProps {
   highlights: HighlightsData | undefined;
   isLoading: boolean;
-  isDynamic?: boolean; // Nuevo prop para indicar si son highlights dinámicos
+  isDynamic?: boolean;
 }
 
 export const MailingHighlights: React.FC<MailingHighlightsProps> = ({

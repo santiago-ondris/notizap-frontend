@@ -13,24 +13,20 @@ export default function ClientesRankingPage() {
   const { role } = useAuth();
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   
-  // Usar el store de filtros
   const { 
     lastAppliedFilters, 
     clearFilters  } = useClienteFiltersStore();
   
   const hasActiveFiltersHook = useHasActiveClienteFilters();
 
-  // Estado local para la interfaz
   const [filtrosAplicados, setFiltrosAplicados] = useState<any>(null);
 
-  // Sincronizar con el store al montar y cuando cambien los filtros
   useEffect(() => {
     if (lastAppliedFilters) {
       setFiltrosAplicados(lastAppliedFilters);
     }
   }, [lastAppliedFilters]);
 
-  // Mostrar filtros automáticamente si hay filtros activos
   useEffect(() => {
     if (hasActiveFiltersHook && !mostrarFiltros) {
       setMostrarFiltros(true);
@@ -42,7 +38,7 @@ export default function ClientesRankingPage() {
   };
 
   const limpiarFiltros = () => {
-    clearFilters(); // Limpiar desde el store
+    clearFilters();
     setFiltrosAplicados(null);
     setMostrarFiltros(false);
   };

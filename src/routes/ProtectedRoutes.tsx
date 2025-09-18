@@ -13,11 +13,12 @@ import { VentasVendedorasPage } from "@/pages/Vendedoras/VentasVendedorasPage";
 import LocalesStatsPage from "@/pages/Vendedoras/LocalesStatsPage";
 import { ComisionesVendedorasPage } from "@/pages/Vendedoras/ComisionesVendedorasPage";
 import { ReposicionPage } from "@/pages/Reposicion/ReposicionPage";
+import { ReposicionSelectorPage } from "@/pages/Reposicion/ReposicionSelectorPage";
+import { ReposicionNinosPage } from "@/pages/Reposicion/ReposicionNinosPage";
 
 export const ProtectedRoutes = (
   <>
     <Route path="usuarios"          element={<UsersPage />} />
-    <Route path="reposicion"          element={<ReposicionPage />} />
     <Route path="mailing"           element={<MailingPage />} />
     <Route path="clientes">
       <Route index                   element={<ClientesPage />} />
@@ -35,6 +36,11 @@ export const ProtectedRoutes = (
       <Route index                   element={<VentasVendedorasPage />} />
       <Route path="rendimiento"            element={<LocalesStatsPage />} />
       <Route path="comisioneslocales"            element={<ComisionesVendedorasPage />} />
+    </Route>
+    <Route path="reposicion">
+      <Route index                   element={<ReposicionSelectorPage />} />
+      <Route path="adultos"            element={<ReposicionPage />} />
+      <Route path="ninos"            element={<ReposicionNinosPage />} />
     </Route>
   </>
 );

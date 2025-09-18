@@ -7,7 +7,7 @@ export function LocalesStatsTablaDias({
   metricaComparar,
   onVendedoraClick,
 }: {
-  dias: any[]; // RendimientoLocalesDia[]
+  dias: any[]; 
   metricaComparar: 'monto' | 'cantidad';
   onVendedoraClick?: (nombre: string) => void;
 }) {

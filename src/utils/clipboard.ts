@@ -3,7 +3,6 @@ export const copiarAlPortapapeles = async (texto: string): Promise<boolean> => {
       await navigator.clipboard.writeText(texto);
       return true;
     } catch (error) {
-      // Fallback para navegadores más antiguos
       try {
         const textarea = document.createElement('textarea');
         textarea.value = texto;

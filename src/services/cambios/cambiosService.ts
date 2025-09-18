@@ -10,15 +10,10 @@ import {
 } from '@/types/cambios/cambiosTypes';
 import { formatearFechaCambios } from '@/utils/envios/fechaHelpers';
 
-/**
- * Servicio para gestión de cambios
- */
+
 class CambiosService {
   private readonly baseUrl = '/api/v1/cambio';
 
-  /**
-   * Obtener todos los cambios
-   */
   async obtenerTodos(): Promise<CambioSimpleDto[]> {
     try {
       const response = await api.get<CambioSimpleDto[]>(this.baseUrl);
@@ -29,12 +24,8 @@ class CambiosService {
     }
   }
 
-  /**
-   * Obtener cambios filtrados por mes (método principal para el selector)
-   */
   async obtenerPorMes(mes: number, año: number): Promise<CambioSimpleDto[]> {
     try {
-      // Generar filtros de fecha para el mes específico
       const fechaDesde = new Date(año, mes - 1, 1);
       const fechaHasta = new Date(año, mes, 0); // Último día del mes
 
@@ -47,8 +38,6 @@ class CambiosService {
 
       console.log(`🗓️ Obteniendo cambios para ${MesesUtils.formatearMes(mes, año)}:`, filtros);
 
-      // Por ahora, obtenemos todos y filtramos localmente
-      // En el futuro se puede implementar un endpoint específico
       const todosCambios = await this.obtenerTodos();
       return this.filtrarCambios(todosCambios, filtros);
     } catch (error) {
@@ -57,9 +46,6 @@ class CambiosService {
     }
   }
 
-  /**
-   * Obtener un cambio por ID
-   */
   async obtenerPorId(id: number): Promise<CambioSimpleDto> {
     try {
       const response = await api.get<CambioSimpleDto>(`${this.baseUrl}/${id}`);
@@ -70,16 +56,12 @@ class CambiosService {
     }
   }
 
-  /**
-   * Crear un nuevo cambio
-   */
   async crear(cambio: CreateCambioSimpleDto): Promise<number> {
     try {
       this.validarCambio(cambio);
       const response = await api.post<number>(this.baseUrl, cambio);
       return response.data;
     } catch (error: any) {
-      // Si viene de Axios, mostramos cuerpo y status
       if (error.response) {
         console.error(
           'Error al crear cambio:',
@@ -89,16 +71,12 @@ class CambiosService {
       } else {
         console.error('Error al crear cambio:', error);
       }
-      throw error;  // o throw new Error(error.response?.data?.message || error.message)
+      throw error;
     }
   }
 
-  /**
-   * Actualizar un cambio existente
-   */
   async actualizar(id: number, cambio: CambioSimpleDto): Promise<void> {
     try {
-      // Validar antes de enviar
       this.validarCambio(cambio);
       
       await api.put(`${this.baseUrl}/${id}`, cambio);
@@ -108,9 +86,6 @@ class CambiosService {
     }
   }
 
-    /**
-   * Actualizar etiqueta y estado de despacho
-   */
   async actualizarEtiqueta(id: number, etiqueta: string, etiquetaDespachada: boolean): Promise<void> {
     try {
       const dto = {
@@ -125,9 +100,6 @@ class CambiosService {
     }
   }
 
-  /**
-   * Eliminar un cambio
-   */
   async eliminar(id: number): Promise<void> {
     try {
       await api.delete(`${this.baseUrl}/${id}`);
@@ -143,7 +115,7 @@ class CambiosService {
       
       const cambioActualizado: CambioSimpleDto = {
         ...cambioCompleto,
-        envio: envio.trim() // Limpiamos espacios en blanco
+        envio: envio.trim()
       };
   
       await this.actualizarSinValidacionCompleta(id, cambioActualizado);
@@ -153,15 +125,10 @@ class CambiosService {
     }
   }
 
-  /**
-   * Actualizar solo los estados de un cambio (para checkboxes inline)
-   */
   async actualizarEstados(id: number, estados: EstadosCambio): Promise<void> {
     try {
-      // Primero obtenemos el cambio completo
       const cambioCompleto = await this.obtenerPorId(id);
       
-      // Actualizamos solo los estados
       const cambioActualizado: CambioSimpleDto = {
         ...cambioCompleto,
         llegoAlDeposito: estados.llegoAlDeposito,
@@ -170,7 +137,6 @@ class CambiosService {
         parPedido: estados.parPedido
       };
 
-      // Para actualización de estados, usamos una validación más permisiva
       await this.actualizarSinValidacionCompleta(id, cambioActualizado);
     } catch (error) {
       console.error('Error al actualizar estados:', error);
@@ -178,9 +144,6 @@ class CambiosService {
     }
   }
 
-  /**
-   * Actualizar un cambio sin validación completa (solo para estados)
-   */
   private async actualizarSinValidacionCompleta(id: number, cambio: CambioSimpleDto): Promise<void> {
     try {
       await api.put(`${this.baseUrl}/${id}`, cambio);
@@ -190,14 +153,10 @@ class CambiosService {
     }
   }
 
-  /**
-   * Filtrar cambios según criterios (ACTUALIZADO con filtros de mes)
-   */
   filtrarCambios(cambios: CambioSimpleDto[], filtros: CambiosFiltros): CambioSimpleDto[] {
     return cambios.filter(cambio => {
       const fechaCambio = new Date(cambio.fecha);
 
-      // Filtro por mes y año específico (NUEVA FUNCIONALIDAD)
       if (filtros.mes && filtros.año) {
         if (fechaCambio.getFullYear() !== filtros.año || 
             fechaCambio.getMonth() + 1 !== filtros.mes) {
@@ -205,7 +164,6 @@ class CambiosService {
         }
       }
 
-      // Filtro por fecha (rango)
       if (filtros.fechaDesde) {
         const fechaDesde = new Date(filtros.fechaDesde);
         if (fechaCambio < fechaDesde) return false;
@@ -213,21 +171,18 @@ class CambiosService {
 
       if (filtros.fechaHasta) {
         const fechaHasta = new Date(filtros.fechaHasta);
-        fechaHasta.setHours(23, 59, 59, 999); // Final del día
+        fechaHasta.setHours(23, 59, 59, 999); 
         if (fechaCambio > fechaHasta) return false;
       }
 
-      // Filtro por pedido
       if (filtros.pedido && !cambio.pedido.toLowerCase().includes(filtros.pedido.toLowerCase())) {
         return false;
       }
 
-      // Filtro por celular
       if (filtros.celular && !cambio.celular.includes(filtros.celular)) {
         return false;
       }
 
-      // Filtro por nombre
       if (filtros.nombre) {
         const nombreCompleto = `${cambio.nombre} ${cambio.apellido || ''}`.toLowerCase();
         if (!nombreCompleto.includes(filtros.nombre.toLowerCase())) {
@@ -235,12 +190,10 @@ class CambiosService {
         }
       }
 
-      // Filtro por motivo
       if (filtros.motivo && cambio.motivo !== filtros.motivo) {
         return false;
       }
 
-      // Filtro por estado
       if (filtros.estado && filtros.estado !== 'todos') {
         return this.cumpleEstado(cambio, filtros.estado);
       }
@@ -249,9 +202,6 @@ class CambiosService {
     });
   }
 
-  /**
-   * Verificar si un cambio cumple con un estado específico
-   */
   private cumpleEstado(cambio: CambioSimpleDto, estado: EstadoCambioFiltro): boolean {
     switch (estado) {
       case 'pendiente_llegada':
@@ -269,9 +219,6 @@ class CambiosService {
     }
   }
 
-  /**
-   * Calcular estadísticas de cambios
-   */
   calcularEstadisticas(cambios: CambioSimpleDto[]): CambiosEstadisticasData {
     const stats: CambiosEstadisticasData = {
       totalCambios: cambios.length,
@@ -286,7 +233,6 @@ class CambiosService {
     };
 
     cambios.forEach(cambio => {
-      // Contadores de estado
       if (!cambio.llegoAlDeposito) {
         stats.pendientesLlegada++;
       } else if (cambio.llegoAlDeposito && !cambio.yaEnviado) {
@@ -305,7 +251,6 @@ class CambiosService {
         stats.sinRegistrar++;
       }
 
-      // Sumar diferencias monetarias
       if (cambio.diferenciaAbonada) {
         stats.diferenciaAbonada += cambio.diferenciaAbonada;
       }
@@ -315,28 +260,20 @@ class CambiosService {
       }
     });
 
-    // Calcular diferencia neta
     stats.diferencianNeta = stats.diferenciaAbonada - stats.diferenciaAFavor;
 
     return stats;
   }
 
-  /**
-   * Obtener cambios listos para OCA (llegoAlDeposito = true, yaEnviado = false)
-   */
   obtenerListosParaOCA(cambios: CambioSimpleDto[]): CambioSimpleDto[] {
     return cambios.filter(cambio => 
       cambio.llegoAlDeposito && !cambio.yaEnviado
     );
   }
 
-  /**
-   * Validar datos de un cambio antes del envío
-   */
   validarCambio(cambio: CreateCambioSimpleDto | CambioSimpleDto): void {
     const errores: string[] = [];
 
-    // Validaciones básicas
     if (!cambio.pedido?.trim()) errores.push('El número de pedido es obligatorio');
     if (!cambio.celular?.trim()) errores.push('El celular es obligatorio');
     if (!cambio.nombre?.trim()) errores.push('El nombre es obligatorio');
@@ -344,7 +281,6 @@ class CambiosService {
     if (!cambio.modeloCambio?.trim()) errores.push('El modelo de cambio es obligatorio');
     if (!cambio.motivo?.trim()) errores.push('El motivo es obligatorio');
 
-    // Validar diferencias (mutuamente excluyentes)
     if (cambio.diferenciaAbonada && cambio.diferenciaAFavor) {
       errores.push('No puede haber diferencia abonada y a favor al mismo tiempo');
     }
@@ -357,13 +293,11 @@ class CambiosService {
       errores.push('La diferencia a favor no puede ser negativa');
     }
 
-    // Validar email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (cambio.email && !emailRegex.test(cambio.email)) {
       errores.push('El formato del email no es válido');
     }
 
-    // Validar fechas
     if (!cambio.fecha) errores.push('La fecha es obligatoria');
 
     if (errores.length > 0) {
@@ -371,35 +305,23 @@ class CambiosService {
     }
   }
 
-  /**
-   * Formatear fecha para mostrar
-   */
   formatearFecha(fecha: string): string {
     return formatearFechaCambios(fecha);
   }
 
-  /**
-   * Formatear dinero para mostrar
-   */
   formatearDinero(cantidad: number | undefined): string {
     if (!cantidad || cantidad === 0) return '-';
     return `${cantidad.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
   }
 
-  /**
-   * Obtener color del estado
-   */
   obtenerColorEstado(cambio: CambioSimpleDto): string {
-    if (!cambio.llegoAlDeposito) return '#FFD700'; // Pendiente llegada
-    if (cambio.llegoAlDeposito && !cambio.yaEnviado) return '#B695BF'; // Listo envío
-    if (cambio.yaEnviado && !cambio.cambioRegistradoSistema) return '#51590E'; // Enviado
-    if (cambio.llegoAlDeposito && cambio.yaEnviado && cambio.cambioRegistradoSistema) return '#51590E'; // Completado
-    return '#D94854'; // Error o estado indefinido
+    if (!cambio.llegoAlDeposito) return '#FFD700';
+    if (cambio.llegoAlDeposito && !cambio.yaEnviado) return '#B695BF'; 
+    if (cambio.yaEnviado && !cambio.cambioRegistradoSistema) return '#51590E'; 
+    if (cambio.llegoAlDeposito && cambio.yaEnviado && cambio.cambioRegistradoSistema) return '#51590E';
+    return '#D94854'; 
   }
 
-  /**
-   * Obtener descripción del estado
-   */
   obtenerDescripcionEstado(cambio: CambioSimpleDto): string {
     if (!cambio.llegoAlDeposito) return 'Pendiente llegada';
     if (cambio.llegoAlDeposito && !cambio.yaEnviado) return 'Listo para envío';
@@ -408,9 +330,6 @@ class CambiosService {
     return 'Estado indefinido';
   }
 
-  /**
-   * Crear filtros desde valor del selector de meses
-   */
   crearFiltrosDesdeMes(valorMes: string): CambiosFiltros {
     const { fechaDesde, fechaHasta } = MesesUtils.convertirMesAFiltros(valorMes);
     const [año, mes] = valorMes.split('-').map(Number);
@@ -423,15 +342,11 @@ class CambiosService {
     };
   }
 
-  /**
-   * Obtener valor del selector para el mes actual
-   */
   obtenerMesActualSelector(): string {
     const { mes, año } = MesesUtils.obtenerMesActual();
     return `${año}-${mes.toString().padStart(2, '0')}`;
   }
 }
 
-// Exportar instancia única del servicio
 const cambiosService = new CambiosService();
 export default cambiosService;

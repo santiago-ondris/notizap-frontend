@@ -3,9 +3,9 @@ export interface VentaVendedora {
     sucursalNombre: string;
     vendedorNombre: string;
     producto: string;
-    fecha: string; // ISO string
+    fecha: string; 
     cantidad: number;
-    cantidadReal: number; // Cantidad ajustada para productos especiales
+    cantidadReal: number; 
     total: number;
     turno: 'Mañana' | 'Tarde';
     esProductoDescuento: boolean;

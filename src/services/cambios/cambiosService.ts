@@ -16,10 +16,30 @@ class CambiosService {
 
   async obtenerTodos(): Promise<CambioSimpleDto[]> {
     try {
+      console.log('🌐 [CambiosService] Llamando a GET /api/v1/cambio');
+      
       const response = await api.get<CambioSimpleDto[]>(this.baseUrl);
+      
+      console.log('📦 [CambiosService] Respuesta del backend:', {
+        status: response.status,
+        totalCambios: response.data.length,
+        cambios: response.data
+      });
+      
+      // Log detallado de fechas para debug
+      console.table(
+        response.data.map(c => ({
+          id: c.id,
+          pedido: c.pedido,
+          nombre: c.nombre,
+          fecha: c.fecha,
+          fechaFormateada: new Date(c.fecha).toLocaleDateString('es-AR')
+        }))
+      );
+      
       return response.data;
     } catch (error) {
-      console.error('Error al obtener cambios:', error);
+      console.error('❌ [CambiosService] Error al obtener cambios:', error);
       throw new Error('Error al cargar la lista de cambios');
     }
   }
@@ -27,21 +47,34 @@ class CambiosService {
   async obtenerPorMes(mes: number, año: number): Promise<CambioSimpleDto[]> {
     try {
       const fechaDesde = new Date(año, mes - 1, 1);
-      const fechaHasta = new Date(año, mes, 0); // Último día del mes
-
+      const fechaHasta = new Date(año, mes, 0);
+  
       const filtros: CambiosFiltros = {
         fechaDesde: fechaDesde.toISOString().split('T')[0],
         fechaHasta: fechaHasta.toISOString().split('T')[0],
         mes,
         año
       };
-
-      console.log(`🗓️ Obteniendo cambios para ${MesesUtils.formatearMes(mes, año)}:`, filtros);
-
+  
+      console.log('📅 [obtenerPorMes] Filtros aplicados:', filtros);
+  
       const todosCambios = await this.obtenerTodos();
-      return this.filtrarCambios(todosCambios, filtros);
+      
+      console.log('🔍 [obtenerPorMes] ANTES de filtrar:', {
+        totalCambios: todosCambios.length,
+        cambios: todosCambios
+      });
+      
+      const cambiosFiltrados = this.filtrarCambios(todosCambios, filtros);
+      
+      console.log('✅ [obtenerPorMes] DESPUÉS de filtrar:', {
+        cambiosFiltrados: cambiosFiltrados.length,
+        cambios: cambiosFiltrados
+      });
+      
+      return cambiosFiltrados;
     } catch (error) {
-      console.error('Error al obtener cambios por mes:', error);
+      console.error('❌ [obtenerPorMes] Error:', error);
       throw new Error(`Error al cargar cambios de ${MesesUtils.formatearMes(mes, año)}`);
     }
   }
@@ -58,18 +91,25 @@ class CambiosService {
 
   async crear(cambio: CreateCambioSimpleDto): Promise<number> {
     try {
+      console.log('📝 [crear] Creando cambio:', cambio);
+      
       this.validarCambio(cambio);
       const response = await api.post<number>(this.baseUrl, cambio);
+      
+      console.log('✅ [crear] Cambio creado exitosamente:', {
+        nuevoId: response.data,
+        status: response.status
+      });
+      
       return response.data;
     } catch (error: any) {
       if (error.response) {
-        console.error(
-          'Error al crear cambio:',
-          error.response.status,
-          error.response.data
-        );
+        console.error('❌ [crear] Error del backend:', {
+          status: error.response.status,
+          data: error.response.data
+        });
       } else {
-        console.error('Error al crear cambio:', error);
+        console.error('❌ [crear] Error de red:', error);
       }
       throw error;
     }
@@ -154,69 +194,104 @@ class CambiosService {
   }
 
   filtrarCambios(cambios: CambioSimpleDto[], filtros: CambiosFiltros): CambioSimpleDto[] {
+    console.log('🔍 [filtrarCambios] Filtros recibidos:', filtros);
+    
     return cambios.filter(cambio => {
       const fechaCambio = new Date(cambio.fecha);
-
+      const fechaCambioSoloFecha = new Date(Date.UTC(
+        fechaCambio.getUTCFullYear(),
+        fechaCambio.getUTCMonth(),
+        fechaCambio.getUTCDate()
+      ));
+  
       if (filtros.mes && filtros.año) {
-        if (fechaCambio.getFullYear() !== filtros.año || 
-            fechaCambio.getMonth() + 1 !== filtros.mes) {
+        const mesCambio = fechaCambio.getUTCMonth() + 1;
+        const añoCambio = fechaCambio.getUTCFullYear();
+        
+        if (añoCambio !== filtros.año || mesCambio !== filtros.mes) {
+          console.log(`❌ Filtrado por mes/año: Cambio ID ${cambio.id}`, {
+            fechaCambio: cambio.fecha,
+            mesCambio,
+            añoCambio,
+            filtroMes: filtros.mes,
+            filtroAño: filtros.año
+          });
           return false;
         }
       }
-
+  
       if (filtros.fechaDesde) {
-        const fechaDesde = new Date(filtros.fechaDesde);
-        if (fechaCambio < fechaDesde) return false;
+        const fechaDesde = new Date(filtros.fechaDesde + 'T00:00:00Z'); // Forzar UTC
+        
+        if (fechaCambioSoloFecha < fechaDesde) {
+          console.log(`❌ Filtrado por fechaDesde: Cambio ID ${cambio.id}`, {
+            fechaCambio: fechaCambioSoloFecha.toISOString(),
+            fechaDesde: fechaDesde.toISOString()
+          });
+          return false;
+        }
       }
-
+  
       if (filtros.fechaHasta) {
-        const fechaHasta = new Date(filtros.fechaHasta);
-        fechaHasta.setHours(23, 59, 59, 999); 
-        if (fechaCambio > fechaHasta) return false;
+        const fechaHasta = new Date(filtros.fechaHasta + 'T23:59:59Z'); // Forzar UTC y fin del día
+        
+        if (fechaCambioSoloFecha > fechaHasta) {
+          console.log(`❌ Filtrado por fechaHasta: Cambio ID ${cambio.id}`, {
+            fechaCambio: fechaCambioSoloFecha.toISOString(),
+            fechaHasta: fechaHasta.toISOString()
+          });
+          return false;
+        }
       }
-
-      if (filtros.pedido && !cambio.pedido.toLowerCase().includes(filtros.pedido.toLowerCase())) {
-        return false;
+  
+      if (filtros.pedido) {
+        if (!cambio.pedido.toLowerCase().includes(filtros.pedido.toLowerCase())) {
+          return false;
+        }
       }
-
-      if (filtros.celular && !cambio.celular.includes(filtros.celular)) {
-        return false;
+  
+      if (filtros.celular) {
+        if (!cambio.celular.toLowerCase().includes(filtros.celular.toLowerCase())) {
+          return false;
+        }
       }
-
+  
       if (filtros.nombre) {
         const nombreCompleto = `${cambio.nombre} ${cambio.apellido || ''}`.toLowerCase();
         if (!nombreCompleto.includes(filtros.nombre.toLowerCase())) {
           return false;
         }
       }
-
-      if (filtros.motivo && cambio.motivo !== filtros.motivo) {
-        return false;
+  
+      if (filtros.motivo && filtros.motivo !== 'todos_motivos') {
+        if (cambio.motivo !== filtros.motivo) {
+          return false;
+        }
       }
-
+  
       if (filtros.estado && filtros.estado !== 'todos') {
-        return this.cumpleEstado(cambio, filtros.estado);
+        const estadoCambio = this.determinarEstado(cambio);
+        if (estadoCambio !== filtros.estado) {
+          return false;
+        }
       }
-
+  
+      if (filtros.envio) {
+        if (!cambio.envio || !cambio.envio.toLowerCase().includes(filtros.envio.toLowerCase())) {
+          return false;
+        }
+      }
+  
       return true;
     });
   }
 
-  private cumpleEstado(cambio: CambioSimpleDto, estado: EstadoCambioFiltro): boolean {
-    switch (estado) {
-      case 'pendiente_llegada':
-        return !cambio.llegoAlDeposito;
-      case 'listo_envio':
-        return cambio.llegoAlDeposito && !cambio.yaEnviado;
-      case 'enviado':
-        return cambio.yaEnviado;
-      case 'completado':
-        return cambio.llegoAlDeposito && cambio.yaEnviado && cambio.cambioRegistradoSistema;
-      case 'sin_registrar':
-        return !cambio.cambioRegistradoSistema;
-      default:
-        return true;
-    }
+  private determinarEstado(cambio: CambioSimpleDto): EstadoCambioFiltro {
+    if (!cambio.llegoAlDeposito) return 'pendiente_llegada';
+    if (cambio.llegoAlDeposito && !cambio.yaEnviado) return 'listo_envio';
+    if (cambio.yaEnviado && !cambio.cambioRegistradoSistema) return 'enviado';
+    if (cambio.llegoAlDeposito && cambio.yaEnviado && cambio.cambioRegistradoSistema) return 'completado';
+    return 'sin_registrar';
   }
 
   calcularEstadisticas(cambios: CambioSimpleDto[]): CambiosEstadisticasData {

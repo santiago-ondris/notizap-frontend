@@ -39,6 +39,7 @@ export const VentasVendedorasFilters: React.FC<Props> = ({
     fechaFin: filtros.fechaFin ? new Date(filtros.fechaFin) : undefined,
     sucursalNombre: filtros.sucursalNombre || '',
     vendedorNombre: filtros.vendedorNombre || '',
+    productoNombre: filtros.productoNombre || '',
     turno: filtros.turno || '',
     montoMinimo: filtros.montoMinimo,
     montoMaximo: filtros.montoMaximo,
@@ -55,6 +56,7 @@ export const VentasVendedorasFilters: React.FC<Props> = ({
       fechaFin: formData.fechaFin ? dateHelpers.formatearParaAPI(formData.fechaFin) : undefined,
       sucursalNombre: formData.sucursalNombre || undefined,
       vendedorNombre: formData.vendedorNombre || undefined,
+      productoNombre: formData.productoNombre || undefined,
       turno: formData.turno || undefined,
       montoMinimo: formData.montoMinimo,
       montoMaximo: formData.montoMaximo,
@@ -74,6 +76,7 @@ export const VentasVendedorasFilters: React.FC<Props> = ({
       fechaFin: undefined,
       sucursalNombre: '',
       vendedorNombre: '',
+      productoNombre: '',
       turno: '',
       montoMinimo: undefined,
       montoMaximo: undefined,
@@ -259,6 +262,24 @@ export const VentasVendedorasFilters: React.FC<Props> = ({
             <option key={vendedor} value={vendedor} />
           ))}
         </datalist>
+      </div>
+
+      {/* Producto */}
+      <div>
+        <label className="block text-sm font-medium text-white/60 mb-2">
+          📦 Producto
+        </label>
+        <div className="relative">
+          <Package className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+          <input
+            type="text"
+            placeholder="Buscar producto..."
+            value={formData.productoNombre}
+            onChange={(e) => setFormData({ ...formData, productoNombre: e.target.value })}
+            className="w-full pl-10 pr-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/40 focus:border-violet-400 focus:ring-1 focus:ring-violet-400/20 transition-all"
+            disabled={loading}
+          />
+        </div>
       </div>
 
       {/* Filtros avanzados */}
@@ -475,6 +496,11 @@ export const VentasVendedorasFilters: React.FC<Props> = ({
           {formData.vendedorNombre && (
             <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-lg text-xs">
               👤 {formData.vendedorNombre}
+            </span>
+          )}
+          {formData.productoNombre && (
+            <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-lg text-xs">
+              📦 {formData.productoNombre}
             </span>
           )}
           {formData.turno && (

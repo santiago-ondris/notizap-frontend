@@ -3,6 +3,7 @@ export interface VentaVendedoraFilters {
     fechaFin?: string; 
     sucursalNombre?: string;
     vendedorNombre?: string;
+    productoNombre?: string;
     turno?: 'Mañana' | 'Tarde' | '';
     montoMinimo?: number;
     montoMaximo?: number;
@@ -21,6 +22,7 @@ export interface VentaVendedoraFilters {
     fechaFin?: Date;
     sucursalNombre: string;
     vendedorNombre: string;
+    productoNombre: string;
     turno: 'Mañana' | 'Tarde' | '';
     montoMinimo?: number;
     montoMaximo?: number;

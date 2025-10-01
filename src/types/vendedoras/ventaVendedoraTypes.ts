@@ -111,3 +111,7 @@ export interface VentaVendedora {
     pageSize: number;
     totalPaginas: number;
   }
+
+  export interface ContadorProductos {
+    totalProductosEncontrados: number;
+  }

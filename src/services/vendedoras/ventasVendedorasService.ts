@@ -9,7 +9,8 @@ import type {
   RangoFechas,
   UploadResult,
   ValidacionArchivo,
-  VentasResponse
+  VentasResponse,
+  ContadorProductos
 } from '@/types/vendedoras/ventaVendedoraTypes';
 import type { VentaVendedoraFilters } from '@/types/vendedoras/filtrosTypes';
 
@@ -104,6 +105,11 @@ export const ventasVendedorasService = {
 
   async obtenerTodasLasVendedoras(filtros: Partial<VentaVendedoraFilters>): Promise<VentaPorVendedora[]> {
     const response = await api.get(`${BASE_URL}/todas-vendedoras`, { params: filtros });
+    return response.data;
+  },
+
+  async contarProductos(filtros: Partial<VentaVendedoraFilters>): Promise<ContadorProductos> {
+    const response = await api.get(`${BASE_URL}/contar-productos`, { params: filtros });
     return response.data;
   },
 };

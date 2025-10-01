@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Table, 
   ChevronLeft, 
@@ -26,6 +26,7 @@ import type {
 import { dateHelpers } from '@/utils/vendedoras/dateHelpers';
 import { turnoHelpers } from '@/utils/vendedoras/turnoHelpers';
 import { estadisticasHelpers } from '@/utils/vendedoras/estadisticasHelpers';
+import { ventasVendedorasService } from '@/services/vendedoras/ventasVendedorasService';
 
 interface Props {
   data: VentasResponse;
@@ -45,6 +46,31 @@ export const VentasVendedorasTable: React.FC<Props> = ({
   const montoTotalCorrecto = stats.todasVendedoras?.length > 0 
     ? stats.todasVendedoras.reduce((sum, v) => sum + v.montoTotal, 0)
     : stats.montoTotal; // fallback al valor del backend si no hay vendedoras
+
+  const [totalProductos, setTotalProductos] = useState<number>(0);
+  const [loadingContador, setLoadingContador] = useState(false);  
+
+  useEffect(() => {
+    const cargarContadorProductos = async () => {
+      if (!filtros.productoNombre || filtros.productoNombre.trim() === '') {
+        setTotalProductos(0);
+        return;
+      }
+  
+      try {
+        setLoadingContador(true);
+        const resultado = await ventasVendedorasService.contarProductos(filtros);
+        setTotalProductos(resultado.totalProductosEncontrados);
+      } catch (error) {
+        console.error('Error al contar productos:', error);
+        setTotalProductos(0);
+      } finally {
+        setLoadingContador(false);
+      }
+    };
+  
+    cargarContadorProductos();
+  }, [filtros.productoNombre, filtros.fechaInicio, filtros.fechaFin, filtros.sucursalNombre, filtros.vendedorNombre, filtros.turno]);  
 
   const handleSort = (campo: VentaVendedoraFilters['orderBy']) => {
     const nuevaDireccion = filtros.orderBy === campo && filtros.orderDesc ? false : true;
@@ -253,6 +279,28 @@ export const VentasVendedorasTable: React.FC<Props> = ({
 
   return (
     <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl overflow-hidden">
+      {/* Contador de productos encontrados */}
+      {filtros.productoNombre && (
+        <div className="mb-4 px-4 py-3 bg-violet-500/20 border border-violet-500/30 rounded-xl">
+          <div className="flex items-center gap-3">
+            <Package className="w-5 h-5 text-violet-400" />
+            <div className="flex-1">
+              {loadingContador ? (
+                <span className="text-sm text-violet-300">
+                  Buscando productos...
+                </span>
+              ) : (
+                <span className="text-sm font-medium text-violet-300">
+                  Se {totalProductos === 1 ? 'encontró' : 'encontraron'} en total{' '}
+                  <strong className="text-violet-200">{totalProductos}</strong>{' '}
+                  {totalProductos === 1 ? 'producto' : 'productos'} con el nombre{' '}
+                  <strong className="text-violet-200">"{filtros.productoNombre}"</strong>
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-white/10">
         <div className="flex items-center gap-3">

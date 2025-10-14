@@ -43,17 +43,17 @@ const opciones: OpcionReposicion[] = [
   {
     tipo: 'ninos',
     titulo: 'Productos Niños',
-    descripcion: 'Reposición específica para GENERAL PAZ',
+    descripcion: 'Reposición específica para GENERAL PAZ y BARRIO JARDIN',
     icono: Baby,
     color: '#51590E',
     colorHover: '#41480C',
     ruta: '/reposicion/ninos',
     caracteristicas: [
       'Sin configuración de curvas',
-      'Destino único: GENERAL PAZ',
-      'Lógica simple y eficiente'
+      'Destinos: GENERAL PAZ y BARRIO JARDIN',
+      'Lógica simple...'
     ],
-    sucursales: ['GENERAL PAZ'],
+    sucursales: ['GENERAL PAZ', 'BARRIO JARDIN'],
     logica: 'Intentar 2 unidades por talle, si no es posible 1 unidad'
   }
 ];

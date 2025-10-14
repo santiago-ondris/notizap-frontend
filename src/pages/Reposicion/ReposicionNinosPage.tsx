@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Baby, MapPin, Target } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Baby, Loader2, MapPin, Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { FileUploader } from '@/components/Reposicion/FileUploader';
@@ -32,6 +32,10 @@ const estadoInicial: EstadoAnalisisNinos = {
   configuracion: {
     configuracion: CONFIGURACION_NINOS_DEFAULT,
     cambiosPendientes: false
+  },
+  descarga: {
+    descargando: false,
+    error: null
   }
 };
 
@@ -40,12 +44,14 @@ export const ReposicionNinosPage: React.FC = () => {
   const [estado, setEstado] = useState<EstadoAnalisisNinos>(estadoInicial);
   const [tiempoEjecucion, setTiempoEjecucion] = useState<number>(0);
   const [nombreArchivo, setNombreArchivo] = useState<string>('');
+  const [validandoArchivo, setValidandoArchivo] = useState(false);
 
   const volverAlSelector = () => {
     navigate('/reposicion');
   };
 
   const manejarArchivoSeleccionado = (archivo: File) => {
+    setValidandoArchivo(true);
     setEstado(prev => ({
       ...prev,
       upload: {
@@ -58,6 +64,7 @@ export const ReposicionNinosPage: React.FC = () => {
   };
 
   const manejarValidacionCompleta = (validacion: ResultadoValidacionArchivo) => {
+    setValidandoArchivo(false);
     setEstado(prev => ({
       ...prev,
       upload: {
@@ -100,7 +107,7 @@ export const ReposicionNinosPage: React.FC = () => {
 
       setEstado(prev => ({
         ...prev,
-        analisis: { ...prev.analisis, progreso: 60, mensaje: 'Procesando reposiciones para GENERAL PAZ...' }
+        analisis: { ...prev.analisis, progreso: 60, mensaje: 'Procesando reposiciones para GP Y BJ...' }
       }));
 
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -147,6 +154,14 @@ export const ReposicionNinosPage: React.FC = () => {
   const descargarReporte = async () => {
     if (!estado.upload.archivo) return;
 
+    setEstado(prev => ({
+      ...prev,
+      descarga: {
+        descargando: true,
+        error: null
+      }
+    }));
+
     try {
       const blob = await reposicionNinosService.analizarReposicion({
         archivo: estado.upload.archivo,
@@ -156,8 +171,24 @@ export const ReposicionNinosPage: React.FC = () => {
       });
 
       await reposicionNinosService.descargarArchivo(blob, nombreArchivo);
+
+      setEstado(prev => ({
+        ...prev,
+        descarga: {
+          descargando: false,
+          error: null
+        }
+      }));
     } catch (error) {
       console.error('Error al descargar:', error);
+      const mensaje = error instanceof Error ? error.message : 'Error al descargar el archivo';
+      setEstado(prev => ({
+        ...prev,
+        descarga: {
+          descargando: false,
+          error: mensaje
+        }
+      }));
     }
   };
 
@@ -222,11 +253,11 @@ export const ReposicionNinosPage: React.FC = () => {
         </div>
 
         {/* Info del módulo */}
-        <div className="flex items-center gap-4 text-sm">
+        <div className="flex items-center gap-4 text-sm flex-wrap">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#51590E]/20 border border-[#51590E]/30">
             <MapPin className="w-4 h-4 text-[#51590E]" />
             <span className="text-[#51590E] font-medium">
-              Destino: GENERAL PAZ
+              Destinos: GENERAL PAZ y BARRIO JARDIN
             </span>
           </div>
           
@@ -246,7 +277,7 @@ export const ReposicionNinosPage: React.FC = () => {
                 onArchivoSeleccionado={manejarArchivoSeleccionado}
                 onValidacionCompleta={manejarValidacionCompleta}
                 archivo={estado.upload.archivo}
-                validando={false}
+                validando={validandoArchivo}
                 validacion={estado.upload.validacion}
                 error={estado.upload.error}
               />
@@ -293,6 +324,34 @@ export const ReposicionNinosPage: React.FC = () => {
                   >
                     Volver al inicio
                   </button>
+                </div>
+              )}
+
+              {estado.descarga.descargando && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
+                  <div className="bg-[#212026] border border-white/20 rounded-2xl p-8 max-w-sm mx-4 text-center space-y-4">
+                    <div className="w-16 h-16 mx-auto bg-[#51590E]/20 rounded-full flex items-center justify-center">
+                      <Loader2 className="w-8 h-8 text-[#51590E] animate-spin" />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-semibold text-white">
+                        Generando archivo Excel...
+                      </h3>
+                      <p className="text-white/60 text-sm">
+                        Esto puede tomar unos segundos
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {estado.descarga.error && (
+                <div className="mb-6 flex items-start gap-3 p-4 rounded-xl bg-[#D94854]/10 border border-[#D94854]/30">
+                  <AlertCircle className="w-5 h-5 text-[#D94854] mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-medium text-[#D94854] mb-1">Error al descargar</h4>
+                    <p className="text-sm text-white/80">{estado.descarga.error}</p>
+                  </div>
                 </div>
               )}
 

@@ -4,7 +4,7 @@ import type {
   } from './reposicionTypes';
   
   export interface ConfiguracionAnalisisNinos {
-    sucursalDestino: string;
+    sucursalesDestino: string[];
     stockObjetivoPrimario: number;
     stockObjetivoSecundario: number;
     continuarConSucursalesFaltantes: boolean;
@@ -52,11 +52,15 @@ import type {
       configuracion: ConfiguracionAnalisisNinos;
       cambiosPendientes: boolean;
     };
+    descarga: {
+      descargando: boolean;
+      error: string | null;
+    };
   }
   
   export interface InformacionModuloNinos {
     modulo: string;
-    sucursalDestino: string;
+    sucursalesDestino: string[];
     sucursalOrigen: string;
     logicaReposicion: string;
     tiposArchivo: string[];
@@ -65,7 +69,7 @@ import type {
   }
   
   export const CONFIGURACION_NINOS_DEFAULT: ConfiguracionAnalisisNinos = {
-    sucursalDestino: 'GENERAL PAZ',
+    sucursalesDestino: ['GENERAL PAZ', "BARRIO JARDIN"],
     stockObjetivoPrimario: 2,
     stockObjetivoSecundario: 1,
     continuarConSucursalesFaltantes: true,
@@ -75,8 +79,8 @@ import type {
   
   export const MENSAJES_NINOS = {
     TITULO_MODULO: 'Reposición Stock - Productos Niños',
-    DESCRIPCION_MODULO: 'Análisis y reposición de stock para productos de niños hacia GENERAL PAZ',
-    SUCURSAL_DESTINO: 'GENERAL PAZ',
+    DESCRIPCION_MODULO: 'Análisis y reposición de stock para productos de KIDS',
+    SUCURSALES_DESTINO: 'GENERAL PAZ Y BARRIO JARDIN',
     LOGICA_REPOSICION: 'Intentar 2 unidades por talle, si no es posible 1 unidad',
     ARCHIVO_PROCESANDO: 'Procesando archivo de productos de niños...',
     ANALISIS_COMPLETADO: 'Análisis de productos de niños completado',

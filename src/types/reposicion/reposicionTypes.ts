@@ -92,12 +92,14 @@ export interface CurvaTalles {
     "CASA CENTRAL",
     "DEAN FUNES",
     "GENERAL PAZ",
-    "ITUZAINGO NVA CBA"
+    "ITUZAINGO NVA CBA",
+    "BARRIO JARDIN"
   ] as const;
   
   export const SUCURSALES_OBJETIVO = [
     "DEAN FUNES",
     "GENERAL PAZ",
+    "BARRIO JARDIN",
     "25 DE MAYO",
     "ITUZAINGO NVA CBA"
   ] as const;
@@ -105,6 +107,7 @@ export interface CurvaTalles {
   export const ORDEN_PRIORIDAD_DEFECTO = [
     "DEAN FUNES",
     "GENERAL PAZ",
+    "BARRIO JARDIN",
     "25 DE MAYO",
     "ITUZAINGO NVA CBA"
   ] as const;
@@ -180,7 +183,8 @@ export interface CurvaTalles {
   
   export const COLORES_SUCURSAL: Record<string, string> = {
     "DEAN FUNES": "#B695BF",
-    "GENERAL PAZ": "#51590E", 
+    "GENERAL PAZ": "#51590E",
+    "BARRIO JARDIN": "#3B82F6", 
     "25 DE MAYO": "#D94854",
     "ITUZAINGO NVA CBA": "#e327c4",
     "CASA CENTRAL": "#FFD700"
@@ -188,7 +192,8 @@ export interface CurvaTalles {
   
   export const ICONOS_SUCURSAL: Record<string, string> = {
     "DEAN FUNES": "🏪",
-    "GENERAL PAZ": "🏬", 
+    "GENERAL PAZ": "🏬",
+    "BARRIO JARDIN": "🏡", 
     "25 DE MAYO": "🏭",
     "ITUZAINGO NVA CBA": "🏢",
     "CASA CENTRAL": "🏛️"

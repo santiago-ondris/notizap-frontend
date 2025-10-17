@@ -237,7 +237,7 @@ export const TodasLasVendedorasTable: React.FC<Props> = ({
               console.log('TotalVentas:', {
                 nombre: vendedora.vendedorNombre,
                 totalVentas: vendedora.totalVentas,
-                rowData: vendedora, // Si quieres ver toda la fila
+                rowData: vendedora, 
               });
               return (
                 <tr 

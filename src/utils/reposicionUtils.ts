@@ -154,6 +154,7 @@ import {
     const abreviaciones: Record<string, string> = {
       "DEAN FUNES": "DF",
       "GENERAL PAZ": "GP",
+      "BARRIO JARDIN": "BJ",
       "25 DE MAYO": "25M",
       "ITUZAINGO NVA CBA": "INC",
       "CASA CENTRAL": "CC"

@@ -37,12 +37,28 @@ export const ComisionesCalculadora: React.FC<Props> = ({
   const [busqueda, setBusqueda] = useState('');
   const [mostrarDisponibles, setMostrarDisponibles] = useState(false);
 
-  // Cargar datos cuando se abre el modal
+  useEffect(() => {
+    if (isOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (isOpen) {
       cargarDatosVendedoras();
     } else {
-      // Reset al cerrar
       setDatosVendedoras(null);
       setVendedorasSeleccionadas([]);
       setBusqueda('');
@@ -64,7 +80,6 @@ export const ComisionesCalculadora: React.FC<Props> = ({
       
       setDatosVendedoras(datos);
       
-      // Pre-seleccionar vendedoras con ventas
       const preSeleccionadas = datos.vendedorasConVentas.map(v => ({
         ...v,
         estaSeleccionada: true
@@ -84,10 +99,8 @@ export const ComisionesCalculadora: React.FC<Props> = ({
       const existe = prev.find(v => v.id === vendedora.id);
       
       if (existe) {
-        // Remover
         return prev.filter(v => v.id !== vendedora.id);
       } else {
-        // Agregar
         return [...prev, { ...vendedora, estaSeleccionada: true }];
       }
     });
@@ -96,7 +109,6 @@ export const ComisionesCalculadora: React.FC<Props> = ({
   const handleCalcular = async () => {
     if (!datosVendedoras) return;
 
-    // Validaciones UX
     const { esValida, mensaje } = comisionVendedoras.validarSeleccionUX(vendedorasSeleccionadas);
     if (!esValida) {
       toast.error(mensaje);
@@ -143,14 +155,12 @@ export const ComisionesCalculadora: React.FC<Props> = ({
     }
   };
 
-  // Filtrar vendedoras disponibles para agregar
   const vendedorasParaAgregar = datosVendedoras?.vendedorasDisponibles.filter(v => {
     const yaSeleccionada = vendedorasSeleccionadas.some(s => s.id === v.id);
     const cumpleBusqueda = !busqueda || v.nombre.toLowerCase().includes(busqueda.toLowerCase());
     return !yaSeleccionada && cumpleBusqueda;
   }) || [];
 
-  // Preview de cálculos
   const previewComision = datosVendedoras 
     ? comisionPreview.previewComisionIndividual(datosVendedoras.montoFacturado, vendedorasSeleccionadas.length)
     : 0;
@@ -161,15 +171,13 @@ export const ComisionesCalculadora: React.FC<Props> = ({
 
   if (!isOpen) return null;
 
-  // 🚀 CAMBIO: Condiciones más flexibles para mostrar el footer
   const puedeCalcular = !loading && !calculando && vendedorasSeleccionadas.length > 0;
-  const mostrarFooter = !loading; // Simplificado: siempre mostrar si no está cargando
+  const mostrarFooter = !loading;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-[#1A1A20] border border-white/10 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         
-        {/* Header - Fijo */}
         <div className="p-6 border-b border-white/10 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -204,41 +212,38 @@ export const ComisionesCalculadora: React.FC<Props> = ({
             </button>
           </div>
 
-          {/* Advertencia de recálculo */}
           {esRecalculo && datosVendedoras?.yaExistenComisiones && (
-            <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
-              <div className="flex items-center gap-2 text-yellow-300">
-                <AlertTriangle className="w-5 h-5" />
-                <span className="font-medium">¡Advertencia!</span>
+            <div className="mt-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
+              <div className="flex items-center gap-2 text-yellow-300 text-sm">
+                <AlertTriangle className="w-4 h-4" />
+                <span>Ya existen comisiones calculadas. Se sobrescribirán con los nuevos valores.</span>
               </div>
-              <p className="text-yellow-300/80 text-sm mt-1">
-                Las comisiones para este día ya fueron calculadas. Al recalcular se sobrescribirán los valores existentes.
-              </p>
             </div>
           )}
         </div>
 
-        {/* Content - Scrolleable */}
-        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+        <div 
+          className="p-6 overflow-y-auto flex-1 custom-scrollbar"
+          onWheel={(e) => {
+            e.stopPropagation();
+          }}
+        >
           
-          {/* Loading State */}
           {loading && (
             <div className="flex items-center justify-center py-12">
               <div className="flex items-center gap-3 text-white/60">
                 <Loader2 className="w-6 h-6 animate-spin" />
-                <span>Cargando datos de vendedoras...</span>
+                <span>Cargando vendedoras...</span>
               </div>
             </div>
           )}
 
-          {/* Error State */}
-          {error && (
+          {error && !loading && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-6">
               <div className="flex items-center gap-2 text-red-300">
                 <AlertTriangle className="w-5 h-5" />
-                <span className="font-medium">Error</span>
+                <span>{error}</span>
               </div>
-              <p className="text-red-300/80 text-sm mt-1">{error}</p>
               <button
                 onClick={cargarDatosVendedoras}
                 className="mt-3 px-3 py-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 rounded text-red-300 text-sm transition-colors"
@@ -248,12 +253,11 @@ export const ComisionesCalculadora: React.FC<Props> = ({
             </div>
           )}
 
-          {/* Main Content */}
           {datosVendedoras && !loading && (
-            <div className="space-y-6">
-              {/* Resumen del día */}
+            <div className="space-y-4">
+              
               <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
+                <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
                   <Users className="w-5 h-5 text-blue-400" />
                   Resumen del turno
                 </h3>
@@ -289,7 +293,6 @@ export const ComisionesCalculadora: React.FC<Props> = ({
                 </div>
               </div>
 
-              {/* Vendedoras seleccionadas */}
               <div className="bg-white/5 border border-white/10 rounded-xl p-4">
                 <h3 className="font-semibold text-white mb-3">
                   Vendedoras seleccionadas ({vendedorasSeleccionadas.length})
@@ -333,7 +336,6 @@ export const ComisionesCalculadora: React.FC<Props> = ({
                 )}
               </div>
 
-              {/* Agregar vendedoras */}
               <div className="bg-white/5 border border-white/10 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-semibold text-white">
@@ -350,7 +352,6 @@ export const ComisionesCalculadora: React.FC<Props> = ({
                 
                 {mostrarDisponibles && (
                   <div className="space-y-3">
-                    {/* Búsqueda */}
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
                       <input
@@ -363,7 +364,6 @@ export const ComisionesCalculadora: React.FC<Props> = ({
                       />
                     </div>
                     
-                    {/* Lista de vendedoras disponibles */}
                     {vendedorasParaAgregar.length === 0 ? (
                       <div className="text-center py-4 text-white/60">
                         <Users className="w-6 h-6 mx-auto mb-2 text-white/40" />
@@ -372,7 +372,12 @@ export const ComisionesCalculadora: React.FC<Props> = ({
                         </p>
                       </div>
                     ) : (
-                      <div className="max-h-32 overflow-y-auto custom-scrollbar space-y-1">
+                      <div 
+                        className="max-h-32 overflow-y-auto custom-scrollbar space-y-1"
+                        onWheel={(e) => {
+                          e.stopPropagation();
+                        }}
+                      >
                         {vendedorasParaAgregar.map(vendedora => (
                           <button
                             key={vendedora.id}
@@ -393,7 +398,6 @@ export const ComisionesCalculadora: React.FC<Props> = ({
           )}
         </div>
 
-        {/* Footer - Siempre visible cuando no está cargando */}
         {mostrarFooter && (
           <div className="p-6 border-t border-white/10 bg-white/5 flex-shrink-0">
             <div className="flex items-center justify-between">
@@ -430,7 +434,6 @@ export const ComisionesCalculadora: React.FC<Props> = ({
           </div>
         )}
 
-        {/* Loading overlay para cálculo */}
         {calculando && (
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center rounded-2xl">
             <div className="bg-[#1A1A20] border border-white/10 rounded-xl p-6 flex items-center gap-3">

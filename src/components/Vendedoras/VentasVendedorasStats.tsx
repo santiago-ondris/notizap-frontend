@@ -135,14 +135,6 @@ export const VentasVendedorasStats: React.FC<Props> = ({
       icono: Award,
       color: 'bg-pink-500/20 text-pink-400',
       emoji: '🏢'
-    },
-    {
-      titulo: 'Transacciones Totales',
-      valor: estadisticasHelpers.formatearNumero(stats.totalVentas),
-      subtitulo: 'total de movimientos',
-      icono: TrendingUp,
-      color: 'bg-red-500/20 text-red-400',
-      emoji: '📊'
     }
   ];
 

@@ -7,7 +7,6 @@ import {
   RefreshCw, 
   AlertCircle, 
   CheckCircle2,
-  TrendingUp,
   Eye,
   Settings,
   Building2,
@@ -17,20 +16,18 @@ import { VentasVendedorasUpload } from '@/components/Vendedoras/VentasVendedoras
 import { VentasVendedorasFilters } from '@/components/Vendedoras/VentasVendedorasFilters';
 import { VentasVendedorasStats } from '@/components/Vendedoras/VentasVendedorasStats';
 import { VentasVendedorasTable } from '@/components/Vendedoras/VentasVendedorasTable';
-import { VentasVendedorasChart } from '@/components/Vendedoras/VentasVendedorasChart';
 import { ventasVendedorasService } from '@/services/vendedoras/ventasVendedorasService';
 import type { 
     VentaVendedoraStats,
     VentasResponse,
     RangoFechas
   } from '@/types/vendedoras/ventaVendedoraTypes';
-  
   import type { 
     VentaVendedoraFilters
   } from '@/types/vendedoras/filtrosTypes';
 import { dateHelpers } from '@/utils/vendedoras/dateHelpers';
 
-type VistaActual = 'dashboard' | 'upload' | 'tabla' | 'graficos' | 'comisiones';
+type VistaActual = 'dashboard' | 'upload' | 'tabla' | 'comisiones';
 
 export const VentasVendedorasPage: React.FC = () => {
   const navigate = useNavigate();
@@ -184,12 +181,6 @@ export const VentasVendedorasPage: React.FC = () => {
       descripcion: 'Vista detallada de ventas'
     },
     {
-      id: 'graficos',
-      label: '📈 Gráficos',
-      icono: TrendingUp,
-      descripcion: 'Análisis visual de tendencias'
-    },
-    {
       id: 'locales',
       label: '🏢 Rendimiento por Locales',
       icono: Building2,
@@ -237,7 +228,7 @@ export const VentasVendedorasPage: React.FC = () => {
               <div>
                 <h1 className="text-3xl font-bold text-white">📊 Rendimiento de Vendedoras</h1>
                 <p className="text-white/70 mt-1">
-                  Análisis detallado de performance por vendedora, sucursal y turno
+                  Que la suerte este de su lado.
                 </p>
               </div>
             </div>
@@ -381,32 +372,6 @@ export const VentasVendedorasPage: React.FC = () => {
               filtros={filtros}
               onFiltrosChange={handleFiltrosChange}
               loading={loading}
-            />
-          </div>
-        )}
-
-        {vistaActual === 'graficos' && (
-          <div className="space-y-6">
-            {/* Filtros */}
-            <VentasVendedorasFilters
-              filtros={filtros}
-              onFiltrosChange={handleFiltrosChange}
-              sucursales={sucursales}
-              vendedores={vendedores}
-              rangoFechasDisponible={rangoFechas ? {
-                fechaMinima: rangoFechas.fechaMinima,
-                fechaMaxima: rangoFechas.fechaMaxima
-              } : undefined}
-              loading={loadingStats}
-            />
-
-            {/* Gráficos */}
-            <VentasVendedorasChart
-              ventasPorDia={stats?.ventasPorDia || []}
-              todasVendedoras={stats?.topVendedoras || []}
-              ventasPorSucursal={stats?.ventasPorSucursal || []}
-              ventasPorTurno={stats?.ventasPorTurno || []}
-              loading={loadingStats}
             />
           </div>
         )}

@@ -138,7 +138,7 @@ export const VentasVendedorasFilters: React.FC<Props> = ({
           </div>
           <div>
             <h3 className="text-xl font-semibold text-white">🔍 Filtros de Búsqueda</h3>
-            <p className="text-sm text-white/60">Personaliza tu análisis de ventas</p>
+            <p className="text-sm text-white/60">:D</p>
           </div>
         </div>
 

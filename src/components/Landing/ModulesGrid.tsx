@@ -132,7 +132,7 @@ export const ModulesGrid: React.FC = () => {
           <span className="text-sm text-white/80 font-medium">Módulos disponibles</span>
         </div>
         <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-          Panel de control
+          Panel de modulos
         </h2>
       </div>
 

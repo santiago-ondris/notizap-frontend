@@ -275,7 +275,7 @@ export const ComisionesVendedorasPage: React.FC = () => {
                 <div>
                   <h1 className="text-2xl font-bold text-white">Comisiones de Vendedoras</h1>
                   <p className="text-white/60 text-sm mt-1">
-                    Gestiona y consulta las comisiones por día, vendedora y sucursal
+                    Comisiones por día, vendedora y sucursal
                   </p>
                 </div>
               </div>

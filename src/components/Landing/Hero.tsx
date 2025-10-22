@@ -91,7 +91,7 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
             </h1>
             <div className="space-y-2">
               <p className="text-xl md:text-2xl text-[#B695BF] font-semibold">
-                Plataforma integral para
+                Plataforma para
               </p>
               <p className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
                 Montella
@@ -101,8 +101,7 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
 
           {/* Description */}
           <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-12 leading-relaxed">
-            Soluciones para el equipo de e-commerce de Montella, más
-            análisis de datos de la empresa.
+            No hay que dar pan al que muere de sed.
           </p>
 
           {/* CTA Buttons */}

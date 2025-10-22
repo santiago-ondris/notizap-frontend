@@ -221,7 +221,7 @@ export default function LocalesStatsPage() {
               <div className="bg-[#B695BF]/20 p-2 rounded-lg">
                 <Users className="w-5 h-5 text-[#B695BF]" />
               </div>
-              <h2 className="text-xl font-bold text-white">🏅 Ranking de cumplimiento por vendedora</h2>
+              <h2 className="text-xl font-bold text-white">Tabla de cumplimiento</h2>
             </div>
             <LocalesStatsVendedorasResumen
               resumenVendedoras={data?.resumenVendedoras ?? []}

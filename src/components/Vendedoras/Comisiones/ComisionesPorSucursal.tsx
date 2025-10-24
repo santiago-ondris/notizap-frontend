@@ -459,7 +459,7 @@ export const ComisionesPorSucursal: React.FC<Props> = ({ className }) => {
             Selecciona sucursal y turno
           </h3>
           <p className="text-white/60 max-w-md mx-auto">
-            Elige una sucursal y un turno para ver las comisiones acumuladas y el detalle por vendedora.
+            Elegi una sucursal y un turno para ver las comisiones acumuladas y el detalle por vendedora.
           </p>
           
           {/* Ayuda visual */}

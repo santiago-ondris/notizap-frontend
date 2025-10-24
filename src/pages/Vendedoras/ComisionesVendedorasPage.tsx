@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, User, Building2, Calculator, Table } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Building2, Calculator, Table, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ComisionesCalendario } from '@/components/Vendedoras/Comisiones/ComisionesCalendario';
 import { ComisionDiaModal } from '@/components/Vendedoras/Comisiones/ComisionDiaModal';
@@ -271,12 +271,17 @@ export const ComisionesVendedorasPage: React.FC = () => {
                   <ArrowLeft className="w-4 h-4" />
                   Volver a Vendedoras
                 </button>
+
+                <button
+                  onClick={() => navigate('/vendedoras/comisioneslocales/info')}
+                  className="flex items-center gap-2 px-3 py-2 bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/30 rounded-xl text-violet-300 transition-all hover:text-violet-200"
+                >
+                  <Info className="w-4 h-4" />
+                  ¿Cómo se calculan?
+                </button>
                 
                 <div>
-                  <h1 className="text-2xl font-bold text-white">Comisiones de Vendedoras</h1>
-                  <p className="text-white/60 text-sm mt-1">
-                    Comisiones por día, vendedora y sucursal
-                  </p>
+                  <h1 className="text-1xl text-white">Comisiones de Vendedoras</h1>
                 </div>
               </div>
 

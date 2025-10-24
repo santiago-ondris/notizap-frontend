@@ -289,7 +289,7 @@ export const TodasLasVendedorasTable: React.FC<Props> = ({
                     <p className="font-medium text-white">
                       {estadisticasHelpers.formatearNumero(vendedora.totalVentas)}
                     </p>
-                    <p className="text-xs text-white/60">ventas netas</p>
+                    <p className="text-xs text-white/60">productos netos</p>
                   </td>
 
                   {/* Promedio */}

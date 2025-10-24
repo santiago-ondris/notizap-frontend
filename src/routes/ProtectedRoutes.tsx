@@ -16,6 +16,7 @@ import { ReposicionPage } from "@/pages/Reposicion/ReposicionPage";
 import { ReposicionSelectorPage } from "@/pages/Reposicion/ReposicionSelectorPage";
 import { ReposicionNinosPage } from "@/pages/Reposicion/ReposicionNinosPage";
 import { ReposicionLogicaPage } from "@/pages/Reposicion/ReposicionLogicaPage";
+import { InfoComisionesPage } from "@/pages/Vendedoras/InfoComisionesPage";
 
 export const ProtectedRoutes = (
   <>
@@ -37,6 +38,7 @@ export const ProtectedRoutes = (
       <Route index                   element={<VentasVendedorasPage />} />
       <Route path="rendimiento"            element={<LocalesStatsPage />} />
       <Route path="comisioneslocales"            element={<ComisionesVendedorasPage />} />
+      <Route path="comisioneslocales/info" element={<InfoComisionesPage />} />
     </Route>
     <Route path="reposicion">
       <Route index                   element={<ReposicionSelectorPage />} />

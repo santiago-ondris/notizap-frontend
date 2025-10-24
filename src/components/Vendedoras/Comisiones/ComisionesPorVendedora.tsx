@@ -431,7 +431,7 @@ export const ComisionesPorVendedora: React.FC<Props> = ({ className }) => {
           <User className="w-16 h-16 text-white/40 mx-auto mb-4" />
           <h3 className="text-xl font-medium text-white/80 mb-2">Selecciona una vendedora</h3>
           <p className="text-white/60 max-w-md mx-auto">
-            Elige una vendedora de la lista para ver sus comisiones acumuladas y el detalle por día.
+            Elegi una vendedora de la lista para ver sus comisiones acumuladas y el detalle por día.
           </p>
         </div>
       )}

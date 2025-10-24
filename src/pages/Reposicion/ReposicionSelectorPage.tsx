@@ -84,6 +84,26 @@ export const ReposicionSelectorPage: React.FC = () => {
           </p>
         </div>
 
+        <div className="flex justify-center mb-8">
+          <button
+            onClick={() => navigate('/reposicion/logica')}
+            className="group flex items-center gap-3 px-6 py-3 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300"
+          >
+            <div className="p-2 rounded-lg bg-[#B695BF]/20 border border-[#B695BF]/30 group-hover:scale-110 transition-transform duration-300">
+              <Settings className="w-5 h-5 text-[#B695BF]" />
+            </div>
+            <div className="text-left">
+              <div className="text-sm font-semibold text-white">
+                ¿Cómo funciona?
+              </div>
+              <div className="text-xs text-white/60">
+                Ver lógica detallada del módulo
+              </div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-white/40 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" />
+          </button>
+        </div>
+
         {/* Opciones */}
         <div className="grid md:grid-cols-2 gap-8">
           {opciones.map((opcion) => {

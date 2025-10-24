@@ -15,6 +15,7 @@ import { ComisionesVendedorasPage } from "@/pages/Vendedoras/ComisionesVendedora
 import { ReposicionPage } from "@/pages/Reposicion/ReposicionPage";
 import { ReposicionSelectorPage } from "@/pages/Reposicion/ReposicionSelectorPage";
 import { ReposicionNinosPage } from "@/pages/Reposicion/ReposicionNinosPage";
+import { ReposicionLogicaPage } from "@/pages/Reposicion/ReposicionLogicaPage";
 
 export const ProtectedRoutes = (
   <>
@@ -41,6 +42,7 @@ export const ProtectedRoutes = (
       <Route index                   element={<ReposicionSelectorPage />} />
       <Route path="adultos"            element={<ReposicionPage />} />
       <Route path="ninos"            element={<ReposicionNinosPage />} />
+      <Route path="logica"         element={<ReposicionLogicaPage />} />
     </Route>
   </>
 );

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, User, Building2, Calculator, Table, Info } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Building2, Calculator, Table, Info, FileSpreadsheet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ComisionesCalendario } from '@/components/Vendedoras/Comisiones/ComisionesCalendario';
 import { ComisionDiaModal } from '@/components/Vendedoras/Comisiones/ComisionDiaModal';
@@ -11,6 +11,7 @@ import { ComisionesTable } from '@/components/Vendedoras/Comisiones/ComisionesTa
 import { ComisionesFilters } from '@/components/Vendedoras/Comisiones/ComisionesFilters';
 import { comisionesVendedorasService } from '@/services/vendedoras/comisionesVendedorasService';
 import { comisionFechas } from '@/utils/vendedoras/comisionHelpers';
+import { ExportarLiquidacionVista } from '@/components/Vendedoras/Comisiones/ExportarLiquidacionVista';
 import { toast } from 'react-toastify';
 import type { 
   DiaCalendario,
@@ -22,7 +23,7 @@ import type {
   ComisionVendedoraFilters 
 } from '@/types/vendedoras/comisionFiltersTypes';
 
-type VistaActual = VistaComision | 'tabla-general';
+type VistaActual = VistaComision | 'tabla-general' | 'exportar-liquidacion';
 
 interface OpcionVista {
   key: VistaActual;
@@ -37,6 +38,12 @@ const OPCIONES_VISTA: OpcionVista[] = [
     label: 'Calendario',
     icono: Calendar,
     descripcion: 'Vista mensual con estados de comisiones'
+  },
+  {
+    key: 'exportar-liquidacion',
+    label: 'Exportar liquidación',
+    icono: FileSpreadsheet,
+    descripcion: 'Generar archivo Excel de liquidación'
   },
   {
     key: 'por-vendedora',
@@ -170,6 +177,9 @@ export const ComisionesVendedorasPage: React.FC = () => {
         return (
           <ComisionesCalendario onDiaClick={handleDiaClick} />
         );
+
+      case 'exportar-liquidacion':
+        return <ExportarLiquidacionVista />;  
         
       case 'por-vendedora':
         return (
@@ -280,9 +290,6 @@ export const ComisionesVendedorasPage: React.FC = () => {
                   ¿Cómo se calculan?
                 </button>
                 
-                <div>
-                  <h1 className="text-1xl text-white">Comisiones de Vendedoras</h1>
-                </div>
               </div>
 
               {/* Selector de vista */}

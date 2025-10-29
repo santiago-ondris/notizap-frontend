@@ -119,3 +119,20 @@ export interface ComisionVendedora {
     topVendedorasPorComisiones: ResumenComisionVendedora[];
     todasLasVendedoras: ResumenComisionVendedora[];
   }
+
+  export interface ExportarLiquidacionComisionesRequest {
+    fechaInicio?: string;
+    fechaFin?: string;
+    sucursalNombre?: string;
+    turno?: 'Mañana' | 'Tarde' | '';
+    vendedorNombre?: string;
+    orderBy: 'nombre' | 'monto' | 'dias';
+    orderDesc: boolean;
+  }
+  
+  export interface LiquidacionVendedora {
+    vendedoraNombre: string;
+    totalComisiones: number;
+    diasTrabajos: number;
+    sucursalesQueTrabaja: string;
+  }

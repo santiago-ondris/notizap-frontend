@@ -8,7 +8,8 @@ import type {
   CalendarioComisiones,
   ResumenComisionVendedora,
   DatosMaestrosComisiones,
-  ComisionesStats
+  ComisionesStats,
+  ExportarLiquidacionComisionesRequest
 } from '@/types/vendedoras/comisionTypes';
 import type {
   ComisionVendedoraFilters,
@@ -28,6 +29,15 @@ export const comisionesVendedorasService = {
   ): Promise<VendedorasDisponiblesResponse> {
     const response = await api.get(`${BASE_URL}/vendedoras-disponibles`, {
       params: { fecha, sucursalNombre, turno }
+    });
+    return response.data;
+  },
+
+  async exportarLiquidacion(
+    filtros: ExportarLiquidacionComisionesRequest
+  ): Promise<Blob> {
+    const response = await api.post(`${BASE_URL}/exportar-liquidacion`, filtros, {
+      responseType: 'blob'
     });
     return response.data;
   },

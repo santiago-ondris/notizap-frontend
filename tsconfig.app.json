@@ -26,5 +26,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
   },
-  "include": ["src", "deprecated/Comisiones"]
+  "include": ["src", "deprecated/Comisiones", "../../Backend/src/Deprecated/MailingPage", "../../Backend/src/Deprecated/mailingservice", "../../Backend/src/Deprecated/mailingtypes", "../../Backend/src/Deprecated/mailingutils"]
 }

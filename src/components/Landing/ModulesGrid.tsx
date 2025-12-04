@@ -1,10 +1,7 @@
 import { ModuleCard } from "./ModuleCard";
 import {
-  Mail,
   Repeat,
-  Send,
   BarChart3,
-  User,
   Grid3X3,
   Lock,
   Fish,
@@ -21,34 +18,10 @@ const modules = [
     roles: ["admin", "superadmin"]
   },
   {
-    title: "Mailing",
-    description: "Campañas y métricas de Mailchimp",
-    icon: Mail,
-    color: "#B695BF",
-    to: "/mailing",
-    roles: ["viewer", "admin", "superadmin"]
-  },
-  {
-    title: "Clientes",
-    description: "Comportamientos de compra y segmentación",
-    icon: User,
-    color: "#F23D5E",
-    to: "/clientes",
-    roles: ["viewer", "admin", "superadmin"]
-  },
-  {
-    title: "Envíos",
-    description: "Envíos diarios y resúmenes por tipo",
-    icon: Send,
-    color: "#B695BF",
-    to: "/envios",
-    roles: ["viewer", "admin", "superadmin"]
-  },
-  {
     title: "Cambios/Devoluciones",
     description: "Gestión de cambios y devoluciones",
     icon: Repeat,
-    color: "#F23D5E",
+    color: "#51590E",
     to: "/cambios",
     roles: ["admin", "superadmin"]
   },
@@ -75,11 +48,8 @@ export const ModulesGrid: React.FC = () => {
             <span className="text-sm text-white/80 font-medium">Módulos del sistema</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Herramientas integradas
+            Jovito
           </h2>
-          <p className="text-xl text-white/60 max-w-2xl mx-auto">
-            Accede a todos los módulos disponibles
-          </p>
         </div>
 
         {/* Login prompt */}
@@ -94,22 +64,8 @@ export const ModulesGrid: React.FC = () => {
                 Acceso requerido
               </h3>
               <p className="text-white/70 mb-8 leading-relaxed">
-                Inicia sesión para acceder a todos los módulos y herramientas de gestión de Notizap
+                Inicio de sesión obligatorio
               </p>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 text-sm text-white/60">
-                  <div className="w-2 h-2 rounded-full bg-[#51590E]"></div>
-                  <span>Análisis en tiempo real</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-white/60">
-                  <div className="w-2 h-2 rounded-full bg-[#B695BF]"></div>
-                  <span>Gestión centralizada</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-white/60">
-                  <div className="w-2 h-2 rounded-full bg-[#D94854]"></div>
-                  <span>Reportes automatizados</span>
-                </div>
-              </div>
             </div>
             
             {/* Decorative glow */}

@@ -1,6 +1,5 @@
 import { Route } from "react-router-dom";
 import { UsersPage }                 from "@/pages/Login/UsersPage";
-import EnviosPage                from "@/pages/Envios/EnviosPage";
 import CambiosPage               from "@/pages/Cambios/CambiosPage";
 import DevolucionesPage from "@/pages/Cambios/DevolucionesPage";
 import DevolucionesMercadoLibrePage from "@/pages/Cambios/DevolucionesMercadoLibrePage";
@@ -16,7 +15,6 @@ import { InfoComisionesPage } from "@/pages/Vendedoras/InfoComisionesPage";
 export const ProtectedRoutes = (
   <>
     <Route path="usuarios"          element={<UsersPage />} />
-    <Route path="envios"            element={<EnviosPage />} />
     <Route path="cambios">
       <Route index                   element={<CambiosPage />} />
       <Route path="devoluciones"            element={<DevolucionesPage />} />

@@ -8,7 +8,7 @@ import {
   type EstadoCambioFiltro,
   MesesUtils
 } from '@/types/cambios/cambiosTypes';
-import { formatearFechaCambios } from '@/utils/envios/fechaHelpers';
+import { formatearFechaCambios } from '@/utils/fechaHelpers';
 
 
 class CambiosService {

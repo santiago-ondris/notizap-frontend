@@ -14,7 +14,7 @@ import {
   MOTIVOS_CAMBIO,
 } from '@/types/cambios/cambiosTypes';
 import { MultiProductInput } from './MultiProductInput';
-import { fechaInputAISO, fechaISOAInput } from '@/utils/envios/fechaHelpers';
+import { fechaInputAISO, fechaISOAInput } from '@/utils/fechaHelpers';
 
 interface CambioModalProps {
   isOpen: boolean;

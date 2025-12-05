@@ -21,7 +21,7 @@ import {
   type DevolucionFormErrors,
   MOTIVOS_DEVOLUCION
 } from '@/types/cambios/devolucionesTypes';
-import { fechaInputAISO, fechaISOAInput } from '@/utils/envios/fechaHelpers';
+import { fechaInputAISO, fechaISOAInput } from '@/utils/fechaHelpers';
 import { MultiProductInput } from '@/components/Cambios/MultiProductInput'
 
 interface DevolucionModalProps {

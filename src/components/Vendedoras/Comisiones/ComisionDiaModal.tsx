@@ -16,6 +16,7 @@ interface Props {
   onClose: () => void;
   onCalcularClick?: (fecha: string, sucursal: string, turno: string) => void;
   onRecalcularClick?: (fecha: string, sucursal: string, turno: string) => void;
+  onRefreshReady?: (refrescar: () => void) => void;
 }
 
 export const ComisionDiaModal: React.FC<Props> = ({
@@ -23,7 +24,8 @@ export const ComisionDiaModal: React.FC<Props> = ({
   isOpen,
   onClose,
   onCalcularClick,
-  onRecalcularClick
+  onRecalcularClick,
+  onRefreshReady
 }) => {
   const [loading, setLoading] = useState(false);
   const [vendedorasData, setVendedorasData] = useState<Map<string, VendedorasDisponiblesResponse>>(new Map());
@@ -35,6 +37,12 @@ export const ComisionDiaModal: React.FC<Props> = ({
       cargarDetallesVendedoras();
     }
   }, [isOpen, dia]);
+
+  useEffect(() => {
+    if (onRefreshReady) {
+      onRefreshReady(cargarDetallesVendedoras);
+    }
+  }, [onRefreshReady]);
 
   const cargarDetallesVendedoras = async () => {
     if (!dia.estadosPorSucursalTurno.length) return;

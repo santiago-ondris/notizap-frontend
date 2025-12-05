@@ -73,6 +73,8 @@ export const ComisionesVendedorasPage: React.FC = () => {
   const [modalDiaAbierto, setModalDiaAbierto] = useState(false);
   const [diaSeleccionado, setDiaSeleccionado] = useState<DiaCalendario | null>(null);
   const [calculadoraAbierta, setCalculadoraAbierta] = useState(false);
+  const [refrescarCalendario, setRefrescarCalendario] = useState<(() => void) | null>(null);
+  const [refrescarModal, setRefrescarModal] = useState<(() => void) | null>(null);
   const [datosCalculadora, setDatosCalculadora] = useState<{
     fecha: string;
     sucursal: string;
@@ -162,6 +164,8 @@ export const ComisionesVendedorasPage: React.FC = () => {
 
   const handleCalculadoraSuccess = () => {
     toast.success('¡Comisiones calculadas correctamente!');
+    refrescarCalendario?.();
+    refrescarModal?.();
   };
 
   const handleFiltrosGeneralesChange = (filtros: Partial<ComisionVendedoraFilters>) => {
@@ -175,7 +179,10 @@ export const ComisionesVendedorasPage: React.FC = () => {
     switch (vistaActual) {
       case 'calendario':
         return (
-          <ComisionesCalendario onDiaClick={handleDiaClick} />
+          <ComisionesCalendario 
+            onDiaClick={handleDiaClick} 
+            onRefreshReady={(fn) => setRefrescarCalendario(() => fn)}
+          />
         );
 
       case 'exportar-liquidacion':
@@ -331,6 +338,7 @@ export const ComisionesVendedorasPage: React.FC = () => {
             onClose={() => setModalDiaAbierto(false)}
             onCalcularClick={handleCalcularClick}
             onRecalcularClick={handleRecalcularClick}
+            onRefreshReady={(fn) => setRefrescarModal(() => fn)}
           />
         )}
 

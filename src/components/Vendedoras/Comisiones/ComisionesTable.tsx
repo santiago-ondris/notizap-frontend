@@ -214,6 +214,11 @@ export const ComisionesTable: React.FC<Props> = ({
                 </button>
               </th>
 
+              {/* Porcentaje */}
+              <th className="px-4 py-3 text-center">
+                <span className="text-white/80 font-medium">%</span>
+              </th>
+
               {/* Vendedoras */}
               <th className="px-4 py-3 text-center">
                 <span className="flex items-center gap-2 text-white/80 font-medium justify-center">
@@ -291,6 +296,13 @@ export const ComisionesTable: React.FC<Props> = ({
                 <td className="px-4 py-3 text-right">
                   <span className="text-green-300 font-bold">
                     {comisionFormato.formatearMoneda(comision.montoComision)}
+                  </span>
+                </td>
+
+                {/* Porcentaje */}
+                <td className="px-4 py-3 text-center">
+                  <span className="text-white/60 text-sm">
+                    {comision.porcentajeComision}%
                   </span>
                 </td>
 

@@ -7,6 +7,7 @@ export interface ComisionVendedora {
     montoFacturado: number;
     montoSinIva: number;
     totalVendedoras: number;
+    porcentajeComision: number;
     montoComision: number;
     fechaCalculado: string; 
     calculadoPorNombre: string;
@@ -43,6 +44,7 @@ export interface ComisionVendedora {
     montoFacturado: number;
     montoSinIva: number;
     totalVendedoras: number;
+    porcentajeComision: number;
     comisionIndividual: number;
     comisionesPorVendedora: ComisionVendedoraCalculada[];
     mensaje: string;
@@ -108,6 +110,7 @@ export interface ComisionVendedora {
     sucursalNombre: string;
     turno: 'Mañana' | 'Tarde';
     vendedorasNombres: string[];
+    porcentajeComision: number;
   }
   
   export interface ComisionesStats {

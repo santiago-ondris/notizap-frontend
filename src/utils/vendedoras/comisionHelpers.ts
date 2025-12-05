@@ -11,16 +11,16 @@ import type {
       return montoFacturado - (montoFacturado * 21 / 100);
     },
   
-    previewComisionIndividual(montoFacturado: number, totalVendedoras: number): number {
+    previewComisionIndividual(montoFacturado: number, totalVendedoras: number, porcentajeComision: number = 1): number {
       if (totalVendedoras <= 0 || montoFacturado <= 0) return 0;
       const montoSinIva = this.previewMontoSinIva(montoFacturado);
-      return (montoSinIva * 1 / 100) / totalVendedoras;
+      return (montoSinIva * porcentajeComision / 100) / totalVendedoras;
     },
   
-    previewComisionTotal(montoFacturado: number): number {
+    previewComisionTotal(montoFacturado: number, porcentajeComision: number = 1): number {
       if (montoFacturado <= 0) return 0;
       const montoSinIva = this.previewMontoSinIva(montoFacturado);
-      return montoSinIva * 1 / 100;
+      return montoSinIva * porcentajeComision / 100;
     },
   
     validacionesBasicasUX(

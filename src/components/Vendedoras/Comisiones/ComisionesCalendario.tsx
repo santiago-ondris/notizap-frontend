@@ -22,11 +22,13 @@ import type {
 
 interface Props {
   onDiaClick?: (dia: DiaCalendario) => void;
+  onRefreshReady?: (refrescar: () => void) => void;
   className?: string;
 }
 
 export const ComisionesCalendario: React.FC<Props> = ({
   onDiaClick,
+  onRefreshReady,
   className
 }) => {
   // Estados principales
@@ -65,6 +67,12 @@ export const ComisionesCalendario: React.FC<Props> = ({
       cargarCalendario();
     }
   }, [añoActual, mesActual, filtros.sucursalNombre, filtros.turno, datosMaestros]);
+
+  useEffect(() => {
+    if (onRefreshReady) {
+      onRefreshReady(cargarCalendario);
+    }
+  }, [onRefreshReady, datosMaestros]);
 
   const cargarDatosMaestros = async () => {
     try {

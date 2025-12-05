@@ -36,6 +36,7 @@ export const ComisionesCalculadora: React.FC<Props> = ({
   const [vendedorasSeleccionadas, setVendedorasSeleccionadas] = useState<VendedoraDisponible[]>([]);
   const [busqueda, setBusqueda] = useState('');
   const [mostrarDisponibles, setMostrarDisponibles] = useState(false);
+  const [porcentajeComision, setPorcentajeComision] = useState<number>(1);
 
   useEffect(() => {
     if (isOpen) {
@@ -64,6 +65,7 @@ export const ComisionesCalculadora: React.FC<Props> = ({
       setBusqueda('');
       setMostrarDisponibles(false);
       setError(null);
+      setPorcentajeComision(1);
     }
   }, [isOpen, fecha, sucursalNombre, turno]);
 
@@ -134,7 +136,8 @@ export const ComisionesCalculadora: React.FC<Props> = ({
         fecha,
         sucursalNombre,
         turno: turno as 'Mañana' | 'Tarde',
-        vendedorasNombres: vendedorasSeleccionadas.map(v => v.nombre)
+        vendedorasNombres: vendedorasSeleccionadas.map(v => v.nombre),
+        porcentajeComision
       };
 
       const response = esRecalculo 
@@ -162,11 +165,11 @@ export const ComisionesCalculadora: React.FC<Props> = ({
   }) || [];
 
   const previewComision = datosVendedoras 
-    ? comisionPreview.previewComisionIndividual(datosVendedoras.montoFacturado, vendedorasSeleccionadas.length)
+    ? comisionPreview.previewComisionIndividual(datosVendedoras.montoFacturado, vendedorasSeleccionadas.length, porcentajeComision)
     : 0;
-  
-  const previewTotal = datosVendedoras 
-    ? comisionPreview.previewComisionTotal(datosVendedoras.montoFacturado)
+
+const previewTotal = datosVendedoras 
+    ? comisionPreview.previewComisionTotal(datosVendedoras.montoFacturado, porcentajeComision)
     : 0;
 
   if (!isOpen) return null;
@@ -262,6 +265,19 @@ export const ComisionesCalculadora: React.FC<Props> = ({
                   Resumen del turno
                 </h3>
                 
+                <div className="mb-4">
+                  <label className="block text-white/60 text-sm mb-2">Porcentaje de comisión (%)</label>
+                  <input
+                    type="number"
+                    min="0.1"
+                    step="0.1"
+                    value={porcentajeComision}
+                    onChange={(e) => setPorcentajeComision(parseFloat(e.target.value) || 1)}
+                    className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    disabled={calculando}
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
                     <div className="text-white/60 text-sm">Monto facturado</div>

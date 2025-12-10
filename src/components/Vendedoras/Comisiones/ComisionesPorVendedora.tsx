@@ -331,13 +331,13 @@ export const ComisionesPorVendedora: React.FC<Props> = ({ className }) => {
                   <div className="text-2xl font-bold text-blue-300">
                     {resumenVendedora.diasConComisiones}
                   </div>
-                  <div className="text-xs text-white/60">Días trabajados</div>
+                  <div className="text-xs text-white/60">Turnos trabajados</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-yellow-300">
                     {comisionFormato.formatearMoneda(resumenVendedora.promedioComisionPorDia)}
                   </div>
-                  <div className="text-xs text-white/60">Promedio por día</div>
+                  <div className="text-xs text-white/60">Promedio por turno</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-purple-300">

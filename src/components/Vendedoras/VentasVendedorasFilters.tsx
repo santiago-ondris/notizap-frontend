@@ -108,7 +108,14 @@ export const VentasVendedorasFilters: React.FC<Props> = ({
         rangoFechas = dateHelpers.obtenerUltimaSemana();
         break;
       case 'mesActual':
-        rangoFechas = dateHelpers.obtenerMesActual();
+        const mesActual = dateHelpers.obtenerMesActual();
+        const fechaMaxDisponible = rangoFechasDisponible?.fechaMaxima 
+          ? new Date(rangoFechasDisponible.fechaMaxima) 
+          : mesActual.fin;
+        rangoFechas = {
+          inicio: mesActual.inicio,
+          fin: fechaMaxDisponible < mesActual.fin ? fechaMaxDisponible : mesActual.fin
+        };
         break;
       case 'mesAnterior':
         rangoFechas = dateHelpers.obtenerMesAnterior();

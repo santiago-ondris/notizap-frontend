@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Rocket, ArrowRight, Sparkles } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface HeroProps {
   onLoginClick: () => void;
@@ -10,6 +11,21 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
   const rocketLeftRef = useRef<HTMLDivElement>(null);
   const rocketRightRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
+
+  const { isAuthenticated } = useAuth();
+  const [floatingMessages, setFloatingMessages] = useState<number[]>([]);
+
+  const handleAccessClick = () => {
+    if (isAuthenticated) {
+      const id = Date.now();
+      setFloatingMessages(prev => [...prev, id]);
+      setTimeout(() => {
+        setFloatingMessages(prev => prev.filter(msgId => msgId !== id));
+      }, 1000);
+    } else {
+      onLoginClick();
+    }
+  };
 
   useEffect(() => {
     const leftRocket = rocketLeftRef.current;
@@ -39,6 +55,10 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
         @keyframes sparkle {
           0%, 100% { opacity: 0.4; transform: scale(1) rotate(0deg); }
           50% { opacity: 1; transform: scale(1.1) rotate(180deg); }
+        }
+        @keyframes float-up-fade {
+          0% { opacity: 1; transform: translateY(0); }
+          100% { opacity: 0; transform: translateY(-50px); }
         }
       `}</style>
       
@@ -106,8 +126,18 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="relative">
+            {floatingMessages.map(id => (
+              <span
+                key={id}
+                className="absolute left-1/2 -translate-x-1/2 -top-8 text-white/90 text-sm font-medium whitespace-nowrap pointer-events-none"
+                style={{ animation: 'float-up-fade 1s ease-out forwards' }}
+              >
+                ¡Ya estás logueado!
+              </span>
+            ))}
             <button
-              onClick={onLoginClick}
+              onClick={handleAccessClick}
               className="group relative px-8 py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-[#D94854] to-[#F23D5E] text-white shadow-2xl hover:shadow-[#D94854]/25 transition-all duration-300 transform hover:scale-105 hover:rotate-1"
               style={{ animation: 'pulse-glow 3s ease-in-out infinite' }}
             >
@@ -117,6 +147,7 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
               </span>
               <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#F23D5E] to-[#D94854] opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
             </button>
+          </div>
             
             <button 
               onClick={() => {

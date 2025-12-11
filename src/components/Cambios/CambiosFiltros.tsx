@@ -108,20 +108,17 @@ export const CambiosFiltros: React.FC<CambiosFiltrosProps> = ({
 
   // Manejar cambio de filtro
   const handleFiltroChange = (campo: keyof FiltrosType, valor: any) => {
-    console.log(`🚀 Cambiando filtro ${campo}:`, valor);
     
     const nuevosFiltros = {
       ...filtros,
       [campo]: valor === '' || valor === 'todos' || valor === 'todos_motivos' ? undefined : valor
     };
     
-    console.log('📊 Nuevos filtros:', nuevosFiltros);
     onFiltrosChange(nuevosFiltros);
   };
 
   // Limpiar todos los filtros
   const limpiarFiltros = () => {
-    console.log('🧹 Limpiando todos los filtros');
     onFiltrosChange({});
     setMostrarFiltrosAvanzados(false);
   };

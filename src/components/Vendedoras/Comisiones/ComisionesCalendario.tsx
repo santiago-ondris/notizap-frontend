@@ -107,11 +107,6 @@ export const ComisionesCalendario: React.FC<Props> = ({
       
       // Obtener datos del backend
       const datosBackend = await comisionesVendedorasService.obtenerCalendarioComisiones(filtrosCalendario);
-      console.log('Datos del backend:', datosBackend);
-      console.log('Primer día de datos:', datosBackend[0]);
-      if (datosBackend[0]) {
-        console.log('Estados del primer día:', datosBackend[0].estadosPorSucursalTurno);
-      }
       
       // Actualizar días con datos del backend
       let diasActualizados = calendarioActualizacion.actualizarConDatos(diasBase, datosBackend);

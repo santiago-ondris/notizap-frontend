@@ -15,28 +15,8 @@ class CambiosService {
   private readonly baseUrl = '/api/v1/cambio';
 
   async obtenerTodos(): Promise<CambioSimpleDto[]> {
-    try {
-      console.log('🌐 [CambiosService] Llamando a GET /api/v1/cambio');
-      
+    try {     
       const response = await api.get<CambioSimpleDto[]>(this.baseUrl);
-      
-      console.log('📦 [CambiosService] Respuesta del backend:', {
-        status: response.status,
-        totalCambios: response.data.length,
-        cambios: response.data
-      });
-      
-      // Log detallado de fechas para debug
-      console.table(
-        response.data.map(c => ({
-          id: c.id,
-          pedido: c.pedido,
-          nombre: c.nombre,
-          fecha: c.fecha,
-          fechaFormateada: new Date(c.fecha).toLocaleDateString('es-AR')
-        }))
-      );
-      
       return response.data;
     } catch (error) {
       console.error('❌ [CambiosService] Error al obtener cambios:', error);
@@ -55,22 +35,10 @@ class CambiosService {
         mes,
         año
       };
-  
-      console.log('📅 [obtenerPorMes] Filtros aplicados:', filtros);
-  
+    
       const todosCambios = await this.obtenerTodos();
       
-      console.log('🔍 [obtenerPorMes] ANTES de filtrar:', {
-        totalCambios: todosCambios.length,
-        cambios: todosCambios
-      });
-      
       const cambiosFiltrados = this.filtrarCambios(todosCambios, filtros);
-      
-      console.log('✅ [obtenerPorMes] DESPUÉS de filtrar:', {
-        cambiosFiltrados: cambiosFiltrados.length,
-        cambios: cambiosFiltrados
-      });
       
       return cambiosFiltrados;
     } catch (error) {
@@ -90,16 +58,9 @@ class CambiosService {
   }
 
   async crear(cambio: CreateCambioSimpleDto): Promise<number> {
-    try {
-      console.log('📝 [crear] Creando cambio:', cambio);
-      
+    try {      
       this.validarCambio(cambio);
       const response = await api.post<number>(this.baseUrl, cambio);
-      
-      console.log('✅ [crear] Cambio creado exitosamente:', {
-        nuevoId: response.data,
-        status: response.status
-      });
       
       return response.data;
     } catch (error: any) {
@@ -194,7 +155,6 @@ class CambiosService {
   }
 
   filtrarCambios(cambios: CambioSimpleDto[], filtros: CambiosFiltros): CambioSimpleDto[] {
-    console.log('🔍 [filtrarCambios] Filtros recibidos:', filtros);
     
     return cambios.filter(cambio => {
       const fechaCambio = new Date(cambio.fecha);
@@ -209,13 +169,6 @@ class CambiosService {
         const añoCambio = fechaCambio.getUTCFullYear();
         
         if (añoCambio !== filtros.año || mesCambio !== filtros.mes) {
-          console.log(`❌ Filtrado por mes/año: Cambio ID ${cambio.id}`, {
-            fechaCambio: cambio.fecha,
-            mesCambio,
-            añoCambio,
-            filtroMes: filtros.mes,
-            filtroAño: filtros.año
-          });
           return false;
         }
       }
@@ -224,10 +177,6 @@ class CambiosService {
         const fechaDesde = new Date(filtros.fechaDesde + 'T00:00:00Z'); // Forzar UTC
         
         if (fechaCambioSoloFecha < fechaDesde) {
-          console.log(`❌ Filtrado por fechaDesde: Cambio ID ${cambio.id}`, {
-            fechaCambio: fechaCambioSoloFecha.toISOString(),
-            fechaDesde: fechaDesde.toISOString()
-          });
           return false;
         }
       }
@@ -236,10 +185,6 @@ class CambiosService {
         const fechaHasta = new Date(filtros.fechaHasta + 'T23:59:59Z'); // Forzar UTC y fin del día
         
         if (fechaCambioSoloFecha > fechaHasta) {
-          console.log(`❌ Filtrado por fechaHasta: Cambio ID ${cambio.id}`, {
-            fechaCambio: fechaCambioSoloFecha.toISOString(),
-            fechaHasta: fechaHasta.toISOString()
-          });
           return false;
         }
       }

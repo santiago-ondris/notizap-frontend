@@ -48,15 +48,12 @@ const CambiosPage: React.FC = () => {
     
     try {
       const [año, mes] = valorMes.split('-').map(Number);
-      console.log(`📅 Cargando cambios para ${MesesUtils.formatearMes(mes, año)}`);
       
       const cambiosData = await cambiosService.obtenerPorMes(mes, año);
       setCambios(cambiosData);
       
       if (cambiosData.length === 0) {
         toast.info(`No hay cambios registrados en ${MesesUtils.formatearMes(mes, año)}`);
-      } else {
-        console.log(`✅ Se cargaron ${cambiosData.length} cambios para ${MesesUtils.formatearMes(mes, año)}`);
       }
       
     } catch (error) {
@@ -71,7 +68,6 @@ const CambiosPage: React.FC = () => {
 
 
   const handleCambioMes = (nuevoMes: string) => {
-    console.log(`🗓️ Cambiando mes seleccionado: ${nuevoMes}`);
     setMesSeleccionado(nuevoMes);
     
     setFiltros({});
@@ -85,8 +81,6 @@ const CambiosPage: React.FC = () => {
       ...filtrosMes,
       ...filtros 
     };
-
-    console.log('🔍 Aplicando filtros combinados:', filtrosCombinados);
     
     const cambiosFiltradosResult = cambiosService.filtrarCambios(cambios, filtrosCombinados);
     setCambiosFiltrados(cambiosFiltradosResult);
@@ -97,7 +91,6 @@ const CambiosPage: React.FC = () => {
 
 
   const handleFiltrosChange = (nuevosFiltros: FiltrosType) => {
-    console.log('🎛️ Actualizando filtros adicionales:', nuevosFiltros);
     setFiltros(nuevosFiltros);
   };
 
@@ -237,7 +230,6 @@ const CambiosPage: React.FC = () => {
 
   useEffect(() => {
     if (puedeVer) {
-      console.log('🚀 Componente montado, cargando mes actual:', mesSeleccionado);
       cargarCambiosPorMes(mesSeleccionado);
     }
   }, [puedeVer]);

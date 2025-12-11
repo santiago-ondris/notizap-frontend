@@ -149,14 +149,11 @@ import type {
   
   export const comisionEstados = {
     determinarEstadoDia(estados: EstadoCalculoComision[]): EstadoDia {
-      console.log('🔍 Determinando estado para:', estados);
       if (!estados || estados.length === 0) {
-        console.log('❌ Sin estados');
         return 'sin-datos';
       }
   
       const conVentas = estados.filter(e => e.tieneVentas);
-      console.log('✅ Con ventas:', conVentas);
       
       if (conVentas.length === 0) {
         return 'sin-datos';

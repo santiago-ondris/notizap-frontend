@@ -234,11 +234,6 @@ export const TodasLasVendedorasTable: React.FC<Props> = ({
             {vendedorasParaMostrar.map((vendedora) => {
               const posicion = vendedorasOrdenadas.findIndex(v => v.vendedorNombre === vendedora.vendedorNombre) + 1;
               const emojiPosicion = estadisticasHelpers.obtenerEmojiPosicion(posicion);
-              console.log('TotalVentas:', {
-                nombre: vendedora.vendedorNombre,
-                totalVentas: vendedora.totalVentas,
-                rowData: vendedora, 
-              });
               return (
                 <tr 
                   key={vendedora.vendedorNombre}

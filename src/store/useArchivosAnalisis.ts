@@ -35,7 +35,6 @@ interface ArchivosAnalisisStore {
   setResultadoEvolucionStock: (resultado: EvolucionStockResult) => void;
   limpiarResultadoEvolucionStock: () => void;
 }
-console.log("Zustand store inicializado", new Date().toLocaleTimeString());
 
 export const useArchivosAnalisis = create<ArchivosAnalisisStore>((set) => ({
   archivos: {},

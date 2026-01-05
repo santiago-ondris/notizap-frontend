@@ -33,6 +33,13 @@ export const comisionesVendedorasService = {
     return response.data;
   },
 
+  async obtenerDetalleDia(fecha: string): Promise<VendedorasDisponiblesResponse[]> {
+    const response = await api.get(`${BASE_URL}/detalle-dia`, {
+      params: { fecha }
+    });
+    return response.data;
+  },
+
   async exportarLiquidacion(
     filtros: ExportarLiquidacionComisionesRequest
   ): Promise<Blob> {
@@ -88,7 +95,7 @@ export const comisionesVendedorasService = {
       orderBy: 'fecha',
       orderDesc: true,
       page: 1,
-      pageSize: 500 
+      pageSize: 500
     };
 
     return await this.obtenerComisiones(comisionFilters);
@@ -107,8 +114,8 @@ export const comisionesVendedorasService = {
   ): Promise<CalendarioComisiones[]> {
     const response = await api.get(`${BASE_URL}/calendario`, {
       params: {
-        año: filtros.año,  
-        mes: filtros.mes 
+        año: filtros.año,
+        mes: filtros.mes
       }
     });
     return response.data;

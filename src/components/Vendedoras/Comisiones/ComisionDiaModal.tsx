@@ -4,10 +4,10 @@ import { ComisionEstadoChip } from './ComisionEstadoChip';
 import { comisionesVendedorasService } from '@/services/vendedoras/comisionesVendedorasService';
 import { comisionFormato } from '@/utils/vendedoras/comisionHelpers';
 import { calendarioDetalle } from '@/utils/vendedoras/calendarioHelpers';
-import type { 
-  DiaCalendario, 
+import type {
+  DiaCalendario,
   EstadoCalculoComision,
-  VendedorasDisponiblesResponse 
+  VendedorasDisponiblesResponse
 } from '@/types/vendedoras/comisionTypes';
 
 interface Props {
@@ -50,24 +50,15 @@ export const ComisionDiaModal: React.FC<Props> = ({
     try {
       setLoading(true);
       setError(null);
+
+      const vendedorasDisponibles = await comisionesVendedorasService.obtenerDetalleDia(dia.fecha);
+
       const nuevasVendedoras = new Map<string, VendedorasDisponiblesResponse>();
 
-      // Cargar datos para cada combinación sucursal-turno que tenga ventas
-      for (const estado of dia.estadosPorSucursalTurno) {
-        if (estado.tieneVentas) {
-          const key = `${estado.sucursalNombre}-${estado.turno}`;
-          try {
-            const vendedoras = await comisionesVendedorasService.obtenerVendedorasDisponibles(
-              dia.fecha,
-              estado.sucursalNombre,
-              estado.turno
-            );
-            nuevasVendedoras.set(key, vendedoras);
-          } catch (err) {
-            console.error(`Error cargando vendedoras para ${key}:`, err);
-          }
-        }
-      }
+      vendedorasDisponibles.forEach(vendedora => {
+        const key = `${vendedora.sucursalNombre}-${vendedora.turno}`;
+        nuevasVendedoras.set(key, vendedora);
+      });
 
       setVendedorasData(nuevasVendedoras);
     } catch (err) {
@@ -95,7 +86,7 @@ export const ComisionDiaModal: React.FC<Props> = ({
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-[#1A1A20] border border-white/10 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-        
+
         {/* Header */}
         <div className="p-6 border-b border-white/10">
           <div className="flex items-center justify-between">
@@ -120,7 +111,7 @@ export const ComisionDiaModal: React.FC<Props> = ({
                 </div>
               </div>
             </div>
-            
+
             <button
               onClick={onClose}
               className="p-2 hover:bg-white/10 rounded-lg transition-colors"
@@ -131,13 +122,13 @@ export const ComisionDiaModal: React.FC<Props> = ({
         </div>
 
         {/* Content */}
-        <div 
+        <div
           className="p-6 overflow-y-auto max-h-[calc(90vh-200px)] custom-scrollbar"
           onWheel={(e) => {
             e.stopPropagation();
           }}
         >
-          
+
           {/* Sin datos */}
           {estadosConVentas.length === 0 && (
             <div className="text-center py-12">
@@ -238,12 +229,12 @@ export const ComisionDiaModal: React.FC<Props> = ({
                                 <span className="font-medium text-white">
                                   {comisionFormato.formatearTurno(estado.turno)}
                                 </span>
-                                <ComisionEstadoChip 
-                                  estado={estado.tieneComisionesCalculadas ? 'completo' : 'pendiente'} 
-                                  size="sm" 
+                                <ComisionEstadoChip
+                                  estado={estado.tieneComisionesCalculadas ? 'completo' : 'pendiente'}
+                                  size="sm"
                                 />
                               </div>
-                              
+
                               <div className="text-right">
                                 <div className="font-medium text-white">
                                   {comisionFormato.formatearMoneda(estado.montoFacturado)}
@@ -312,7 +303,7 @@ export const ComisionDiaModal: React.FC<Props> = ({
             <div className="text-xs text-white/60">
               💡 Haz clic en "Calcular comisiones" para configurar las vendedoras
             </div>
-            
+
             <button
               onClick={onClose}
               className="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white transition-colors"

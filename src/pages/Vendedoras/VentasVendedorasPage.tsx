@@ -1,40 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { 
-  BarChart3, 
-  Upload, 
-  RefreshCw, 
-  AlertCircle, 
+import {
+  BarChart3,
+  Upload,
+  RefreshCw,
+  AlertCircle,
   CheckCircle2,
   Eye,
   Settings,
   Building2,
-  Calculator
+  Calculator,
+  User,
 } from 'lucide-react';
 import { VentasVendedorasUpload } from '@/components/Vendedoras/VentasVendedorasUpload';
 import { VentasVendedorasFilters } from '@/components/Vendedoras/VentasVendedorasFilters';
 import { VentasVendedorasStats } from '@/components/Vendedoras/VentasVendedorasStats';
 import { VentasVendedorasTable } from '@/components/Vendedoras/VentasVendedorasTable';
+import { VendedorasManagementModal } from '@/components/Vendedoras/VendedorasManagementModal';
 import { ventasVendedorasService } from '@/services/vendedoras/ventasVendedorasService';
-import type { 
-    VentaVendedoraStats,
-    VentasResponse,
-    RangoFechas
-  } from '@/types/vendedoras/ventaVendedoraTypes';
-  import type { 
-    VentaVendedoraFilters
-  } from '@/types/vendedoras/filtrosTypes';
+import type {
+  VentaVendedoraStats,
+  VentasResponse,
+  RangoFechas
+} from '@/types/vendedoras/ventaVendedoraTypes';
+import type {
+  VentaVendedoraFilters
+} from '@/types/vendedoras/filtrosTypes';
 import { dateHelpers } from '@/utils/vendedoras/dateHelpers';
 
 type VistaActual = 'dashboard' | 'upload' | 'tabla' | 'comisiones';
 
 export const VentasVendedorasPage: React.FC = () => {
   const navigate = useNavigate();
-  
+
   const [vistaActual, setVistaActual] = useState<VistaActual>('dashboard');
   const [modoAdmin, setModoAdmin] = useState(false);
-  
+  const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
+
   const [stats, setStats] = useState<VentaVendedoraStats | null>(null);
   const [ventasData, setVentasData] = useState<VentasResponse | null>(null);
   const [sucursales, setSucursales] = useState<string[]>([]);
@@ -112,17 +115,17 @@ export const VentasVendedorasPage: React.FC = () => {
   const cargarEstadisticas = async () => {
     try {
       setLoadingStats(true);
-      
+
       const [statsResponse, todasVendedorasResponse] = await Promise.all([
         ventasVendedorasService.obtenerEstadisticas(filtros),
         ventasVendedorasService.obtenerTodasLasVendedoras(filtros)
       ]);
-      
+
       const statsCompletas = {
         ...statsResponse,
         todasVendedoras: todasVendedorasResponse
       };
-      
+
       setStats(statsCompletas);
     } catch (error) {
       console.error('Error cargando estadísticas:', error);
@@ -136,7 +139,7 @@ export const VentasVendedorasPage: React.FC = () => {
     toast.success('¡Archivo subido exitosamente!', {
       icon: <CheckCircle2 className="text-green-500" />
     });
-    
+
     await cargarDatosIniciales();
     setVistaActual('dashboard');
   };
@@ -195,6 +198,13 @@ export const VentasVendedorasPage: React.FC = () => {
       descripcion: 'Calcular y gestionar comisiones',
       esNavegacion: true,
       ruta: '/vendedoras/comisioneslocales'
+    },
+    {
+      id: 'gestion-vendedoras',
+      label: '👥 Gestionar Vendedoras',
+      icono: User,
+      descripcion: 'Activar/Desactivar vendedoras',
+      soloAdmin: true
     }
   ];
 
@@ -217,7 +227,7 @@ export const VentasVendedorasPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#1A1A20] py-8 px-4">
       <div className="max-w-7xl mx-auto space-y-6">
-        
+
         {/* Header principal */}
         <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
           <div className="flex items-center justify-between">
@@ -247,11 +257,10 @@ export const VentasVendedorasPage: React.FC = () => {
               {/* Toggle modo admin */}
               <button
                 onClick={() => setModoAdmin(!modoAdmin)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${
-                  modoAdmin
-                    ? 'bg-red-500/20 border-red-500/30 text-red-400'
-                    : 'bg-white/10 border-white/20 text-white/80 hover:bg-white/20'
-                }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${modoAdmin
+                  ? 'bg-red-500/20 border-red-500/30 text-red-400'
+                  : 'bg-white/10 border-white/20 text-white/80 hover:bg-white/20'
+                  }`}
               >
                 <Settings className="w-4 h-4" />
                 {modoAdmin ? 'Modo Admin' : 'Vista Básica'}
@@ -269,17 +278,18 @@ export const VentasVendedorasPage: React.FC = () => {
                 <button
                   key={opcion.id}
                   onClick={() => {
-                    if (opcion.esNavegacion && opcion.ruta) {
+                    if (opcion.id === 'gestion-vendedoras') {
+                      setIsManagementModalOpen(true);
+                    } else if (opcion.esNavegacion && opcion.ruta) {
                       navigate(opcion.ruta);
                     } else {
                       setVistaActual(opcion.id as VistaActual);
                     }
                   }}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all group ${
-                    vistaActual === opcion.id
-                      ? 'bg-violet-500/20 border-violet-500/30 text-violet-400'
-                      : 'bg-white/5 border-white/20 text-white/80 hover:bg-white/10 hover:border-white/30'
-                  }`}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all group ${vistaActual === opcion.id
+                    ? 'bg-violet-500/20 border-violet-500/30 text-violet-400'
+                    : 'bg-white/5 border-white/20 text-white/80 hover:bg-white/10 hover:border-white/30'
+                    }`}
                 >
                   <opcion.icono className="w-5 h-5" />
                   <div className="text-left">
@@ -299,12 +309,12 @@ export const VentasVendedorasPage: React.FC = () => {
               <div className="flex-1">
                 <p className="text-blue-400 font-medium">
                   💡 Datos disponibles desde{' '}
-                  {rangoFechas.fechaMinima ? 
-                    dateHelpers.formatearFechaCompleta(rangoFechas.fechaMinima) : 
+                  {rangoFechas.fechaMinima ?
+                    dateHelpers.formatearFechaCompleta(rangoFechas.fechaMinima) :
                     'N/A'
                   } hasta{' '}
-                  {rangoFechas.fechaMaxima ? 
-                    dateHelpers.formatearFechaCompleta(rangoFechas.fechaMaxima) : 
+                  {rangoFechas.fechaMaxima ?
+                    dateHelpers.formatearFechaCompleta(rangoFechas.fechaMaxima) :
                     'N/A'
                   }
                 </p>
@@ -318,30 +328,30 @@ export const VentasVendedorasPage: React.FC = () => {
 
         {/* Contenido principal según la vista */}
         {vistaActual === 'dashboard' && (
-        <div className="space-y-6">
-          {/* Filtros */}
-          <VentasVendedorasFilters
-            filtros={filtros}
-            onFiltrosChange={handleFiltrosChange}
-            sucursales={sucursales}
-            vendedores={vendedores}
-            rangoFechasDisponible={rangoFechas ? {
-              fechaMinima: rangoFechas.fechaMinima,
-              fechaMaxima: rangoFechas.fechaMaxima
-            } : undefined}
-            loading={loading || loadingStats}
-          />
+          <div className="space-y-6">
+            {/* Filtros */}
+            <VentasVendedorasFilters
+              filtros={filtros}
+              onFiltrosChange={handleFiltrosChange}
+              sucursales={sucursales}
+              vendedores={vendedores}
+              rangoFechasDisponible={rangoFechas ? {
+                fechaMinima: rangoFechas.fechaMinima,
+                fechaMaxima: rangoFechas.fechaMaxima
+              } : undefined}
+              loading={loading || loadingStats}
+            />
 
-          {/* Estadísticas */}
-          <VentasVendedorasStats
-            stats={stats || {} as VentaVendedoraStats}
-            loading={loadingStats}
-            mostrarComparacionSucursales={
-              !filtros.sucursalNombre || filtros.sucursalNombre === ''
-            }
-          />
-        </div>
-      )}
+            {/* Estadísticas */}
+            <VentasVendedorasStats
+              stats={stats || {} as VentaVendedoraStats}
+              loading={loadingStats}
+              mostrarComparacionSucursales={
+                !filtros.sucursalNombre || filtros.sucursalNombre === ''
+              }
+            />
+          </div>
+        )}
 
         {vistaActual === 'upload' && modoAdmin && (
           <VentasVendedorasUpload
@@ -401,6 +411,13 @@ export const VentasVendedorasPage: React.FC = () => {
             )}
           </div>
         )}
+
+        {/* Modals */}
+        <VendedorasManagementModal
+          isOpen={isManagementModalOpen}
+          onClose={() => setIsManagementModalOpen(false)}
+          onUpdate={cargarDatosIniciales}
+        />
 
       </div>
     </div>

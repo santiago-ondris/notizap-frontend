@@ -139,3 +139,65 @@ export interface ComisionVendedora {
     diasTrabajos: number;
     sucursalesQueTrabaja: string;
   }
+
+  // ==================== Tipos para Cálculo Batch ====================
+
+  export interface TurnoPendiente {
+    fecha: string;
+    sucursalNombre: string;
+    turno: 'Mañana' | 'Tarde';
+    montoFacturado: number;
+    cantidadVendedoras: number;
+    vendedoras: VendedoraDisponible[];
+    // Estado local para UI
+    seleccionado?: boolean;
+    modificado?: boolean;
+    vendedorasSeleccionadas?: VendedoraDisponible[];
+    porcentajeComision?: number;
+  }
+
+  export interface TurnosPendientesPorSucursal {
+    sucursalNombre: string;
+    turnos: TurnoPendiente[];
+    totalTurnos: number;
+    montoTotalFacturado: number;
+  }
+
+  export interface TurnosPendientesBatch {
+    fechaInicio: string;
+    fechaFin: string;
+    porSucursal: TurnosPendientesPorSucursal[];
+    totalTurnos: number;
+    montoTotalFacturado: number;
+  }
+
+  export interface TurnoParaCalcular {
+    fecha: string;
+    sucursalNombre: string;
+    turno: 'Mañana' | 'Tarde';
+    vendedorasNombres: string[];
+    porcentajeComision: number;
+  }
+
+  export interface CalcularBatchRequest {
+    turnos: TurnoParaCalcular[];
+  }
+
+  export interface ResultadoTurnoBatch {
+    fecha: string;
+    sucursalNombre: string;
+    turno: string;
+    exitoso: boolean;
+    error?: string;
+    montoFacturado: number;
+    comisionTotal: number;
+    vendedorasCalculadas: number;
+  }
+
+  export interface CalcularBatchResponse {
+    turnosCalculados: number;
+    turnosConError: number;
+    comisionTotalCalculada: number;
+    resultados: ResultadoTurnoBatch[];
+    mensaje: string;
+  }

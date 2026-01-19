@@ -1,5 +1,5 @@
 import api from '@/api/api';
-import type { 
+import type {
   VentaVendedoraStats,
   VentaVendedoraUpload,
   VentaPorVendedora,
@@ -80,8 +80,8 @@ export const ventasVendedorasService = {
   },
 
   async obtenerTopVendedoras(filtros: Partial<VentaVendedoraFilters>, top: number = 10): Promise<VentaPorVendedora[]> {
-    const response = await api.get(`${BASE_URL}/top-vendedoras`, { 
-      params: { ...filtros, top } 
+    const response = await api.get(`${BASE_URL}/top-vendedoras`, {
+      params: { ...filtros, top }
     });
     return response.data;
   },
@@ -112,6 +112,15 @@ export const ventasVendedorasService = {
     const response = await api.get(`${BASE_URL}/contar-productos`, { params: filtros });
     return response.data;
   },
+
+  async obtenerVendedoresGestion(): Promise<import('@/types/vendedoras/ventaVendedoraTypes').VendedorGestion[]> {
+    const response = await api.get(`${BASE_URL}/gestion`);
+    return response.data;
+  },
+
+  async toggleEstadoVendedora(id: number): Promise<void> {
+    await api.post(`${BASE_URL}/${id}/toggle-active`);
+  }
 };
 
 export const dateHelpers = {
@@ -143,7 +152,7 @@ export const dateHelpers = {
     const hoy = new Date();
     const hace7Dias = new Date();
     hace7Dias.setDate(hoy.getDate() - 7);
-    
+
     return {
       inicio: hace7Dias,
       fin: hoy
@@ -154,7 +163,7 @@ export const dateHelpers = {
     const hoy = new Date();
     const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
     const finMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
-    
+
     return {
       inicio: inicioMes,
       fin: finMes
@@ -196,16 +205,16 @@ export const moneyHelpers = {
 export const validationHelpers = {
   esArchivoValido(archivo: File): { valido: boolean; mensaje?: string } {
     if (!archivo.name.toLowerCase().endsWith('.xlsx')) {
-      return { 
-        valido: false, 
-        mensaje: 'Solo se permiten archivos Excel (.xlsx)' 
+      return {
+        valido: false,
+        mensaje: 'Solo se permiten archivos Excel (.xlsx)'
       };
     }
 
     if (archivo.size > 10 * 1024 * 1024) {
-      return { 
-        valido: false, 
-        mensaje: 'El archivo no puede exceder los 10MB' 
+      return {
+        valido: false,
+        mensaje: 'El archivo no puede exceder los 10MB'
       };
     }
 
@@ -218,17 +227,17 @@ export const validationHelpers = {
     }
 
     if (inicio > fin) {
-      return { 
-        valido: false, 
-        mensaje: 'La fecha de inicio debe ser anterior a la fecha de fin' 
+      return {
+        valido: false,
+        mensaje: 'La fecha de inicio debe ser anterior a la fecha de fin'
       };
     }
 
     const unAno = 365 * 24 * 60 * 60 * 1000;
     if (fin.getTime() - inicio.getTime() > unAno) {
-      return { 
-        valido: false, 
-        mensaje: 'El rango no puede exceder 1 año' 
+      return {
+        valido: false,
+        mensaje: 'El rango no puede exceder 1 año'
       };
     }
 

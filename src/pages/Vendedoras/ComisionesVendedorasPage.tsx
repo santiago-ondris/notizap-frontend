@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, User, Building2, Calculator, Table, Info, FileSpreadsheet } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Building2, Calculator, Table, Info, FileSpreadsheet, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ComisionesCalendario } from '@/components/Vendedoras/Comisiones/ComisionesCalendario';
 import { ComisionDiaModal } from '@/components/Vendedoras/Comisiones/ComisionDiaModal';
@@ -12,18 +12,19 @@ import { ComisionesFilters } from '@/components/Vendedoras/Comisiones/Comisiones
 import { comisionesVendedorasService } from '@/services/vendedoras/comisionesVendedorasService';
 import { comisionFechas } from '@/utils/vendedoras/comisionHelpers';
 import { ExportarLiquidacionVista } from '@/components/Vendedoras/Comisiones/ExportarLiquidacionVista';
+import { CalculoRapidoPage } from '@/components/Vendedoras/Comisiones/CalculoRapidoPage';
 import { toast } from 'react-toastify';
-import type { 
+import type {
   DiaCalendario,
   ComisionesResponse,
   DatosMaestrosComisiones
 } from '@/types/vendedoras/comisionTypes';
-import type { 
+import type {
   VistaComision,
-  ComisionVendedoraFilters 
+  ComisionVendedoraFilters
 } from '@/types/vendedoras/comisionFiltersTypes';
 
-type VistaActual = VistaComision | 'tabla-general' | 'exportar-liquidacion';
+type VistaActual = VistaComision | 'tabla-general' | 'exportar-liquidacion' | 'calculo-rapido';
 
 interface OpcionVista {
   key: VistaActual;
@@ -33,6 +34,12 @@ interface OpcionVista {
 }
 
 const OPCIONES_VISTA: OpcionVista[] = [
+  {
+    key: 'calculo-rapido',
+    label: 'Cálculo Rápido',
+    icono: Zap,
+    descripcion: 'Calcular comisiones en batch por rango de fechas'
+  },
   {
     key: 'calendario',
     label: 'Calendario',
@@ -67,9 +74,9 @@ const OPCIONES_VISTA: OpcionVista[] = [
 
 export const ComisionesVendedorasPage: React.FC = () => {
   const navigate = useNavigate();
-  
+
   const [vistaActual, setVistaActual] = useState<VistaActual>('por-vendedora');
-  
+
   const [modalDiaAbierto, setModalDiaAbierto] = useState(false);
   const [diaSeleccionado, setDiaSeleccionado] = useState<DiaCalendario | null>(null);
   const [calculadoraAbierta, setCalculadoraAbierta] = useState(false);
@@ -85,7 +92,7 @@ export const ComisionesVendedorasPage: React.FC = () => {
   const [comisionesGenerales, setComisionesGenerales] = useState<ComisionesResponse | null>(null);
   const [datosMaestros, setDatosMaestros] = useState<DatosMaestrosComisiones | null>(null);
   const [loadingTablaGeneral, setLoadingTablaGeneral] = useState(false);
-  
+
   const rangoMesAnterior = comisionFechas.rangoMesAnterior();
   const [filtrosGenerales, setFiltrosGenerales] = useState<ComisionVendedoraFilters>({
     fechaInicio: comisionFechas.formatearParaApi(rangoMesAnterior.inicio),
@@ -111,8 +118,8 @@ export const ComisionesVendedorasPage: React.FC = () => {
   }, [filtrosGenerales, vistaActual, datosMaestros]);
 
   const cargarDatosMaestros = async () => {
-    if (datosMaestros) return; 
-    
+    if (datosMaestros) return;
+
     try {
       const datos = await comisionesVendedorasService.obtenerDatosMaestros();
       setDatosMaestros(datos);
@@ -177,34 +184,39 @@ export const ComisionesVendedorasPage: React.FC = () => {
 
   const renderVistaActual = () => {
     switch (vistaActual) {
+      case 'calculo-rapido':
+        return (
+          <CalculoRapidoPage onCalculoExitoso={() => refrescarCalendario?.()} />
+        );
+
       case 'calendario':
         return (
-          <ComisionesCalendario 
-            onDiaClick={handleDiaClick} 
+          <ComisionesCalendario
+            onDiaClick={handleDiaClick}
             onRefreshReady={(fn) => setRefrescarCalendario(() => fn)}
           />
         );
 
       case 'exportar-liquidacion':
-        return <ExportarLiquidacionVista />;  
-        
+        return <ExportarLiquidacionVista />;
+
       case 'por-vendedora':
         return (
           <ComisionesPorVendedora />
         );
-        
+
       case 'por-sucursal':
         return (
           <ComisionesPorSucursal />
         );
-        
+
       case 'calcular':
         return (
           <div className="text-center py-12">
             <Calculator className="w-16 h-16 text-white/40 mx-auto mb-4" />
             <h3 className="text-xl font-medium text-white/80 mb-2">Calculadora de comisiones</h3>
             <p className="text-white/60 max-w-md mx-auto mb-6">
-              Para calcular comisiones, ve al calendario y haz clic en un día específico, 
+              Para calcular comisiones, ve al calendario y haz clic en un día específico,
               o selecciona una fecha desde el modal del día.
             </p>
             <button
@@ -215,7 +227,7 @@ export const ComisionesVendedorasPage: React.FC = () => {
             </button>
           </div>
         );
-        
+
       case 'tabla-general':
         return (
           <div className="space-y-6">
@@ -254,7 +266,7 @@ export const ComisionesVendedorasPage: React.FC = () => {
                     {loadingTablaGeneral ? 'Cargando comisiones...' : 'Sin comisiones'}
                   </h3>
                   <p className="text-white/60">
-                    {loadingTablaGeneral 
+                    {loadingTablaGeneral
                       ? 'Obteniendo todas las comisiones registradas'
                       : 'No hay comisiones para mostrar con los filtros aplicados'
                     }
@@ -264,7 +276,7 @@ export const ComisionesVendedorasPage: React.FC = () => {
             </div>
           </div>
         );
-        
+
       default:
         return null;
     }
@@ -273,12 +285,12 @@ export const ComisionesVendedorasPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#1A1A20] py-8 px-4">
       <div className="max-w-7xl mx-auto">
-        
+
         {/* Header */}
         <div className="mb-8">
           <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-              
+
               {/* Título y navegación */}
               <div className="flex items-center gap-4">
                 <button
@@ -296,7 +308,7 @@ export const ComisionesVendedorasPage: React.FC = () => {
                   <Info className="w-4 h-4" />
                   ¿Cómo se calculan?
                 </button>
-                
+
               </div>
 
               {/* Selector de vista */}

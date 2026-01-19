@@ -5,8 +5,8 @@ import { ApiError } from "@/types/api/errorTypes";
 import ErrorToast from "@/components/ui/ErrorToast";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  // baseURL : "http://localhost:5090",
+  // baseURL: import.meta.env.VITE_API_URL,
+  baseURL : "http://localhost:5090",
   headers: {
     'Content-Type': 'application/json',
   }

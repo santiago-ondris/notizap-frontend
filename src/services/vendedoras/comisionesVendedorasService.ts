@@ -9,7 +9,9 @@ import type {
   ResumenComisionVendedora,
   DatosMaestrosComisiones,
   ComisionesStats,
-  ExportarLiquidacionComisionesRequest
+  ExportarLiquidacionComisionesRequest,
+  AjusteComisionManual,
+  CrearAjusteManualRequest
 } from '@/types/vendedoras/comisionTypes';
 import type {
   ComisionVendedoraFilters,
@@ -154,6 +156,28 @@ export const comisionesVendedorasService = {
 
   async obtenerEstadisticas(filtros: Partial<ComisionVendedoraFilters>): Promise<ComisionesStats> {
     const response = await api.get(`${BASE_URL}/estadisticas`, { params: filtros });
+    return response.data;
+  },
+
+  // Ajustes Manuales
+  async crearAjusteManual(request: CrearAjusteManualRequest): Promise<AjusteComisionManual> {
+    const response = await api.post(`${BASE_URL}/ajuste-manual`, request);
+    return response.data;
+  },
+
+  async obtenerAjustesPorDia(
+    fecha: string,
+    sucursalNombre: string,
+    turno: string
+  ): Promise<AjusteComisionManual[]> {
+    const response = await api.get(`${BASE_URL}/ajustes`, {
+      params: { fecha, sucursalNombre, turno }
+    });
+    return response.data;
+  },
+
+  async eliminarAjusteManual(id: number): Promise<boolean> {
+    const response = await api.delete(`${BASE_URL}/ajuste-manual/${id}`);
     return response.data;
   }
 };

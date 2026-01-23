@@ -6,14 +6,14 @@ import { ComisionesTable } from './ComisionesTable';
 import { comisionesVendedorasService } from '@/services/vendedoras/comisionesVendedorasService';
 import { comisionFormato, comisionFechas } from '@/utils/vendedoras/comisionHelpers';
 import { toast } from 'react-toastify';
-import type { 
+import type {
   ResumenComisionVendedora,
   ComisionesResponse,
   DatosMaestrosComisiones
 } from '@/types/vendedoras/comisionTypes';
-import type { 
+import type {
   ComisionVendedoraFilters,
-  FiltrosVendedora 
+  FiltrosVendedora
 } from '@/types/vendedoras/comisionFiltersTypes';
 
 interface Props {
@@ -320,30 +320,36 @@ export const ComisionesPorVendedora: React.FC<Props> = ({ className }) => {
           {resumenVendedora ? (
             <div>
               {/* Estadísticas principales */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-green-300">
                     {comisionFormato.formatearMoneda(resumenVendedora.totalComisiones)}
                   </div>
-                  <div className="text-xs text-white/60">Total comisiones</div>
+                  <div className="text-xs text-white/60">Comisiones calc.</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-orange-300">
+                    {comisionFormato.formatearMoneda(resumenVendedora.totalAjustesManuales)}
+                  </div>
+                  <div className="text-xs text-white/60">Ajustes manuales</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-emerald-400">
+                    {comisionFormato.formatearMoneda(resumenVendedora.totalConAjustes)}
+                  </div>
+                  <div className="text-xs text-white/60 font-medium">TOTAL FINAL</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-blue-300">
                     {resumenVendedora.diasConComisiones}
                   </div>
-                  <div className="text-xs text-white/60">Turnos trabajados</div>
+                  <div className="text-xs text-white/60">Turnos laborados</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-yellow-300">
                     {comisionFormato.formatearMoneda(resumenVendedora.promedioComisionPorDia)}
                   </div>
-                  <div className="text-xs text-white/60">Promedio por turno</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-300">
-                    {resumenVendedora.sucursalesQueTrabaja.length}
-                  </div>
-                  <div className="text-xs text-white/60">Sucursales</div>
+                  <div className="text-xs text-white/60">Promedio total</div>
                 </div>
               </div>
 
@@ -370,7 +376,7 @@ export const ComisionesPorVendedora: React.FC<Props> = ({ className }) => {
                 {loadingResumen ? 'Cargando resumen...' : 'Sin datos de comisiones'}
               </h3>
               <p className="text-white/60">
-                {loadingResumen 
+                {loadingResumen
                   ? 'Obteniendo información de la vendedora'
                   : 'No hay comisiones registradas en el período seleccionado'
                 }
@@ -414,7 +420,7 @@ export const ComisionesPorVendedora: React.FC<Props> = ({ className }) => {
                   {loading ? 'Cargando detalle...' : 'Sin detalle disponible'}
                 </h3>
                 <p className="text-white/60">
-                  {loading 
+                  {loading
                     ? 'Obteniendo comisiones detalladas'
                     : 'No hay comisiones para mostrar en el detalle'
                   }

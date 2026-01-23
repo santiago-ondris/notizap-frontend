@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, Building2, Clock, Calculator, AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
+import { X, Calendar, Building2, Clock, Calculator, AlertTriangle, CheckCircle2, Loader2, Trash2, PlusCircle } from 'lucide-react';
 import { ComisionEstadoChip } from './ComisionEstadoChip';
 import { comisionesVendedorasService } from '@/services/vendedoras/comisionesVendedorasService';
 import { comisionFormato } from '@/utils/vendedoras/comisionHelpers';
 import { calendarioDetalle } from '@/utils/vendedoras/calendarioHelpers';
+import { AjusteManualModal } from './AjusteManualModal';
+import { toast } from 'react-toastify';
 import type {
   DiaCalendario,
   EstadoCalculoComision,
-  VendedorasDisponiblesResponse
+  VendedorasDisponiblesResponse,
+  AjusteComisionManual
 } from '@/types/vendedoras/comisionTypes';
 
 interface Props {
@@ -29,7 +32,21 @@ export const ComisionDiaModal: React.FC<Props> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [vendedorasData, setVendedorasData] = useState<Map<string, VendedorasDisponiblesResponse>>(new Map());
+  const [ajustesData, setAjustesData] = useState<Map<string, AjusteComisionManual[]>>(new Map());
   const [error, setError] = useState<string | null>(null);
+
+  // Estado para el modal de ajuste manual
+  const [ajusteModalConfig, setAjusteModalConfig] = useState<{
+    isOpen: boolean;
+    sucursalNombre: string;
+    turno: 'Mañana' | 'Tarde';
+    vendedoras: string[];
+  }>({
+    isOpen: false,
+    sucursalNombre: '',
+    turno: 'Mañana',
+    vendedoras: []
+  });
 
   // Cargar datos detallados cuando se abre el modal
   useEffect(() => {
@@ -52,8 +69,19 @@ export const ComisionDiaModal: React.FC<Props> = ({
       setError(null);
 
       const vendedorasDisponibles = await comisionesVendedorasService.obtenerDetalleDia(dia.fecha);
-
       const nuevasVendedoras = new Map<string, VendedorasDisponiblesResponse>();
+      const nuevosAjustes = new Map<string, AjusteComisionManual[]>();
+
+      // Cargar ajustes para cada estado que tenga ventas o comisiones
+      await Promise.all(dia.estadosPorSucursalTurno.map(async (estado) => {
+        const ajustes = await comisionesVendedorasService.obtenerAjustesPorDia(
+          dia.fecha,
+          estado.sucursalNombre,
+          estado.turno
+        );
+        const key = `${estado.sucursalNombre}-${estado.turno}`;
+        nuevosAjustes.set(key, ajustes);
+      }));
 
       vendedorasDisponibles.forEach(vendedora => {
         const key = `${vendedora.sucursalNombre}-${vendedora.turno}`;
@@ -61,11 +89,33 @@ export const ComisionDiaModal: React.FC<Props> = ({
       });
 
       setVendedorasData(nuevasVendedoras);
+      setAjustesData(nuevosAjustes);
     } catch (err) {
       console.error('Error cargando detalles:', err);
       setError('Error al cargar detalles del día');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const abrirAjusteModal = (vendedorasInfo: VendedorasDisponiblesResponse) => {
+    setAjusteModalConfig({
+      isOpen: true,
+      sucursalNombre: vendedorasInfo.sucursalNombre,
+      turno: vendedorasInfo.turno as 'Mañana' | 'Tarde',
+      vendedoras: vendedorasInfo.vendedorasDisponibles.map(v => v.nombre)
+    });
+  };
+
+  const handleEliminarAjuste = async (id: number) => {
+    if (!window.confirm('¿Está seguro de eliminar este ajuste manual?')) return;
+
+    try {
+      await comisionesVendedorasService.eliminarAjusteManual(id);
+      toast.success('Ajuste eliminado');
+      cargarDetallesVendedoras();
+    } catch (error) {
+      toast.error('Error al eliminar el ajuste');
     }
   };
 
@@ -260,32 +310,70 @@ export const ComisionDiaModal: React.FC<Props> = ({
                             )}
 
                             {/* Acciones */}
-                            <div className="flex gap-2">
+                            <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5 mt-3">
                               {estado.tieneComisionesCalculadas ? (
                                 <button
                                   onClick={() => handleRecalcularClick(estado)}
-                                  className="flex items-center gap-2 px-3 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/40 rounded-lg text-yellow-300 text-sm transition-colors"
+                                  className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/40 rounded-lg text-yellow-300 text-xs transition-colors"
                                 >
-                                  <Calculator className="w-4 h-4" />
+                                  <Calculator className="w-3.5 h-3.5" />
                                   Recalcular
                                 </button>
                               ) : (
                                 <button
                                   onClick={() => handleCalcularClick(estado)}
-                                  className="flex items-center gap-2 px-3 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/40 rounded-lg text-green-300 text-sm transition-colors"
+                                  className="flex items-center gap-2 px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 border border-green-500/40 rounded-lg text-green-300 text-xs transition-colors"
                                 >
-                                  <Calculator className="w-4 h-4" />
+                                  <Calculator className="w-3.5 h-3.5" />
                                   Calcular comisiones
                                 </button>
                               )}
 
+                              {vendedorasInfo && (
+                                <button
+                                  onClick={() => abrirAjusteModal(vendedorasInfo)}
+                                  className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-500/40 rounded-lg text-indigo-300 text-xs transition-colors"
+                                >
+                                  <PlusCircle className="w-3.5 h-3.5" />
+                                  Añadir Ajuste
+                                </button>
+                              )}
+
                               {vendedorasInfo && vendedorasInfo.yaExistenComisiones && (
-                                <div className="flex items-center gap-2 px-3 py-2 bg-blue-500/20 border border-blue-500/40 rounded-lg text-blue-300 text-sm">
-                                  <CheckCircle2 className="w-4 h-4" />
+                                <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 border border-blue-500/40 rounded-lg text-blue-300 text-xs">
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
                                   Ya calculadas
                                 </div>
                               )}
                             </div>
+
+                            {/* Mostrar Ajustes Manuales si existen */}
+                            {ajustesData.get(key) && ajustesData.get(key)!.length > 0 && (
+                              <div className="mt-4 space-y-2">
+                                <h5 className="text-[10px] uppercase tracking-wider text-white/40 font-bold px-1">Ajustes Manuales</h5>
+                                <div className="space-y-1">
+                                  {ajustesData.get(key)!.map(ajuste => (
+                                    <div key={ajuste.id} className="flex items-center justify-between bg-white/5 border border-white/5 rounded-lg px-3 py-2 text-xs">
+                                      <div className="flex flex-col">
+                                        <span className="text-white font-medium">{ajuste.vendedorNombre}</span>
+                                        <span className="text-[10px] text-white/40">Por {ajuste.creadoPorNombre}</span>
+                                      </div>
+                                      <div className="flex items-center gap-3">
+                                        <span className={ajuste.montoAjuste >= 0 ? 'text-green-400 font-bold' : 'text-red-400 font-bold'}>
+                                          {ajuste.montoAjuste >= 0 ? '+' : ''}{comisionFormato.formatearMoneda(ajuste.montoAjuste)}
+                                        </span>
+                                        <button
+                                          onClick={() => handleEliminarAjuste(ajuste.id)}
+                                          className="p-1 hover:bg-red-500/20 rounded transition-colors text-white/40 hover:text-red-400"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -301,7 +389,7 @@ export const ComisionDiaModal: React.FC<Props> = ({
         <div className="p-6 border-t border-white/10 bg-white/5">
           <div className="flex items-center justify-between">
             <div className="text-xs text-white/60">
-              💡 Haz clic en "Calcular comisiones" para configurar las vendedoras
+              💡 Haz clic en "Calcular comisiones" para configurar las vendedoras o en "Añadir Ajuste" para montos manuales
             </div>
 
             <button
@@ -313,6 +401,17 @@ export const ComisionDiaModal: React.FC<Props> = ({
           </div>
         </div>
       </div>
+
+      {/* Modal de Ajuste Manual */}
+      <AjusteManualModal
+        isOpen={ajusteModalConfig.isOpen}
+        onClose={() => setAjusteModalConfig(prev => ({ ...prev, isOpen: false }))}
+        onSuccess={cargarDetallesVendedoras}
+        fecha={dia.fecha}
+        sucursalNombre={ajusteModalConfig.sucursalNombre}
+        turno={ajusteModalConfig.turno}
+        vendedoras={ajusteModalConfig.vendedoras}
+      />
     </div>
   );
 };

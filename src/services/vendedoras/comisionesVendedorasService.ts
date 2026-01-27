@@ -179,6 +179,18 @@ export const comisionesVendedorasService = {
   async eliminarAjusteManual(id: number): Promise<boolean> {
     const response = await api.delete(`${BASE_URL}/ajuste-manual/${id}`);
     return response.data;
+  },
+
+  async calcularComisionIndividual(
+    fecha: string,
+    sucursalNombre: string,
+    turno: string,
+    vendedorNombre: string
+  ): Promise<number> {
+    const response = await api.get(`${BASE_URL}/calcular-individual`, {
+      params: { fecha, sucursalNombre, turno, vendedorNombre }
+    });
+    return response.data;
   }
 };
 

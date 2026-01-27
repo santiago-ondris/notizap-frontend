@@ -4,20 +4,20 @@ import { cn } from '@/lib/utils';
 import { ComisionesFilters } from './ComisionesFilters';
 import { ComisionEstadoChip } from './ComisionEstadoChip';
 import { comisionesVendedorasService } from '@/services/vendedoras/comisionesVendedorasService';
-import { 
-  calendarioGeneracion, 
-  calendarioActualizacion, 
+import {
+  calendarioGeneracion,
+  calendarioActualizacion,
   calendarioNavegacion,
   calendarioAnalisis
 } from '@/utils/vendedoras/calendarioHelpers';
 import { comisionFormato } from '@/utils/vendedoras/comisionHelpers';
-import type { 
+import type {
   DiaCalendario,
-  DatosMaestrosComisiones 
+  DatosMaestrosComisiones
 } from '@/types/vendedoras/comisionTypes';
-import type { 
+import type {
   FiltrosCalendario,
-  ComisionVendedoraFilters 
+  ComisionVendedoraFilters
 } from '@/types/vendedoras/comisionFiltersTypes';
 
 interface Props {
@@ -35,16 +35,16 @@ export const ComisionesCalendario: React.FC<Props> = ({
   const [loading, setLoading] = useState(false);
   const [loadingDatos, setLoadingDatos] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Estados del calendario
   const mesAnterior = calendarioNavegacion.fechaMesAnterior();
   const [añoActual, setAñoActual] = useState(mesAnterior.año);
   const [mesActual, setMesActual] = useState(mesAnterior.mes);
   const [diasCalendario, setDiasCalendario] = useState<DiaCalendario[]>([]);
-  
+
   // Estados de datos
   const [datosMaestros, setDatosMaestros] = useState<DatosMaestrosComisiones | null>(null);
-  
+
   // Estados de filtros
   const [filtros, setFiltros] = useState<ComisionVendedoraFilters>({
     sucursalNombre: undefined,
@@ -61,19 +61,6 @@ export const ComisionesCalendario: React.FC<Props> = ({
     cargarDatosMaestros();
   }, []);
 
-  // Cargar calendario cuando cambia mes o filtros
-  useEffect(() => {
-    if (datosMaestros) {
-      cargarCalendario();
-    }
-  }, [añoActual, mesActual, filtros.sucursalNombre, filtros.turno, datosMaestros]);
-
-  useEffect(() => {
-    if (onRefreshReady) {
-      onRefreshReady(cargarCalendario);
-    }
-  }, [onRefreshReady, datosMaestros]);
-
   const cargarDatosMaestros = async () => {
     try {
       setLoadingDatos(true);
@@ -87,16 +74,16 @@ export const ComisionesCalendario: React.FC<Props> = ({
     }
   };
 
-  const cargarCalendario = async () => {
+  const cargarCalendario = React.useCallback(async () => {
     if (!datosMaestros) return;
-    
+
     try {
       setLoading(true);
       setError(null);
-      
+
       // Generar estructura básica del calendario
       const diasBase = calendarioGeneracion.generarDiasDelMes(añoActual, mesActual);
-      
+
       // Preparar filtros para el backend
       const filtrosCalendario: FiltrosCalendario = {
         año: añoActual,
@@ -104,29 +91,42 @@ export const ComisionesCalendario: React.FC<Props> = ({
         sucursalNombre: filtros.sucursalNombre,
         turno: filtros.turno === '' ? undefined : filtros.turno
       };
-      
+
       // Obtener datos del backend
       const datosBackend = await comisionesVendedorasService.obtenerCalendarioComisiones(filtrosCalendario);
-      
+
       // Actualizar días con datos del backend
       let diasActualizados = calendarioActualizacion.actualizarConDatos(diasBase, datosBackend);
-      
+
       // Aplicar filtros locales si es necesario
       diasActualizados = calendarioActualizacion.aplicarFiltros(
         diasActualizados,
         filtros.sucursalNombre,
         filtros.turno
       );
-      
+
       setDiasCalendario(diasActualizados);
-      
+
     } catch (err) {
       console.error('Error cargando calendario:', err);
       setError('Error al cargar el calendario');
     } finally {
       setLoading(false);
     }
-  };
+  }, [datosMaestros, añoActual, mesActual, filtros.sucursalNombre, filtros.turno]);
+
+  // Cargar calendario cuando cambia mes o filtros
+  useEffect(() => {
+    if (datosMaestros) {
+      cargarCalendario();
+    }
+  }, [cargarCalendario, datosMaestros]);
+
+  useEffect(() => {
+    if (onRefreshReady) {
+      onRefreshReady(cargarCalendario);
+    }
+  }, [onRefreshReady, cargarCalendario]);
 
   const handleFiltrosChange = (nuevosFiltros: Partial<ComisionVendedoraFilters>) => {
     setFiltros(prev => ({
@@ -201,7 +201,7 @@ export const ComisionesCalendario: React.FC<Props> = ({
 
   return (
     <div className={cn('space-y-6', className)}>
-      
+
       {/* Filtros */}
       <ComisionesFilters
         filtros={filtros}
@@ -213,7 +213,7 @@ export const ComisionesCalendario: React.FC<Props> = ({
       {/* Header del calendario */}
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-          
+
           {/* Navegación del mes */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
@@ -224,11 +224,11 @@ export const ComisionesCalendario: React.FC<Props> = ({
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
-              
+
               <h2 className="text-xl font-bold text-white min-w-[200px] text-center">
                 {calendarioNavegacion.formatearTituloMes(añoActual, mesActual)}
               </h2>
-              
+
               <button
                 onClick={() => navegarMes('siguiente')}
                 className="p-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -290,7 +290,7 @@ export const ComisionesCalendario: React.FC<Props> = ({
 
       {/* Calendario */}
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-        
+
         {/* Días de la semana */}
         <div className="grid grid-cols-7 gap-2 mb-4">
           {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(dia => (
@@ -310,8 +310,8 @@ export const ComisionesCalendario: React.FC<Props> = ({
                 'relative aspect-square border rounded-lg text-sm transition-all duration-200',
                 'flex flex-col items-center justify-center gap-1 p-1',
                 // Estilos base
-                dia.esDelMes 
-                  ? 'border-white/20 hover:border-white/40 text-white' 
+                dia.esDelMes
+                  ? 'border-white/20 hover:border-white/40 text-white'
                   : 'border-white/10 text-white/40',
                 // Estados
                 dia.esHoy && 'ring-2 ring-blue-400',
@@ -333,9 +333,9 @@ export const ComisionesCalendario: React.FC<Props> = ({
 
               {/* Estado */}
               {dia.esDelMes && dia.estado !== 'sin-datos' && (
-                <ComisionEstadoChip 
-                  estado={dia.estado} 
-                  showText={false} 
+                <ComisionEstadoChip
+                  estado={dia.estado}
+                  showText={false}
                   size="sm"
                   className="absolute top-0.5 right-0.5 w-4 h-4 p-0 text-xs"
                 />

@@ -147,6 +147,10 @@ export const ComisionesVendedorasPage: React.FC = () => {
     setModalDiaAbierto(true);
   };
 
+  const handleRefreshReady = React.useCallback((fn: () => void) => {
+    setRefrescarCalendario(() => fn);
+  }, []);
+
   const handleCalcularClick = (fecha: string, sucursal: string, turno: string) => {
     setDatosCalculadora({
       fecha,
@@ -193,7 +197,7 @@ export const ComisionesVendedorasPage: React.FC = () => {
         return (
           <ComisionesCalendario
             onDiaClick={handleDiaClick}
-            onRefreshReady={(fn) => setRefrescarCalendario(() => fn)}
+            onRefreshReady={handleRefreshReady}
           />
         );
 

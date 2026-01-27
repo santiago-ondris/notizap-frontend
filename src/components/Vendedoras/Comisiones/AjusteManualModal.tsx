@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, User, DollarSign, Loader2, Save, Info, CheckCircle2, AlertOctagon, ChevronDown, Search, Check } from 'lucide-react';
+import { X, User, DollarSign, Loader2, Save, Info, CheckCircle2, AlertOctagon, ChevronDown, Search, Check, Calculator } from 'lucide-react';
 import { comisionesVendedorasService } from '@/services/vendedoras/comisionesVendedorasService';
 import { toast } from 'react-toastify';
 import type { CrearAjusteManualRequest } from '@/types/vendedoras/comisionTypes';
@@ -27,6 +27,7 @@ export const AjusteManualModal: React.FC<Props> = ({
     const [montoAjuste, setMontoAjuste] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [touched, setTouched] = useState({ vendedor: false, monto: false });
+    const [isCalculating, setIsCalculating] = useState(false);
 
     // Estado para el Dropdown Personalizado
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -89,6 +90,31 @@ export const AjusteManualModal: React.FC<Props> = ({
             .join('')
             .substring(0, 2)
             .toUpperCase();
+    };
+
+    const handleCalcularAutomatico = async () => {
+        if (!vendedorNombre) {
+            setTouched(prev => ({ ...prev, vendedor: true }));
+            toast.error('Debe seleccionar una vendedora primero');
+            return;
+        }
+
+        try {
+            setIsCalculating(true);
+            const monto = await comisionesVendedorasService.calcularComisionIndividual(
+                fecha,
+                sucursalNombre,
+                turno,
+                vendedorNombre
+            );
+            setMontoAjuste(monto.toFixed(2));
+            toast.success('Monto calculado exitosamente (1%)');
+        } catch (error) {
+            console.error('Error al calcular comisión:', error);
+            toast.error('Error al calcular el monto automático');
+        } finally {
+            setIsCalculating(false);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -280,6 +306,15 @@ export const AjusteManualModal: React.FC<Props> = ({
                                         {isNegative ? 'Descuento' : 'Bonificación'}
                                     </span>
                                 )}
+                                <button
+                                    type="button"
+                                    onClick={handleCalcularAutomatico}
+                                    disabled={isCalculating || !vendedorNombre}
+                                    className="ml-auto mr-2 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isCalculating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Calculator className="w-3 h-3" />}
+                                    Calcular 1%
+                                </button>
                             </label>
                             <div className="relative">
                                 <span className={`absolute left-4 top-1/2 -translate-y-1/2 font-bold transition-colors duration-200 

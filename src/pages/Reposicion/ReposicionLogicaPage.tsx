@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
+import {
   ArrowLeft,
   Package,
   Baby,
@@ -34,15 +34,15 @@ export const ReposicionLogicaPage: React.FC = () => {
           </button>
 
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-6">
               <Info className="w-4 h-4 text-[#B695BF]" />
               <span className="text-sm text-white/80 font-medium">Documentación</span>
             </div>
-            
+
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
               Lógica del Módulo de Reposición
             </h1>
-            
+
             <p className="text-xl text-white/60 max-w-3xl mx-auto">
               Para no olvidar..
             </p>
@@ -53,11 +53,10 @@ export const ReposicionLogicaPage: React.FC = () => {
         <div className="flex justify-center gap-4 mb-12">
           <button
             onClick={() => setModuloActivo('adultos')}
-            className={`flex items-center gap-3 px-6 py-3 rounded-xl border transition-all duration-300 ${
-              moduloActivo === 'adultos'
+            className={`flex items-center gap-3 px-6 py-3 rounded-xl border transition-all duration-300 ${moduloActivo === 'adultos'
                 ? 'bg-[#B695BF]/20 border-[#B695BF]/50 text-white'
                 : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
-            }`}
+              }`}
           >
             <Package className="w-5 h-5" />
             <span className="font-semibold">Productos Adultos</span>
@@ -65,11 +64,10 @@ export const ReposicionLogicaPage: React.FC = () => {
 
           <button
             onClick={() => setModuloActivo('ninos')}
-            className={`flex items-center gap-3 px-6 py-3 rounded-xl border transition-all duration-300 ${
-              moduloActivo === 'ninos'
+            className={`flex items-center gap-3 px-6 py-3 rounded-xl border transition-all duration-300 ${moduloActivo === 'ninos'
                 ? 'bg-[#51590E]/20 border-[#51590E]/50 text-white'
                 : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
-            }`}
+              }`}
           >
             <Baby className="w-5 h-5" />
             <span className="font-semibold">Productos Niños</span>
@@ -95,10 +93,10 @@ const ContenidoAdultos: React.FC = () => {
       >
         <div className="space-y-4 text-white/70">
           <p className="leading-relaxed">
-            El módulo de adultos utiliza <strong className="text-white">curvas de talles personalizables</strong> para 
+            El módulo de adultos utiliza <strong className="text-white">curvas de talles personalizables</strong> para
             determinar cuántas unidades de cada talle debe tener cada sucursal.
           </p>
-          
+
           <div className="bg-white/5 rounded-lg p-4 border border-white/10">
             <h4 className="text-white font-semibold mb-2">Curva predeterminada:</h4>
             <div className="flex flex-wrap gap-2">
@@ -232,10 +230,10 @@ const ContenidoNinos: React.FC = () => {
       >
         <div className="space-y-4 text-white/70">
           <p className="leading-relaxed">
-            El módulo de niños utiliza una <strong className="text-white">lógica de dos pasadas</strong> para 
+            El módulo de niños utiliza una <strong className="text-white">lógica de dos pasadas</strong> para
             distribuir el stock de forma equitativa entre las sucursales especializadas.
           </p>
-          
+
           <div className="grid md:grid-cols-2 gap-4">
             <div className="bg-white/5 rounded-lg p-4 border border-white/10">
               <h4 className="text-white font-semibold mb-2 flex items-center gap-2">
@@ -279,9 +277,9 @@ const ContenidoNinos: React.FC = () => {
               </div>
               <h3 className="text-xl font-bold text-white">Primera Pasada: Garantizar Mínimo</h3>
             </div>
-            
+
             <p className="text-white/70 mb-4 leading-relaxed">
-              Se intenta llevar cada sucursal a <strong className="text-white">1 unidad por talle</strong>. 
+              Se intenta llevar cada sucursal a <strong className="text-white">1 unidad por talle</strong>.
               Se procesan en orden de prioridad: primero GENERAL PAZ, luego BARRIO JARDIN.
             </p>
 
@@ -303,9 +301,9 @@ const ContenidoNinos: React.FC = () => {
               </div>
               <h3 className="text-xl font-bold text-white">Segunda Pasada: Completar al Ideal</h3>
             </div>
-            
+
             <p className="text-white/70 mb-4 leading-relaxed">
-              Con el stock restante, se intenta llevar cada sucursal a <strong className="text-white">2 unidades por talle</strong>. 
+              Con el stock restante, se intenta llevar cada sucursal a <strong className="text-white">2 unidades por talle</strong>.
               Nuevamente en orden de prioridad.
             </p>
 
@@ -538,11 +536,11 @@ interface SeccionCardProps {
 
 const SeccionCard: React.FC<SeccionCardProps> = ({ titulo, icono: Icono, color, children }) => {
   return (
-    <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-8">
+    <div className="bg-white/5 rounded-2xl border border-white/10 p-8">
       <div className="flex items-center gap-3 mb-6">
-        <div 
+        <div
           className="p-2 rounded-lg"
-          style={{ 
+          style={{
             backgroundColor: `${color}20`,
             border: `1px solid ${color}30`
           }}
@@ -625,7 +623,7 @@ const EjemploAdultos: React.FC<EjemploAdultosProps> = ({ titulo, descripcion, da
                 {obtenerIconoEstado(sucursal.estado)}
                 <span className="text-white font-medium">{sucursal.nombre}</span>
               </div>
-              
+
               <div className="flex items-center gap-4 text-sm">
                 <div className="text-white/50">
                   Necesita: <span className="text-white">{sucursal.necesita}</span>
@@ -633,8 +631,8 @@ const EjemploAdultos: React.FC<EjemploAdultosProps> = ({ titulo, descripcion, da
                 <div className="text-white/50">
                   Recibe: <span className={
                     sucursal.estado === 'completo' ? 'text-green-400' :
-                    sucursal.estado === 'parcial' ? 'text-yellow-400' :
-                    'text-red-400'
+                      sucursal.estado === 'parcial' ? 'text-yellow-400' :
+                        'text-red-400'
                   }>{sucursal.recibe}</span>
                 </div>
               </div>
@@ -645,11 +643,10 @@ const EjemploAdultos: React.FC<EjemploAdultosProps> = ({ titulo, descripcion, da
         {/* Stock restante */}
         <div className="flex items-center gap-3 text-sm pt-2 border-t border-white/10">
           <span className="text-white/50">Stock restante:</span>
-          <span className={`px-3 py-1 rounded-md border font-semibold ${
-            datos.stockRestante > 0 
+          <span className={`px-3 py-1 rounded-md border font-semibold ${datos.stockRestante > 0
               ? 'bg-[#B695BF]/20 border-[#B695BF]/30 text-[#B695BF]'
               : 'bg-white/5 border-white/10 text-white/50'
-          }`}>
+            }`}>
             {datos.stockRestante} unidades
           </span>
         </div>
@@ -693,7 +690,7 @@ const EjemploNinos: React.FC<EjemploNinosProps> = ({ titulo, descripcion, pasos,
               </div>
               <span className="text-white font-semibold text-sm">{paso.descripcion}</span>
             </div>
-            
+
             <ul className="space-y-1.5 ml-8">
               {paso.acciones.map((accion, index) => (
                 <li key={index} className="text-white/60 text-sm flex items-start gap-2">
@@ -711,7 +708,7 @@ const EjemploNinos: React.FC<EjemploNinosProps> = ({ titulo, descripcion, pasos,
             <CheckCircle className="w-5 h-5 text-[#51590E]" />
             <span className="text-white font-semibold">Resultado Final:</span>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div className="bg-white/5 rounded p-3 border border-white/10">
               <div className="text-white/50 text-xs mb-1">GENERAL PAZ</div>
@@ -722,7 +719,7 @@ const EjemploNinos: React.FC<EjemploNinosProps> = ({ titulo, descripcion, pasos,
               <div className="text-white text-2xl font-bold">{resultado.barrioJardin}</div>
             </div>
           </div>
-          
+
           <p className="text-white/60 text-sm italic">{resultado.explicacion}</p>
         </div>
       </div>

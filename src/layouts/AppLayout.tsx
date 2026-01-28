@@ -8,21 +8,20 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="relative min-h-screen w-full">
-      {/* Background con patrón sutil */}
-      <div 
-        className="fixed inset-0 bg-gradient-to-br from-[#212026] via-[#1a1d22] to-[#212026]"
+      {/* Background simplificado */}
+      <div
+        className="fixed inset-0 bg-[#1A1D22]"
         style={{
           backgroundImage: `
-            radial-gradient(circle at 25% 25%, rgba(217, 72, 84, 0.03) 0%, transparent 50%),
-            radial-gradient(circle at 75% 75%, rgba(182, 149, 191, 0.03) 0%, transparent 50%),
-            radial-gradient(circle at 50% 50%, rgba(81, 89, 14, 0.02) 0%, transparent 50%)
+            radial-gradient(circle at 25% 25%, rgba(217, 72, 84, 0.02) 0%, transparent 50%),
+            radial-gradient(circle at 75% 75%, rgba(182, 149, 191, 0.02) 0%, transparent 50%)
           `,
         }}
       />
-      
+
       {/* Grid pattern overlay */}
-      <div 
-        className="fixed inset-0 opacity-[0.02]"
+      <div
+        className="fixed inset-0 opacity-[0.01]"
         style={{
           backgroundImage: `
             linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
@@ -31,16 +30,10 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           backgroundSize: '32px 32px'
         }}
       />
-      
-      {/* Floating gradient orbs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-[#D94854]/10 to-[#F23D5E]/5 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-[#B695BF]/10 to-[#51590E]/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
-      </div>
 
       <div className="relative z-10 flex flex-col min-h-screen">
-       <Navbar onLoginClick={openLoginModal} />
-         
+        <Navbar onLoginClick={openLoginModal} />
+
         {/* Main content wrapper */}
         <main className="flex-1 pt-16">
           <div className="relative">
@@ -50,7 +43,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
         {/* Modern footer */}
         <footer className="relative mt-auto">
-          
+
           <div className="bg-[#212026]">
             <div className="max-w-6xl mx-auto px-6 py-8">
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -63,7 +56,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     Powered by Montella
                   </span>
                 </div>
-                
+
                 <div className="flex items-center gap-6 text-sm text-gray-400">
                   <span className="hover:text-white transition-colors cursor-pointer">
                     © 2025

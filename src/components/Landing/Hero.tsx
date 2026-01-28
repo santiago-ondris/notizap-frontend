@@ -30,7 +30,7 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
   useEffect(() => {
     const leftRocket = rocketLeftRef.current;
     const rightRocket = rocketRightRef.current;
-    
+
     if (leftRocket) {
       leftRocket.style.animation = 'float 3s ease-in-out infinite';
       leftRocket.style.animationDelay = '0s';
@@ -61,8 +61,8 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
           100% { opacity: 0; transform: translateY(-50px); }
         }
       `}</style>
-      
-      <section 
+
+      <section
         ref={heroRef}
         className="relative flex items-center justify-center min-h-[80vh] w-full px-6 pt-20 pb-20 overflow-hidden"
       >
@@ -97,7 +97,7 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
         {/* Main hero content */}
         <div className="relative z-20 text-center max-w-4xl mx-auto">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 mb-8 hover:bg-white/10 transition-all cursor-default">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 hover:bg-white/10 transition-all cursor-default">
             <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
             <span className="text-sm text-white/80 font-medium">Gracias al team E-Commerce</span>
           </div>
@@ -126,35 +126,35 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <div className="relative">
-            {floatingMessages.map(id => (
-              <span
-                key={id}
-                className="absolute left-1/2 -translate-x-1/2 -top-8 text-white/90 text-sm font-medium whitespace-nowrap pointer-events-none"
-                style={{ animation: 'float-up-fade 1s ease-out forwards' }}
+            <div className="relative">
+              {floatingMessages.map(id => (
+                <span
+                  key={id}
+                  className="absolute left-1/2 -translate-x-1/2 -top-8 text-white/90 text-sm font-medium whitespace-nowrap pointer-events-none"
+                  style={{ animation: 'float-up-fade 1s ease-out forwards' }}
+                >
+                  ¡Ya estás logueado!
+                </span>
+              ))}
+              <button
+                onClick={handleAccessClick}
+                className="group relative px-8 py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-[#D94854] to-[#F23D5E] text-white shadow-2xl hover:shadow-[#D94854]/25 transition-all duration-300 transform hover:scale-105 hover:rotate-1"
+                style={{ animation: 'pulse-glow 3s ease-in-out infinite' }}
               >
-                ¡Ya estás logueado!
-              </span>
-            ))}
+                <span className="relative z-10 flex items-center gap-2">
+                  Acceder al sistema
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </span>
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#F23D5E] to-[#D94854] opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
+            </div>
+
             <button
-              onClick={handleAccessClick}
-              className="group relative px-8 py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-[#D94854] to-[#F23D5E] text-white shadow-2xl hover:shadow-[#D94854]/25 transition-all duration-300 transform hover:scale-105 hover:rotate-1"
-              style={{ animation: 'pulse-glow 3s ease-in-out infinite' }}
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                Acceder al sistema
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </span>
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#F23D5E] to-[#D94854] opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
-            </button>
-          </div>
-            
-            <button 
               onClick={() => {
                 const modulesSection = document.getElementById('modules-section');
                 modulesSection?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="px-8 py-4 rounded-xl font-semibold text-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40 backdrop-blur-sm transition-all duration-300 hover:scale-105"
+              className="px-8 py-4 rounded-xl font-semibold text-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40 transition-all duration-300 hover:scale-105"
             >
               Ver módulos
             </button>
@@ -179,9 +179,9 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
 
         {/* Background decorative elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#D94854]/10 rounded-full blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[#B695BF]/10 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#51590E]/5 rounded-full blur-3xl" />
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#D94854]/05 rounded-full" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[#B695BF]/05 rounded-full" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#51590E]/03 rounded-full" />
         </div>
       </section>
     </>

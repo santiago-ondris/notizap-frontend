@@ -19,15 +19,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       setIsScrolled(currentScrollY > 20);
-      
+
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setIsVisible(false);
       } else {
-        setIsVisible(true); 
+        setIsVisible(true);
       }
-      
+
       setLastScrollY(currentScrollY);
     };
 
@@ -44,27 +44,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
   }, [showUserMenu]);
 
   return (
-    <nav 
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ease-in-out ${
-        isVisible ? 'translate-y-0' : '-translate-y-full'
-      }`}
+    <nav
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ease-in-out ${isVisible ? 'translate-y-0' : '-translate-y-full'
+        }`}
     >
       {/* Backdrop blur container */}
       <div className={`
         transition-all duration-300 ease-in-out
-        ${isScrolled 
-          ? 'bg-[#212026] backdrop-blur-xl shadow-lg shadow-black/20' 
+        ${isScrolled
+          ? 'bg-[#212026] shadow-lg shadow-black/20'
           : 'bg-[#212026]'
         }
       `}>
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex items-center justify-between h-16">
-            
+
             {/* Left side - Logo and nav items */}
             <div className="flex items-center gap-6">
               {/* Logo */}
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className="group flex items-center gap-2 hover:opacity-90 transition-opacity"
               >
                 <div className="relative">
@@ -84,8 +83,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                   to="/"
                   className={`
                     flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all
-                    ${isLanding 
-                      ? "bg-gradient-to-r from-[#D94854] to-[#F23D5E] text-white shadow-lg shadow-[#D94854]/25" 
+                    ${isLanding
+                      ? "bg-gradient-to-r from-[#D94854] to-[#F23D5E] text-white shadow-lg shadow-[#D94854]/25"
                       : "text-white/70 hover:text-white hover:bg-white/10"
                     }
                   `}
@@ -93,7 +92,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                   <Home className="w-4 h-4" />
                   Inicio
                 </Link>
-                
+
                 {isAuthenticated && role === "superadmin" && (
                   <Link
                     to="/usuarios"
@@ -121,7 +120,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#B695BF] to-[#D94854] flex items-center justify-center text-white text-sm font-semibold">
                       {(username || email)?.charAt(0).toUpperCase()}
                     </div>
-                    
+
                     {/* User info */}
                     <div className="hidden md:block text-left">
                       <div className="text-white text-sm font-medium">
@@ -131,13 +130,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                         {role}
                       </div>
                     </div>
-                    
+
                     <ChevronDown className={`w-4 h-4 text-white/60 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
                   </button>
 
                   {/* Dropdown menu */}
                   {showUserMenu && (
-                    <div className="absolute right-0 top-full mt-2 w-64 bg-[#212026]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden">
+                    <div className="absolute right-0 top-full mt-2 w-64 bg-[#212026]/FE border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden">
                       {/* User info header */}
                       <div className="px-4 py-3 border-b border-white/10 bg-gradient-to-r from-white/5 to-transparent">
                         <div className="text-white font-medium">
@@ -149,7 +148,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                           </span>
                         </div>
                       </div>
-                      
+
                       {/* Mobile navigation items */}
                       <div className="md:hidden border-b border-white/10">
                         <Link
@@ -171,7 +170,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                           </Link>
                         )}
                       </div>
-                      
+
                       {/* Logout button */}
                       <button
                         onClick={() => {

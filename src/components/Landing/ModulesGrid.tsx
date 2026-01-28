@@ -43,7 +43,7 @@ export const ModulesGrid: React.FC = () => {
       <section className="py-20 max-w-6xl mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-6">
             <Grid3X3 className="w-4 h-4 text-[#B695BF]" />
             <span className="text-sm text-white/80 font-medium">Módulos del sistema</span>
           </div>
@@ -56,7 +56,7 @@ export const ModulesGrid: React.FC = () => {
         <div className="flex flex-col items-center justify-center py-20">
           <div className="relative">
             {/* Glassmorphism card */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-12 text-center max-w-md mx-auto shadow-2xl">
+            <div className="bg-white/5 rounded-2xl border border-white/10 p-12 text-center max-w-md mx-auto shadow-2xl">
               <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-[#D94854]/20 to-[#F23D5E]/20 flex items-center justify-center">
                 <Lock className="w-8 h-8 text-[#D94854]" />
               </div>
@@ -67,9 +67,9 @@ export const ModulesGrid: React.FC = () => {
                 Inicio de sesión obligatorio
               </p>
             </div>
-            
+
             {/* Decorative glow */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#D94854]/10 to-[#B695BF]/10 rounded-2xl blur-xl -z-10"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-[#D94854]/10 to-[#B695BF]/10 rounded-2xl -z-10"></div>
           </div>
         </div>
       </section>
@@ -83,7 +83,7 @@ export const ModulesGrid: React.FC = () => {
     <section id="modules-section" className="py-20 max-w-6xl mx-auto px-6">
       {/* Header */}
       <div className="text-center mb-16">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 mb-6">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-6">
           <Grid3X3 className="w-4 h-4 text-[#B695BF]" />
           <span className="text-sm text-white/80 font-medium">Módulos disponibles</span>
         </div>
@@ -98,7 +98,7 @@ export const ModulesGrid: React.FC = () => {
           <div
             key={module.title}
             className="opacity-0 animate-fadeIn"
-            style={{ 
+            style={{
               animationDelay: `${index * 100}ms`,
               animationFillMode: 'forwards'
             }}
@@ -110,10 +110,10 @@ export const ModulesGrid: React.FC = () => {
 
       {/* Role indicator */}
       <div className="mt-16 text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
           <div className="w-2 h-2 rounded-full bg-[#B695BF] animate-pulse"></div>
           <span className="text-sm text-white/60">
-            Mostrando {filteredModules.length} módulos para rol: 
+            Mostrando {filteredModules.length} módulos para rol:
             <span className="text-[#B695BF] font-semibold ml-1 uppercase">{role}</span>
           </span>
         </div>

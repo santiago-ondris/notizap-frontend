@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Search, Filter, Calendar, DollarSign, Package, RotateCcw, Zap } from 'lucide-react';
-import type { 
-  FiltrosFormData, 
-  VentaVendedoraFilters 
+import type {
+  FiltrosFormData,
+  VentaVendedoraFilters
 } from '@/types/vendedoras/filtrosTypes';
-import { 
-  TURNOS_OPTIONS, 
-  ORDENAMIENTO_OPTIONS, 
+import {
+  TURNOS_OPTIONS,
+  ORDENAMIENTO_OPTIONS,
   PAGE_SIZE_OPTIONS,
-  FILTROS_PREDEFINIDOS 
+  FILTROS_PREDEFINIDOS
 } from '@/types/vendedoras/filtrosTypes';
 import { dateHelpers } from '@/utils/vendedoras/dateHelpers';
 import { turnoHelpers } from '@/utils/vendedoras/turnoHelpers';
@@ -87,7 +87,7 @@ export const VentasVendedorasFilters: React.FC<Props> = ({
     };
 
     setFormData(formLimpio);
-    
+
     const filtrosLimpios: VentaVendedoraFilters = {
       incluirProductosDescuento: true,
       excluirDomingos: true,
@@ -109,8 +109,8 @@ export const VentasVendedorasFilters: React.FC<Props> = ({
         break;
       case 'mesActual':
         const mesActual = dateHelpers.obtenerMesActual();
-        const fechaMaxDisponible = rangoFechasDisponible?.fechaMaxima 
-          ? new Date(rangoFechasDisponible.fechaMaxima) 
+        const fechaMaxDisponible = rangoFechasDisponible?.fechaMaxima
+          ? new Date(rangoFechasDisponible.fechaMaxima)
           : mesActual.fin;
         rangoFechas = {
           inicio: mesActual.inicio,
@@ -136,7 +136,7 @@ export const VentasVendedorasFilters: React.FC<Props> = ({
   const validacionFechas = dateHelpers.validarRangoFechas(formData.fechaInicio, formData.fechaFin);
 
   return (
-    <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
+    <div className="bg-white/10 border border-white/20 rounded-2xl p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -479,11 +479,10 @@ export const VentasVendedorasFilters: React.FC<Props> = ({
         <button
           onClick={aplicarFiltros}
           disabled={!validacionFechas.valido || loading}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
-            validacionFechas.valido && !loading
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${validacionFechas.valido && !loading
               ? 'bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/30 text-violet-400'
               : 'bg-white/5 border border-white/10 text-white/40 cursor-not-allowed'
-          }`}
+            }`}
         >
           <Search className="w-4 h-4" />
           {loading ? 'Buscando...' : 'Aplicar filtros'}
@@ -491,42 +490,42 @@ export const VentasVendedorasFilters: React.FC<Props> = ({
       </div>
 
       {/* Indicadores de filtros activos */}
-      {(formData.fechaInicio || formData.fechaFin || formData.sucursalNombre || 
-        formData.vendedorNombre || formData.turno || formData.montoMinimo || 
+      {(formData.fechaInicio || formData.fechaFin || formData.sucursalNombre ||
+        formData.vendedorNombre || formData.turno || formData.montoMinimo ||
         formData.montoMaximo) && (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {formData.sucursalNombre && (
-            <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-lg text-xs">
-              🏢 {formData.sucursalNombre}
-            </span>
-          )}
-          {formData.vendedorNombre && (
-            <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-lg text-xs">
-              👤 {formData.vendedorNombre}
-            </span>
-          )}
-          {formData.productoNombre && (
-            <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-lg text-xs">
-              📦 {formData.productoNombre}
-            </span>
-          )}
-          {formData.turno && (
-            <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-lg text-xs">
-              {turnoHelpers.formatearTurnoCorto(formData.turno as any)}
-            </span>
-          )}
-          {formData.montoMinimo && (
-            <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-lg text-xs">
-              💰 Min: ${formData.montoMinimo.toLocaleString()}
-            </span>
-          )}
-          {formData.montoMaximo && (
-            <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-lg text-xs">
-              💰 Max: ${formData.montoMaximo.toLocaleString()}
-            </span>
-          )}
-        </div>
-      )}
+          <div className="mt-4 flex flex-wrap gap-2">
+            {formData.sucursalNombre && (
+              <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-lg text-xs">
+                🏢 {formData.sucursalNombre}
+              </span>
+            )}
+            {formData.vendedorNombre && (
+              <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-lg text-xs">
+                👤 {formData.vendedorNombre}
+              </span>
+            )}
+            {formData.productoNombre && (
+              <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-lg text-xs">
+                📦 {formData.productoNombre}
+              </span>
+            )}
+            {formData.turno && (
+              <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-lg text-xs">
+                {turnoHelpers.formatearTurnoCorto(formData.turno as any)}
+              </span>
+            )}
+            {formData.montoMinimo && (
+              <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-lg text-xs">
+                💰 Min: ${formData.montoMinimo.toLocaleString()}
+              </span>
+            )}
+            {formData.montoMaximo && (
+              <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-lg text-xs">
+                💰 Max: ${formData.montoMaximo.toLocaleString()}
+              </span>
+            )}
+          </div>
+        )}
     </div>
   );
 };

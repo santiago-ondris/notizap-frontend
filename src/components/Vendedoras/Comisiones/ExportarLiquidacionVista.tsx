@@ -5,9 +5,9 @@ import { comisionFechas } from '@/utils/vendedoras/comisionHelpers';
 import { TURNOS_COMISIONES } from '@/types/vendedoras/comisionFiltersTypes';
 import { toast } from 'react-toastify';
 import { cn } from '@/lib/utils';
-import type { 
+import type {
   ExportarLiquidacionComisionesRequest,
-  DatosMaestrosComisiones 
+  DatosMaestrosComisiones
 } from '@/types/vendedoras/comisionTypes';
 
 interface Props {
@@ -117,12 +117,32 @@ export const ExportarLiquidacionVista: React.FC<Props> = ({ className }) => {
     }));
   };
 
+  const handleFechaChange = (tipo: 'inicio' | 'fin', fecha: string) => {
+    const date = new Date(fecha);
+
+    if (tipo === 'inicio') {
+      const fechaFin = new Date(filtros.fechaFin);
+      if (date > fechaFin) {
+        toast.warning('La fecha de inicio no puede ser posterior a la fecha fin');
+        return;
+      }
+      setFiltros(prev => ({ ...prev, fechaInicio: date }));
+    } else {
+      const fechaInicio = new Date(filtros.fechaInicio);
+      if (date < fechaInicio) {
+        toast.warning('La fecha fin no puede ser anterior a la fecha inicio');
+        return;
+      }
+      setFiltros(prev => ({ ...prev, fechaFin: date }));
+    }
+  };
+
   return (
     <div className={cn("space-y-6", className)}>
 
       {/* Formulario */}
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 space-y-6">
-        
+
         {/* Período - Botones rápidos */}
         <div>
           <label className="block text-sm font-medium text-white/80 mb-3">
@@ -162,7 +182,7 @@ export const ExportarLiquidacionVista: React.FC<Props> = ({ className }) => {
               <input
                 type="date"
                 value={comisionFechas.formatearParaApi(filtros.fechaInicio)}
-                onChange={(e) => setFiltros(prev => ({ ...prev, fechaInicio: new Date(e.target.value) }))}
+                onChange={(e) => handleFechaChange('inicio', e.target.value)}
                 className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-green-500/40"
               />
             </div>
@@ -173,7 +193,7 @@ export const ExportarLiquidacionVista: React.FC<Props> = ({ className }) => {
               <input
                 type="date"
                 value={comisionFechas.formatearParaApi(filtros.fechaFin)}
-                onChange={(e) => setFiltros(prev => ({ ...prev, fechaFin: new Date(e.target.value) }))}
+                onChange={(e) => handleFechaChange('fin', e.target.value)}
                 className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-green-500/40"
               />
             </div>
@@ -267,31 +287,28 @@ export const ExportarLiquidacionVista: React.FC<Props> = ({ className }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <button
               onClick={() => setFiltros(prev => ({ ...prev, orderBy: 'nombre', orderDesc: false }))}
-              className={`px-4 py-2 border rounded-xl text-sm transition-all ${
-                filtros.orderBy === 'nombre'
-                  ? 'bg-green-500/20 border-green-500/40 text-green-300 font-medium'
-                  : 'bg-white/5 border-white/10 text-white/80 hover:bg-white/10'
-              }`}
+              className={`px-4 py-2 border rounded-xl text-sm transition-all ${filtros.orderBy === 'nombre'
+                ? 'bg-green-500/20 border-green-500/40 text-green-300 font-medium'
+                : 'bg-white/5 border-white/10 text-white/80 hover:bg-white/10'
+                }`}
             >
               Nombre (A-Z)
             </button>
             <button
               onClick={() => setFiltros(prev => ({ ...prev, orderBy: 'monto', orderDesc: true }))}
-              className={`px-4 py-2 border rounded-xl text-sm transition-all ${
-                filtros.orderBy === 'monto'
-                  ? 'bg-green-500/20 border-green-500/40 text-green-300 font-medium'
-                  : 'bg-white/5 border-white/10 text-white/80 hover:bg-white/10'
-              }`}
+              className={`px-4 py-2 border rounded-xl text-sm transition-all ${filtros.orderBy === 'monto'
+                ? 'bg-green-500/20 border-green-500/40 text-green-300 font-medium'
+                : 'bg-white/5 border-white/10 text-white/80 hover:bg-white/10'
+                }`}
             >
               Mayor monto
             </button>
             <button
               onClick={() => setFiltros(prev => ({ ...prev, orderBy: 'dias', orderDesc: true }))}
-              className={`px-4 py-2 border rounded-xl text-sm transition-all ${
-                filtros.orderBy === 'dias'
-                  ? 'bg-green-500/20 border-green-500/40 text-green-300 font-medium'
-                  : 'bg-white/5 border-white/10 text-white/80 hover:bg-white/10'
-              }`}
+              className={`px-4 py-2 border rounded-xl text-sm transition-all ${filtros.orderBy === 'dias'
+                ? 'bg-green-500/20 border-green-500/40 text-green-300 font-medium'
+                : 'bg-white/5 border-white/10 text-white/80 hover:bg-white/10'
+                }`}
             >
               Más días trabajados
             </button>

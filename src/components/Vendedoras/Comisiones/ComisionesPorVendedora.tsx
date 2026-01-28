@@ -138,6 +138,14 @@ export const ComisionesPorVendedora: React.FC<Props> = ({ className }) => {
   };
 
   const handleCambiarRangoFechas = (fechaInicio?: string, fechaFin?: string) => {
+    // Validar rango
+    if (fechaInicio && fechaFin) {
+      if (new Date(fechaInicio) > new Date(fechaFin)) {
+        toast.warning('La fecha de inicio no puede ser posterior a la fecha fin');
+        return;
+      }
+    }
+
     const nuevosFiltrosVendedora = {
       ...filtrosVendedora,
       fechaInicio,

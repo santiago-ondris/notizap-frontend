@@ -37,6 +37,7 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
     const [turnosExpandidos, setTurnosExpandidos] = useState<Set<string>>(new Set());
     const [turnosSeleccionados, setTurnosSeleccionados] = useState<Map<string, TurnoPendiente>>(new Map());
     const [porcentajeGlobal, setPorcentajeGlobal] = useState<number>(1);
+    const [modoGlobal, setModoGlobal] = useState<import('@/types/vendedoras/comisionTypes').ModoCalculoComision>('Compartido');
 
     // Filtros de visualización
     const [filtroSucursal, setFiltroSucursal] = useState<string | null>(null);
@@ -64,7 +65,8 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
                         seleccionado: true,
                         modificado: false,
                         vendedorasSeleccionadas: vendedorasConVentas,
-                        porcentajeComision: porcentajeGlobal
+                        porcentajeComision: porcentajeGlobal,
+                        modoCalculo: modoGlobal
                     });
                 });
             });
@@ -144,6 +146,21 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
         });
     };
 
+    const actualizarModoTurno = (key: string, modo: import('@/types/vendedoras/comisionTypes').ModoCalculoComision) => {
+        setTurnosSeleccionados(prev => {
+            const nuevo = new Map(prev);
+            const turno = nuevo.get(key);
+            if (turno) {
+                nuevo.set(key, {
+                    ...turno,
+                    modoCalculo: modo,
+                    modificado: modo !== modoGlobal
+                });
+            }
+            return nuevo;
+        });
+    };
+
     const toggleVendedora = (key: string, vendedora: VendedoraDisponible) => {
         const turno = turnosSeleccionados.get(key);
         if (!turno) return;
@@ -163,6 +180,11 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
 
         turnosSeleccionados.forEach(turno => {
             if (!turno.seleccionado) return;
+
+            // Respetar filtros visuales activos
+            if (filtroSucursal && turno.sucursalNombre !== filtroSucursal) return;
+            if (filtroTurno && turno.turno !== filtroTurno) return;
+
             if (!turno.vendedorasSeleccionadas || turno.vendedorasSeleccionadas.length === 0) return;
 
             turnosParaCalcular.push({
@@ -170,7 +192,8 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
                 sucursalNombre: turno.sucursalNombre,
                 turno: turno.turno,
                 vendedorasNombres: turno.vendedorasSeleccionadas.map(v => v.nombre),
-                porcentajeComision: turno.porcentajeComision || porcentajeGlobal
+                porcentajeComision: turno.porcentajeComision || porcentajeGlobal,
+                modoCalculo: turno.modoCalculo || modoGlobal
             });
         });
 
@@ -247,17 +270,32 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
                         </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm text-white/60 mb-1">% Comisión global</label>
-                        <input
-                            type="number"
-                            min="0.1"
-                            step="0.1"
-                            value={porcentajeGlobal}
-                            onChange={(e) => setPorcentajeGlobal(parseFloat(e.target.value) || 1)}
-                            className="w-24 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
-                            disabled={loading || calculando}
-                        />
+                    <div className="flex gap-4">
+                        <div>
+                            <label className="block text-sm text-white/60 mb-1">Modo Global</label>
+                            <select
+                                value={modoGlobal}
+                                onChange={(e) => setModoGlobal(e.target.value as any)}
+                                className="w-32 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none"
+                                disabled={loading || calculando}
+                            >
+                                <option value="Compartido">Compartido</option>
+                                <option value="Individual">Individual</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm text-white/60 mb-1">% Global</label>
+                            <input
+                                type="number"
+                                min="0.1"
+                                step="0.1"
+                                value={porcentajeGlobal}
+                                onChange={(e) => setPorcentajeGlobal(parseFloat(e.target.value) || 1)}
+                                className="w-24 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
+                                disabled={loading || calculando}
+                            />
+                        </div>
                     </div>
 
                     <button
@@ -456,18 +494,33 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
                                                 {expandido && (
                                                     <div className="p-4 bg-black/20 border-t border-white/5">
                                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                            {/* Porcentaje */}
+                                                            {/* Porcentaje y Modo */}
                                                             <div>
-                                                                <label className="block text-sm text-white/60 mb-1">% Comisión</label>
-                                                                <input
-                                                                    type="number"
-                                                                    min="0.1"
-                                                                    step="0.1"
-                                                                    value={turnoSeleccionado?.porcentajeComision || porcentajeGlobal}
-                                                                    onChange={(e) => actualizarPorcentajeTurno(key, parseFloat(e.target.value) || 1)}
-                                                                    className="w-24 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm"
-                                                                    disabled={calculando}
-                                                                />
+                                                                <div className="mb-4">
+                                                                    <label className="block text-sm text-white/60 mb-1">% Comisión</label>
+                                                                    <input
+                                                                        type="number"
+                                                                        min="0.1"
+                                                                        step="0.1"
+                                                                        value={turnoSeleccionado?.porcentajeComision || porcentajeGlobal}
+                                                                        onChange={(e) => actualizarPorcentajeTurno(key, parseFloat(e.target.value) || 1)}
+                                                                        className="w-24 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm"
+                                                                        disabled={calculando}
+                                                                    />
+                                                                </div>
+
+                                                                <div>
+                                                                    <label className="block text-sm text-white/60 mb-1">Modo Cálculo</label>
+                                                                    <select
+                                                                        value={turnoSeleccionado?.modoCalculo || modoGlobal}
+                                                                        onChange={(e) => actualizarModoTurno(key, e.target.value as any)}
+                                                                        className="w-full px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none"
+                                                                        disabled={calculando}
+                                                                    >
+                                                                        <option value="Compartido">Compartido</option>
+                                                                        <option value="Individual">Individual</option>
+                                                                    </select>
+                                                                </div>
                                                             </div>
 
                                                             {/* Vendedoras */}

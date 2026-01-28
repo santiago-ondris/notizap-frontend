@@ -3,11 +3,12 @@ import { X, Calendar, Building2, Clock, Users, Calculator, AlertTriangle, CheckC
 import { comisionesVendedorasService } from '@/services/vendedoras/comisionesVendedorasService';
 import { comisionFormato, comisionPreview, comisionVendedoras } from '@/utils/vendedoras/comisionHelpers';
 import { toast } from 'react-toastify';
-import type { 
+import type {
   VendedorasDisponiblesResponse,
   VendedoraDisponible,
   CalcularComisionRequest,
-  CalcularComisionResponse
+  CalcularComisionResponse,
+  ModoCalculoComision
 } from '@/types/vendedoras/comisionTypes';
 
 interface Props {
@@ -37,24 +38,9 @@ export const ComisionesCalculadora: React.FC<Props> = ({
   const [busqueda, setBusqueda] = useState('');
   const [mostrarDisponibles, setMostrarDisponibles] = useState(false);
   const [porcentajeComision, setPorcentajeComision] = useState<number>(1);
+  const [modoCalculo, setModoCalculo] = useState<ModoCalculoComision>('Compartido');
 
-  useEffect(() => {
-    if (isOpen) {
-      const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
-      
-      return () => {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
-        window.scrollTo(0, scrollY);
-      };
-    }
-  }, [isOpen]);
+  // ... useEffects ...
 
   useEffect(() => {
     if (isOpen) {
@@ -66,6 +52,7 @@ export const ComisionesCalculadora: React.FC<Props> = ({
       setMostrarDisponibles(false);
       setError(null);
       setPorcentajeComision(1);
+      setModoCalculo('Compartido');
     }
   }, [isOpen, fecha, sucursalNombre, turno]);
 
@@ -73,21 +60,21 @@ export const ComisionesCalculadora: React.FC<Props> = ({
     try {
       setLoading(true);
       setError(null);
-      
+
       const datos = await comisionesVendedorasService.obtenerVendedorasDisponibles(
         fecha,
         sucursalNombre,
         turno
       );
-      
+
       setDatosVendedoras(datos);
-      
+
       const preSeleccionadas = datos.vendedorasConVentas.map(v => ({
         ...v,
         estaSeleccionada: true
       }));
       setVendedorasSeleccionadas(preSeleccionadas);
-      
+
     } catch (err) {
       console.error('Error cargando vendedoras:', err);
       setError('Error al cargar datos de vendedoras');
@@ -99,7 +86,7 @@ export const ComisionesCalculadora: React.FC<Props> = ({
   const toggleVendedora = (vendedora: VendedoraDisponible) => {
     setVendedorasSeleccionadas(prev => {
       const existe = prev.find(v => v.id === vendedora.id);
-      
+
       if (existe) {
         return prev.filter(v => v.id !== vendedora.id);
       } else {
@@ -107,6 +94,12 @@ export const ComisionesCalculadora: React.FC<Props> = ({
       }
     });
   };
+
+  const vendedorasParaAgregar = datosVendedoras?.vendedorasDisponibles.filter(v => {
+    const yaSeleccionada = vendedorasSeleccionadas.some(s => s.id === v.id);
+    const cumpleBusqueda = !busqueda || v.nombre.toLowerCase().includes(busqueda.toLowerCase());
+    return !yaSeleccionada && cumpleBusqueda;
+  }) || [];
 
   const handleCalcular = async () => {
     if (!datosVendedoras) return;
@@ -122,7 +115,7 @@ export const ComisionesCalculadora: React.FC<Props> = ({
       fechaObj,
       vendedorasSeleccionadas.length
     );
-    
+
     if (!esValido) {
       toast.error(mensajeValidacion);
       return;
@@ -137,10 +130,11 @@ export const ComisionesCalculadora: React.FC<Props> = ({
         sucursalNombre,
         turno: turno as 'Mañana' | 'Tarde',
         vendedorasNombres: vendedorasSeleccionadas.map(v => v.nombre),
-        porcentajeComision
+        porcentajeComision,
+        modoCalculo
       };
 
-      const response = esRecalculo 
+      const response = esRecalculo
         ? await comisionesVendedorasService.recalcularComisiones(request)
         : await comisionesVendedorasService.calcularComisiones(request);
 
@@ -158,17 +152,11 @@ export const ComisionesCalculadora: React.FC<Props> = ({
     }
   };
 
-  const vendedorasParaAgregar = datosVendedoras?.vendedorasDisponibles.filter(v => {
-    const yaSeleccionada = vendedorasSeleccionadas.some(s => s.id === v.id);
-    const cumpleBusqueda = !busqueda || v.nombre.toLowerCase().includes(busqueda.toLowerCase());
-    return !yaSeleccionada && cumpleBusqueda;
-  }) || [];
-
-  const previewComision = datosVendedoras 
+  const previewComision = datosVendedoras
     ? comisionPreview.previewComisionIndividual(datosVendedoras.montoFacturado, vendedorasSeleccionadas.length, porcentajeComision)
     : 0;
 
-const previewTotal = datosVendedoras 
+  const previewTotal = datosVendedoras
     ? comisionPreview.previewComisionTotal(datosVendedoras.montoFacturado, porcentajeComision)
     : 0;
 
@@ -180,7 +168,7 @@ const previewTotal = datosVendedoras
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-[#1A1A20] border border-white/10 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        
+
         <div className="p-6 border-b border-white/10 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -205,7 +193,7 @@ const previewTotal = datosVendedoras
                 </div>
               </div>
             </div>
-            
+
             <button
               onClick={onClose}
               className="p-2 hover:bg-white/10 rounded-lg transition-colors"
@@ -225,13 +213,13 @@ const previewTotal = datosVendedoras
           )}
         </div>
 
-        <div 
+        <div
           className="p-6 overflow-y-auto flex-1 custom-scrollbar"
           onWheel={(e) => {
             e.stopPropagation();
           }}
         >
-          
+
           {loading && (
             <div className="flex items-center justify-center py-12">
               <div className="flex items-center gap-3 text-white/60">
@@ -258,24 +246,50 @@ const previewTotal = datosVendedoras
 
           {datosVendedoras && !loading && (
             <div className="space-y-4">
-              
+
               <div className="bg-white/5 border border-white/10 rounded-xl p-4">
                 <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
                   <Users className="w-5 h-5 text-blue-400" />
                   Resumen del turno
                 </h3>
-                
-                <div className="mb-4">
-                  <label className="block text-white/60 text-sm mb-2">Porcentaje de comisión (%)</label>
-                  <input
-                    type="number"
-                    min="0.1"
-                    step="0.1"
-                    value={porcentajeComision}
-                    onChange={(e) => setPorcentajeComision(parseFloat(e.target.value) || 1)}
-                    className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                    disabled={calculando}
-                  />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-white/60 text-sm mb-2">Porcentaje de comisión (%)</label>
+                    <input
+                      type="number"
+                      min="0.1"
+                      step="0.1"
+                      value={porcentajeComision}
+                      onChange={(e) => setPorcentajeComision(parseFloat(e.target.value) || 1)}
+                      className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                      disabled={calculando}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-white/60 text-sm mb-2">Modo de Cálculo</label>
+                    <div className="flex gap-2 p-1 bg-white/5 border border-white/20 rounded-lg">
+                      <button
+                        onClick={() => setModoCalculo('Compartido')}
+                        className={`flex-1 px-3 py-1.5 rounded-md text-sm transition-colors ${modoCalculo === 'Compartido'
+                          ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
+                          : 'text-white/60 hover:text-white'
+                          }`}
+                      >
+                        Compartido
+                      </button>
+                      <button
+                        onClick={() => setModoCalculo('Individual')}
+                        className={`flex-1 px-3 py-1.5 rounded-md text-sm transition-colors ${modoCalculo === 'Individual'
+                          ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
+                          : 'text-white/60 hover:text-white'
+                          }`}
+                      >
+                        Individual
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -285,25 +299,31 @@ const previewTotal = datosVendedoras
                       {comisionFormato.formatearMoneda(datosVendedoras.montoFacturado)}
                     </div>
                   </div>
-                  
+
                   <div>
                     <div className="text-white/60 text-sm">Vendedoras con ventas</div>
                     <div className="text-white font-semibold">
                       {datosVendedoras.vendedorasConVentas.length}
                     </div>
                   </div>
-                  
+
                   <div>
                     <div className="text-white/60 text-sm">Comisión individual</div>
                     <div className="text-green-400 font-semibold">
-                      {comisionFormato.formatearMoneda(previewComision)}
+                      {modoCalculo === 'Individual'
+                        ? 'Varía s/venta'
+                        : comisionFormato.formatearMoneda(previewComision)
+                      }
                     </div>
                   </div>
-                  
+
                   <div>
                     <div className="text-white/60 text-sm">Total comisiones</div>
                     <div className="text-green-400 font-semibold">
-                      {comisionFormato.formatearMoneda(previewTotal)}
+                      {modoCalculo === 'Individual'
+                        ? 'Depende total'
+                        : comisionFormato.formatearMoneda(previewTotal)
+                      }
                     </div>
                   </div>
                 </div>
@@ -313,7 +333,7 @@ const previewTotal = datosVendedoras
                 <h3 className="font-semibold text-white mb-3">
                   Vendedoras seleccionadas ({vendedorasSeleccionadas.length})
                 </h3>
-                
+
                 {vendedorasSeleccionadas.length === 0 ? (
                   <div className="text-center py-6 text-white/60">
                     <Users className="w-8 h-8 mx-auto mb-2 text-white/40" />
@@ -338,7 +358,7 @@ const previewTotal = datosVendedoras
                             </span>
                           )}
                         </div>
-                        
+
                         <button
                           onClick={() => toggleVendedora(vendedora)}
                           className="p-1 hover:bg-red-500/20 rounded transition-colors"
@@ -357,7 +377,7 @@ const previewTotal = datosVendedoras
                   <h3 className="font-semibold text-white">
                     Agregar vendedoras
                   </h3>
-                  
+
                   <button
                     onClick={() => setMostrarDisponibles(!mostrarDisponibles)}
                     className="text-blue-400 hover:text-blue-300 text-sm transition-colors"
@@ -365,7 +385,7 @@ const previewTotal = datosVendedoras
                     {mostrarDisponibles ? 'Ocultar' : 'Mostrar'} disponibles
                   </button>
                 </div>
-                
+
                 {mostrarDisponibles && (
                   <div className="space-y-3">
                     <div className="relative">
@@ -379,7 +399,7 @@ const previewTotal = datosVendedoras
                         disabled={calculando}
                       />
                     </div>
-                    
+
                     {vendedorasParaAgregar.length === 0 ? (
                       <div className="text-center py-4 text-white/60">
                         <Users className="w-6 h-6 mx-auto mb-2 text-white/40" />
@@ -388,7 +408,7 @@ const previewTotal = datosVendedoras
                         </p>
                       </div>
                     ) : (
-                      <div 
+                      <div
                         className="max-h-32 overflow-y-auto custom-scrollbar space-y-1"
                         onWheel={(e) => {
                           e.stopPropagation();
@@ -418,12 +438,12 @@ const previewTotal = datosVendedoras
           <div className="p-6 border-t border-white/10 bg-white/5 flex-shrink-0">
             <div className="flex items-center justify-between">
               <div className="text-xs text-white/60">
-                💡 {esRecalculo 
-                  ? 'Al recalcular se sobrescribirán las comisiones existentes' 
+                💡 {esRecalculo
+                  ? 'Al recalcular se sobrescribirán las comisiones existentes'
                   : 'Selecciona las vendedoras que trabajaron en este turno'
                 }
               </div>
-              
+
               <div className="flex gap-3">
                 <button
                   onClick={onClose}
@@ -432,14 +452,13 @@ const previewTotal = datosVendedoras
                 >
                   Cancelar
                 </button>
-                
+
                 <button
                   onClick={handleCalcular}
-                  className={`px-4 py-2 border rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${
-                    esRecalculo 
-                      ? 'bg-yellow-500/20 hover:bg-yellow-500/30 border-yellow-500/40 text-yellow-300'
-                      : 'bg-green-500/20 hover:bg-green-500/30 border-green-500/40 text-green-300'
-                  }`}
+                  className={`px-4 py-2 border rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${esRecalculo
+                    ? 'bg-yellow-500/20 hover:bg-yellow-500/30 border-yellow-500/40 text-yellow-300'
+                    : 'bg-green-500/20 hover:bg-green-500/30 border-green-500/40 text-green-300'
+                    }`}
                   disabled={!puedeCalcular}
                 >
                   {calculando && <Loader2 className="w-4 h-4 animate-spin" />}

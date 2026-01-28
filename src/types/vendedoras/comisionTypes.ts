@@ -107,12 +107,15 @@ export interface DiaCalendario {
   esDelMes: boolean;
 }
 
+export type ModoCalculoComision = 'Compartido' | 'Individual';
+
 export interface CalcularComisionRequest {
   fecha: string;
   sucursalNombre: string;
   turno: 'Mañana' | 'Tarde';
   vendedorasNombres: string[];
   porcentajeComision: number;
+  modoCalculo: ModoCalculoComision;
 }
 
 export interface ComisionesStats {
@@ -156,6 +159,7 @@ export interface TurnoPendiente {
   modificado?: boolean;
   vendedorasSeleccionadas?: VendedoraDisponible[];
   porcentajeComision?: number;
+  modoCalculo?: ModoCalculoComision;
 }
 
 export interface TurnosPendientesPorSucursal {
@@ -179,6 +183,7 @@ export interface TurnoParaCalcular {
   turno: 'Mañana' | 'Tarde';
   vendedorasNombres: string[];
   porcentajeComision: number;
+  modoCalculo: ModoCalculoComision;
 }
 
 export interface CalcularBatchRequest {

@@ -7,13 +7,13 @@ import { comisionesVendedorasService } from '@/services/vendedoras/comisionesVen
 import { comisionFormato, comisionFechas, comisionEstadisticas } from '@/utils/vendedoras/comisionHelpers';
 import { toast } from 'react-toastify';
 import { TURNOS_COMISIONES } from '@/types/vendedoras/comisionFiltersTypes';
-import type { 
+import type {
   ComisionesResponse,
   DatosMaestrosComisiones,
 } from '@/types/vendedoras/comisionTypes';
-import type { 
+import type {
   ComisionVendedoraFilters,
-  FiltrosSucursalTurno 
+  FiltrosSucursalTurno
 } from '@/types/vendedoras/comisionFiltersTypes';
 
 interface Props {
@@ -89,14 +89,14 @@ export const ComisionesPorSucursal: React.FC<Props> = ({ className }) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const comisiones = await comisionesVendedorasService.obtenerComisionesPorSucursalTurno({
         sucursalNombre: sucursalSeleccionada,
         turno: turnoSeleccionado as 'Mañana' | 'Tarde',
         fechaInicio: filtrosSucursal.fechaInicio,
         fechaFin: filtrosSucursal.fechaFin
       });
-      
+
       setComisionesData(comisiones);
     } catch (err) {
       console.error('Error cargando comisiones:', err);
@@ -109,56 +109,64 @@ export const ComisionesPorSucursal: React.FC<Props> = ({ className }) => {
 
   const handleSeleccionarSucursal = (sucursal: string) => {
     setSucursalSeleccionada(sucursal);
-    
+
     // Actualizar filtros
     const nuevosFiltrosSucursal = {
       ...filtrosSucursal,
       sucursalNombre: sucursal
     };
-    
+
     const nuevosFiltrosDetalle = {
       ...filtrosDetalle,
       sucursalNombre: sucursal,
       page: 1
     };
-    
+
     setFiltrosSucursal(nuevosFiltrosSucursal);
     setFiltrosDetalle(nuevosFiltrosDetalle);
   };
 
   const handleSeleccionarTurno = (turno: string) => {
     setTurnoSeleccionado(turno);
-    
+
     // Actualizar filtros
     const nuevosFiltrosSucursal = {
       ...filtrosSucursal,
       turno: turno as 'Mañana' | 'Tarde'
     };
-    
+
     const nuevosFiltrosDetalle = {
       ...filtrosDetalle,
       turno: turno as 'Mañana' | 'Tarde',
       page: 1
     };
-    
+
     setFiltrosSucursal(nuevosFiltrosSucursal);
     setFiltrosDetalle(nuevosFiltrosDetalle);
   };
 
   const handleCambiarRangoFechas = (fechaInicio?: string, fechaFin?: string) => {
+    // Validar rango
+    if (fechaInicio && fechaFin) {
+      if (new Date(fechaInicio) > new Date(fechaFin)) {
+        toast.warning('La fecha de inicio no puede ser posterior a la fecha fin');
+        return;
+      }
+    }
+
     const nuevosFiltrosSucursal = {
       ...filtrosSucursal,
       fechaInicio,
       fechaFin
     };
-    
+
     const nuevosFiltrosDetalle = {
       ...filtrosDetalle,
       fechaInicio,
       fechaFin,
       page: 1
     };
-    
+
     setFiltrosSucursal(nuevosFiltrosSucursal);
     setFiltrosDetalle(nuevosFiltrosDetalle);
   };
@@ -209,7 +217,7 @@ export const ComisionesPorSucursal: React.FC<Props> = ({ className }) => {
 
   return (
     <div className={cn('space-y-6', className)}>
-      
+
       {/* Header */}
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
         <div className="flex items-center gap-3 mb-6">
@@ -220,13 +228,13 @@ export const ComisionesPorSucursal: React.FC<Props> = ({ className }) => {
         {/* Selección de sucursal y turno */}
         <div className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
+
             {/* Selector de sucursal */}
             <div className="space-y-3">
               <label className="block text-sm font-medium text-white/80">
                 Sucursal <span className="text-red-400">*</span>
               </label>
-              
+
               <select
                 value={sucursalSeleccionada}
                 onChange={(e) => handleSeleccionarSucursal(e.target.value)}
@@ -244,7 +252,7 @@ export const ComisionesPorSucursal: React.FC<Props> = ({ className }) => {
               <label className="block text-sm font-medium text-white/80">
                 Turno <span className="text-red-400">*</span>
               </label>
-              
+
               <select
                 value={turnoSeleccionado}
                 onChange={(e) => handleSeleccionarTurno(e.target.value)}
@@ -263,7 +271,7 @@ export const ComisionesPorSucursal: React.FC<Props> = ({ className }) => {
               <label className="block text-sm font-medium text-white/80">
                 Rango de fechas
               </label>
-              
+
               <div className="space-y-2">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
@@ -275,7 +283,7 @@ export const ComisionesPorSucursal: React.FC<Props> = ({ className }) => {
                       className="w-full px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:border-blue-400 transition-colors"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-xs text-white/60 mb-1">Hasta</label>
                     <input
@@ -313,7 +321,7 @@ export const ComisionesPorSucursal: React.FC<Props> = ({ className }) => {
               <TrendingUp className="w-5 h-5" />
               Resumen acumulado - {sucursalSeleccionada} ({comisionFormato.formatearTurno(turnoSeleccionado)})
             </h3>
-            
+
             {loading && (
               <div className="flex items-center gap-2 text-white/60">
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -330,28 +338,28 @@ export const ComisionesPorSucursal: React.FC<Props> = ({ className }) => {
               </div>
               <div className="text-xs text-white/60">Total comisiones</div>
             </div>
-            
+
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-300">
                 {estadisticas.diasConComisiones}
               </div>
               <div className="text-xs text-white/60">Días con comisiones</div>
             </div>
-            
+
             <div className="text-center">
               <div className="text-2xl font-bold text-yellow-300">
                 {estadisticas.totalVendedoras}
               </div>
               <div className="text-xs text-white/60">Vendedoras</div>
             </div>
-            
+
             <div className="text-center">
               <div className="text-2xl font-bold text-purple-300">
                 {comisionFormato.formatearMoneda(estadisticas.promedioComisiones)}
               </div>
               <div className="text-xs text-white/60">Promedio por día</div>
             </div>
-            
+
             <div className="text-center">
               <div className="text-2xl font-bold text-white">
                 {comisionFormato.formatearNumero(comisionesData?.totalRegistros || 0)}
@@ -366,10 +374,10 @@ export const ComisionesPorSucursal: React.FC<Props> = ({ className }) => {
               <Users className="w-4 h-4" />
               Desglose por vendedora
             </h4>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {estadisticas.resumenPorVendedora.slice(0, 9).map((vendedora, index) => (
-                <div 
+                <div
                   key={vendedora.vendedora}
                   className="bg-white/5 border border-white/10 rounded-lg p-4"
                 >
@@ -381,7 +389,7 @@ export const ComisionesPorSucursal: React.FC<Props> = ({ className }) => {
                       #{index + 1}
                     </span>
                   </div>
-                  
+
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
                       <span className="text-white/60">Total:</span>
@@ -389,12 +397,12 @@ export const ComisionesPorSucursal: React.FC<Props> = ({ className }) => {
                         {comisionFormato.formatearMoneda(vendedora.total)}
                       </span>
                     </div>
-                    
+
                     <div className="flex justify-between">
                       <span className="text-white/60">Días:</span>
                       <span className="text-white">{vendedora.dias}</span>
                     </div>
-                    
+
                     <div className="flex justify-between">
                       <span className="text-white/60">Promedio:</span>
                       <span className="text-blue-300">
@@ -404,7 +412,7 @@ export const ComisionesPorSucursal: React.FC<Props> = ({ className }) => {
                   </div>
                 </div>
               ))}
-              
+
               {/* Mostrar "ver más" si hay más vendedoras */}
               {estadisticas.resumenPorVendedora.length > 9 && (
                 <div className="bg-white/5 border border-white/10 rounded-lg p-4 flex items-center justify-center">
@@ -461,7 +469,7 @@ export const ComisionesPorSucursal: React.FC<Props> = ({ className }) => {
           <p className="text-white/60 max-w-md mx-auto">
             Elegi una sucursal y un turno para ver las comisiones acumuladas y el detalle por vendedora.
           </p>
-          
+
           {/* Ayuda visual */}
           <div className="mt-6 flex items-center justify-center gap-4 text-sm text-white/60">
             <div className="flex items-center gap-2">

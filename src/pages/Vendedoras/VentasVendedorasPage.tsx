@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   BarChart3,
   Upload,
@@ -18,11 +19,14 @@ import { VentasVendedorasFilters } from '@/components/Vendedoras/VentasVendedora
 import { VentasVendedorasStats } from '@/components/Vendedoras/VentasVendedorasStats';
 import { VentasVendedorasTable } from '@/components/Vendedoras/VentasVendedorasTable';
 import { VendedorasManagementModal } from '@/components/Vendedoras/VendedorasManagementModal';
-import { ventasVendedorasService } from '@/services/vendedoras/ventasVendedorasService';
+import {
+  useVentasVendedorasInitialData,
+  useVentasVendedorasQuery,
+  useVentasVendedorasStatsQuery,
+  vendedorasKeys
+} from '@/hooks/vendedoras/useVentasVendedoras';
 import type {
   VentaVendedoraStats,
-  VentasResponse,
-  RangoFechas
 } from '@/types/vendedoras/ventaVendedoraTypes';
 import type {
   VentaVendedoraFilters
@@ -33,20 +37,17 @@ type VistaActual = 'dashboard' | 'upload' | 'tabla' | 'comisiones';
 
 export const VentasVendedorasPage: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [vistaActual, setVistaActual] = useState<VistaActual>('dashboard');
   const [modoAdmin, setModoAdmin] = useState(false);
   const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
 
-  const [stats, setStats] = useState<VentaVendedoraStats | null>(null);
-  const [ventasData, setVentasData] = useState<VentasResponse | null>(null);
-  const [sucursales, setSucursales] = useState<string[]>([]);
-  const [vendedores, setVendedores] = useState<string[]>([]);
-  const [rangoFechas, setRangoFechas] = useState<RangoFechas | null>(null);
-
-  const [loading, setLoading] = useState(false);
-  const [loadingStats, setLoadingStats] = useState(false);
-  const [loadingInicial, setLoadingInicial] = useState(true);
+  const {
+    data: initialData,
+    isLoading: loadingInicial,
+    refetch: refetchInitial
+  } = useVentasVendedorasInitialData();
 
   const [filtros, setFiltros] = useState<VentaVendedoraFilters>({
     incluirProductosDescuento: true,
@@ -57,90 +58,38 @@ export const VentasVendedorasPage: React.FC = () => {
     pageSize: 50
   });
 
+  // Inicializar filtros con fechas de la última semana cuando cargan los datos iniciales
   useEffect(() => {
-    cargarDatosIniciales();
-  }, []);
-
-  useEffect(() => {
-    if (!loadingInicial) {
-      cargarVentas();
-      cargarEstadisticas();
+    if (initialData?.rangoFechas?.ultimaSemana?.fechaInicio && !filtros.fechaInicio) {
+      setFiltros(prev => ({
+        ...prev,
+        fechaInicio: initialData.rangoFechas.ultimaSemana.fechaInicio || undefined,
+        fechaFin: initialData.rangoFechas.ultimaSemana.fechaFin || undefined
+      }));
     }
-  }, [filtros]);
+  }, [initialData, filtros.fechaInicio]);
 
-  const cargarDatosIniciales = async () => {
-    try {
-      setLoadingInicial(true);
+  const {
+    data: ventasData,
+    isLoading: loadingVentas,
+    refetch: refetchVentas
+  } = useVentasVendedorasQuery(filtros, !!filtros.fechaInicio);
 
-      const [sucursalesRes, vendedoresRes, rangoFechasRes] = await Promise.all([
-        ventasVendedorasService.obtenerSucursales(),
-        ventasVendedorasService.obtenerVendedores(),
-        ventasVendedorasService.obtenerRangoFechas()
-      ]);
+  const {
+    data: stats,
+    isLoading: loadingStats,
+    refetch: refetchStats
+  } = useVentasVendedorasStatsQuery(filtros, !!filtros.fechaInicio);
 
-      setSucursales(sucursalesRes);
-      setVendedores(vendedoresRes);
-      setRangoFechas(rangoFechasRes);
-
-      if (rangoFechasRes.ultimaSemana.fechaInicio && rangoFechasRes.ultimaSemana.fechaFin) {
-        const filtrosConFechas: VentaVendedoraFilters = {
-          ...filtros,
-          fechaInicio: rangoFechasRes.ultimaSemana.fechaInicio,
-          fechaFin: rangoFechasRes.ultimaSemana.fechaFin
-        };
-        setFiltros(filtrosConFechas);
-      }
-
-    } catch (error) {
-      console.error('Error cargando datos iniciales:', error);
-      toast.error('Error al cargar datos iniciales');
-    } finally {
-      setLoadingInicial(false);
-    }
-  };
-
-  const cargarVentas = async () => {
-    try {
-      setLoading(true);
-      const response = await ventasVendedorasService.obtenerVentas(filtros);
-      setVentasData(response);
-    } catch (error) {
-      console.error('Error cargando ventas:', error);
-      toast.error('Error al cargar las ventas');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const cargarEstadisticas = async () => {
-    try {
-      setLoadingStats(true);
-
-      const [statsResponse, todasVendedorasResponse] = await Promise.all([
-        ventasVendedorasService.obtenerEstadisticas(filtros),
-        ventasVendedorasService.obtenerTodasLasVendedoras(filtros)
-      ]);
-
-      const statsCompletas = {
-        ...statsResponse,
-        todasVendedoras: todasVendedorasResponse
-      };
-
-      setStats(statsCompletas);
-    } catch (error) {
-      console.error('Error cargando estadísticas:', error);
-      toast.error('Error al cargar estadísticas');
-    } finally {
-      setLoadingStats(false);
-    }
-  };
+  const loading = loadingVentas || loadingStats;
 
   const handleUploadSuccess = async () => {
     toast.success('¡Archivo subido exitosamente!', {
       icon: <CheckCircle2 className="text-green-500" />
     });
 
-    await cargarDatosIniciales();
+    // Invalidar todas las queries para refrescar datos
+    queryClient.invalidateQueries({ queryKey: vendedorasKeys.all });
     setVistaActual('dashboard');
   };
 
@@ -156,12 +105,13 @@ export const VentasVendedorasPage: React.FC = () => {
 
   const refrescarDatos = async () => {
     await Promise.all([
-      cargarVentas(),
-      cargarEstadisticas(),
-      cargarDatosIniciales()
+      refetchInitial(),
+      refetchVentas(),
+      refetchStats()
     ]);
     toast.success('Datos actualizados');
   };
+
 
   const opcionesVista = [
     {
@@ -302,24 +252,24 @@ export const VentasVendedorasPage: React.FC = () => {
         </div>
 
         {/* Información de datos cargados */}
-        {rangoFechas && (
+        {initialData?.rangoFechas && (
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4">
             <div className="flex items-center gap-3">
               <CheckCircle2 className="w-5 h-5 text-blue-400" />
               <div className="flex-1">
                 <p className="text-blue-400 font-medium">
                   💡 Datos disponibles desde{' '}
-                  {rangoFechas.fechaMinima ?
-                    dateHelpers.formatearFechaCompleta(rangoFechas.fechaMinima) :
+                  {initialData.rangoFechas.fechaMinima ?
+                    dateHelpers.formatearFechaCompleta(initialData.rangoFechas.fechaMinima) :
                     'N/A'
                   } hasta{' '}
-                  {rangoFechas.fechaMaxima ?
-                    dateHelpers.formatearFechaCompleta(rangoFechas.fechaMaxima) :
+                  {initialData.rangoFechas.fechaMaxima ?
+                    dateHelpers.formatearFechaCompleta(initialData.rangoFechas.fechaMaxima) :
                     'N/A'
                   }
                 </p>
                 <p className="text-blue-300/70 text-sm">
-                  {sucursales.length} sucursales • {vendedores.length} vendedoras registradas
+                  {initialData.sucursales.length} sucursales • {initialData.vendedores.length} vendedoras registradas
                 </p>
               </div>
             </div>
@@ -333,13 +283,13 @@ export const VentasVendedorasPage: React.FC = () => {
             <VentasVendedorasFilters
               filtros={filtros}
               onFiltrosChange={handleFiltrosChange}
-              sucursales={sucursales}
-              vendedores={vendedores}
-              rangoFechasDisponible={rangoFechas ? {
-                fechaMinima: rangoFechas.fechaMinima,
-                fechaMaxima: rangoFechas.fechaMaxima
+              sucursales={initialData?.sucursales || []}
+              vendedores={initialData?.vendedores || []}
+              rangoFechasDisponible={initialData?.rangoFechas ? {
+                fechaMinima: initialData.rangoFechas.fechaMinima,
+                fechaMaxima: initialData.rangoFechas.fechaMaxima
               } : undefined}
-              loading={loading || loadingStats}
+              loading={loading}
             />
 
             {/* Estadísticas */}
@@ -366,11 +316,11 @@ export const VentasVendedorasPage: React.FC = () => {
             <VentasVendedorasFilters
               filtros={filtros}
               onFiltrosChange={handleFiltrosChange}
-              sucursales={sucursales}
-              vendedores={vendedores}
-              rangoFechasDisponible={rangoFechas ? {
-                fechaMinima: rangoFechas.fechaMinima,
-                fechaMaxima: rangoFechas.fechaMaxima
+              sucursales={initialData?.sucursales || []}
+              vendedores={initialData?.vendedores || []}
+              rangoFechasDisponible={initialData?.rangoFechas ? {
+                fechaMinima: initialData.rangoFechas.fechaMinima,
+                fechaMaxima: initialData.rangoFechas.fechaMaxima
               } : undefined}
               loading={loading}
             />
@@ -387,7 +337,7 @@ export const VentasVendedorasPage: React.FC = () => {
         )}
 
         {/* Estado sin datos */}
-        {!loadingInicial && sucursales.length === 0 && (
+        {!loadingInicial && initialData?.sucursales.length === 0 && (
           <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-8 text-center">
             <AlertCircle className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">
@@ -416,7 +366,7 @@ export const VentasVendedorasPage: React.FC = () => {
         <VendedorasManagementModal
           isOpen={isManagementModalOpen}
           onClose={() => setIsManagementModalOpen(false)}
-          onUpdate={cargarDatosIniciales}
+          onUpdate={refetchInitial}
         />
 
       </div>

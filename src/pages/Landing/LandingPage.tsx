@@ -13,13 +13,10 @@ const LandingPage: React.FC = () => {
   return (
     <div className="relative">
       
-      {/* Background layers */}
       <div className="absolute inset-0 overflow-hidden">
         
-        {/* Animated gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#212026] via-[#1a1d22] to-[#2a1f2b]" />
         
-        {/* Animated mesh gradient overlay */}
         <div 
           className="absolute inset-0 opacity-30"
           style={{
@@ -31,7 +28,6 @@ const LandingPage: React.FC = () => {
           }}
         />
         
-        {/* Dot pattern overlay */}
         <div 
           className="absolute inset-0 opacity-20"
           style={{
@@ -44,14 +40,12 @@ const LandingPage: React.FC = () => {
         />
       </div>
 
-      {/* Content */}
       <div className="relative z-10">
         <Hero 
           onLoginClick={() => setShowLogin(true)}
           onRegisterClick={() => setShowRegister(true)}
         />
         
-        {/* Separator with gradient line */}
         <div className="relative py-1">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
@@ -66,7 +60,6 @@ const LandingPage: React.FC = () => {
         <ModulesGrid />
       </div>
 
-      {/* Modal Forms */}
       {showLogin && !isAuthenticated && (
         <LoginForm
           onSuccess={() => setShowLogin(false)}

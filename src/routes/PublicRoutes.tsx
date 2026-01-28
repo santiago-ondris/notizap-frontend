@@ -1,6 +1,8 @@
+import { lazy } from "react";
 import { Route } from "react-router-dom";
-import LandingPage from "@/pages/Landing/LandingPage";
-import NotFoundPage from "@/pages/NotFoundPage";
+
+const LandingPage = lazy(() => import("@/pages/Landing/LandingPage"));
+const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
 
 export const PublicRoutes = (
   <>
@@ -9,6 +11,6 @@ export const PublicRoutes = (
     <Route
       path="*"
       element={<NotFoundPage />}
-    />    
+    />
   </>
 );

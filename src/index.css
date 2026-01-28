@@ -92,8 +92,8 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
+  --border: rgb(255 255 255 / 10%);
+  --input: rgb(255 255 255 / 15%);
   --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
@@ -106,7 +106,7 @@
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-border: rgb(255 255 255 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
 
@@ -114,6 +114,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -209,29 +210,6 @@ select::-webkit-scrollbar-thumb:hover {
   box-sizing: border-box;
 }
 
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.custom-scrollbar::-webkit-scrollbar-corner {
-  background: rgba(255, 255, 255, 0.05);
-}
 body.overflow-hidden {
   overflow: hidden !important;
 }
@@ -245,19 +223,10 @@ body:has([data-state="open"]) {
 
 /* Estilos para scroll interno del modal */
 .modal-scroll-content {
-  /* Scroll suave nativo */
   overflow-y: auto;
   overflow-x: hidden;
-  
-  /* Mejor scroll en móviles */
   -webkit-overflow-scrolling: touch;
-  
-  /* Evita bounce scroll */
   overscroll-behavior: contain;
-  
-  /* Scrollbar personalizado para desktop */
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
 }
 
 .modal-scroll-content::-webkit-scrollbar {
@@ -294,7 +263,7 @@ body:has([data-state="open"]) {
     max-width: calc(100vw - 2rem) !important;
     max-height: 90vh !important;
   }
-  
+
   .modal-scroll-content {
     /* Más espacio para scroll en móviles */
     padding-bottom: 1rem;
@@ -313,20 +282,24 @@ html::-webkit-scrollbar {
 
 body::-webkit-scrollbar-track,
 html::-webkit-scrollbar-track {
-  background: #181818; /* Fondo oscuro, puedes ajustar a tu color base */
+  background: #181818;
+  /* Fondo oscuro, puedes ajustar a tu color base */
   border-radius: 6px;
 }
 
 body::-webkit-scrollbar-thumb,
 html::-webkit-scrollbar-thumb {
-  background: #33353c; /* Un gris más claro para la barra */
+  background: #33353c;
+  /* Un gris más claro para la barra */
   border-radius: 6px;
-  border: 1px solid #22222b; /* Borde apenas más oscuro para efecto sutil */
+  border: 1px solid #22222b;
+  /* Borde apenas más oscuro para efecto sutil */
 }
 
 body::-webkit-scrollbar-thumb:hover,
 html::-webkit-scrollbar-thumb:hover {
-  background: #444654; /* Un poco más claro al pasar el mouse */
+  background: #444654;
+  /* Un poco más claro al pasar el mouse */
 }
 
 body::-webkit-scrollbar-corner,

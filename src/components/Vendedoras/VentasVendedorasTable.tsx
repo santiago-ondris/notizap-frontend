@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Table, 
-  ChevronLeft, 
-  ChevronRight, 
-  ArrowUpDown, 
-  ArrowUp, 
+import {
+  Table,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpDown,
+  ArrowUp,
   ArrowDown,
   Calendar,
   User,
@@ -15,12 +15,12 @@ import {
   AlertTriangle,
   Gift
 } from 'lucide-react';
-import type { 
-  VentaVendedora, 
+import type {
+  VentaVendedora,
   VentasResponse,
-  VentaVendedoraStats 
+  VentaVendedoraStats
 } from '@/types/vendedoras/ventaVendedoraTypes';
-import type { 
+import type {
   VentaVendedoraFilters,
 } from '@/types/vendedoras/filtrosTypes';
 import { dateHelpers } from '@/utils/vendedoras/dateHelpers';
@@ -43,12 +43,12 @@ export const VentasVendedorasTable: React.FC<Props> = ({
   onFiltrosChange,
   loading = false
 }) => {
-  const montoTotalCorrecto = stats.todasVendedoras?.length > 0 
+  const montoTotalCorrecto = stats.todasVendedoras?.length > 0
     ? stats.todasVendedoras.reduce((sum, v) => sum + v.montoTotal, 0)
     : stats.montoTotal; // fallback al valor del backend si no hay vendedoras
 
   const [totalProductos, setTotalProductos] = useState<number>(0);
-  const [loadingContador, setLoadingContador] = useState(false);  
+  const [loadingContador, setLoadingContador] = useState(false);
 
   useEffect(() => {
     const cargarContadorProductos = async () => {
@@ -56,7 +56,7 @@ export const VentasVendedorasTable: React.FC<Props> = ({
         setTotalProductos(0);
         return;
       }
-  
+
       try {
         setLoadingContador(true);
         const resultado = await ventasVendedorasService.contarProductos(filtros);
@@ -68,13 +68,13 @@ export const VentasVendedorasTable: React.FC<Props> = ({
         setLoadingContador(false);
       }
     };
-  
+
     cargarContadorProductos();
-  }, [filtros.productoNombre, filtros.fechaInicio, filtros.fechaFin, filtros.sucursalNombre, filtros.vendedorNombre, filtros.turno]);  
+  }, [filtros.productoNombre, filtros.fechaInicio, filtros.fechaFin, filtros.sucursalNombre, filtros.vendedorNombre, filtros.turno]);
 
   const handleSort = (campo: VentaVendedoraFilters['orderBy']) => {
     const nuevaDireccion = filtros.orderBy === campo && filtros.orderDesc ? false : true;
-    
+
     onFiltrosChange({
       ...filtros,
       orderBy: campo,
@@ -94,7 +94,7 @@ export const VentasVendedorasTable: React.FC<Props> = ({
     if (filtros.orderBy !== campo) {
       return <ArrowUpDown className="w-4 h-4 text-white/40" />;
     }
-    return filtros.orderDesc 
+    return filtros.orderDesc
       ? <ArrowDown className="w-4 h-4 text-violet-400" />
       : <ArrowUp className="w-4 h-4 text-violet-400" />;
   };
@@ -105,7 +105,7 @@ export const VentasVendedorasTable: React.FC<Props> = ({
     const emojiDia = dateHelpers.obtenerEmojiDia(venta.fecha);
 
     return (
-      <tr 
+      <tr
         key={venta.id}
         className="border-b border-white/10 hover:bg-white/5 transition-colors group"
       >
@@ -150,8 +150,8 @@ export const VentasVendedorasTable: React.FC<Props> = ({
         {/* Turno */}
         <td className="px-4 py-4">
           <div className="flex items-center gap-2">
-            <div 
-              className="w-3 h-3 rounded-full" 
+            <div
+              className="w-3 h-3 rounded-full"
               style={{ backgroundColor: turnoInfo.color }}
             />
             <div>
@@ -197,16 +197,15 @@ export const VentasVendedorasTable: React.FC<Props> = ({
         {/* Total */}
         <td className="px-4 py-4">
           <div className="text-right">
-          <p className={`text-sm font-bold ${
-            venta.cantidad < 0 
-              ? 'text-red-400' 
-              : 'text-green-400'
-          }`}>
-            {venta.cantidad < 0
-              ? `-${estadisticasHelpers.formatearMoneda(Math.abs(venta.total))}`
-              : estadisticasHelpers.formatearMoneda(venta.total)
-            }
-          </p>
+            <p className={`text-sm font-bold ${venta.cantidad < 0
+                ? 'text-red-400'
+                : 'text-green-400'
+              }`}>
+              {venta.cantidad < 0
+                ? `-${estadisticasHelpers.formatearMoneda(Math.abs(venta.total))}`
+                : estadisticasHelpers.formatearMoneda(venta.total)
+              }
+            </p>
             <p className="text-xs text-white/60">
               {estadisticasHelpers.formatearMonedaCompacta(venta.total)}
             </p>
@@ -278,7 +277,7 @@ export const VentasVendedorasTable: React.FC<Props> = ({
   };
 
   return (
-    <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl overflow-hidden">
+    <div className="bg-white/10 border border-white/20 rounded-2xl overflow-hidden">
       {/* Contador de productos encontrados */}
       {filtros.productoNombre && (
         <div className="mb-4 px-4 py-3 bg-violet-500/20 border border-violet-500/30 rounded-xl">
@@ -355,7 +354,7 @@ export const VentasVendedorasTable: React.FC<Props> = ({
                     {getSortIcon('fecha')}
                   </button>
                 </th>
-                
+
                 <th className="px-4 py-4 text-left">
                   <button
                     onClick={() => handleSort('vendedor')}
@@ -430,11 +429,10 @@ export const VentasVendedorasTable: React.FC<Props> = ({
             <button
               onClick={() => handlePageChange(Math.max(1, paginaActual - 1))}
               disabled={paginaActual === 1}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                paginaActual === 1
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${paginaActual === 1
                   ? 'bg-white/5 text-white/40 cursor-not-allowed'
                   : 'bg-white/10 hover:bg-white/20 text-white/80 hover:text-white'
-              }`}
+                }`}
             >
               <ChevronLeft className="w-4 h-4" />
               Anterior
@@ -452,16 +450,15 @@ export const VentasVendedorasTable: React.FC<Props> = ({
               }
 
               const esPaginaActual = pagina === paginaActual;
-              
+
               return (
                 <button
                   key={index}
                   onClick={() => handlePageChange(pagina as number)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                    esPaginaActual
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${esPaginaActual
                       ? 'bg-red-500/20 text-red-400 border border-red-500/30'
                       : 'bg-white/5 hover:bg-white/10 text-white/70 hover:text-white'
-                  }`}
+                    }`}
                 >
                   {pagina}
                 </button>
@@ -473,11 +470,10 @@ export const VentasVendedorasTable: React.FC<Props> = ({
             <button
               onClick={() => handlePageChange(Math.min(totalPaginas, paginaActual + 1))}
               disabled={paginaActual === totalPaginas}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                paginaActual === totalPaginas
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${paginaActual === totalPaginas
                   ? 'bg-white/5 text-white/40 cursor-not-allowed'
                   : 'bg-white/10 hover:bg-white/20 text-white/80 hover:text-white'
-              }`}
+                }`}
             >
               Siguiente
               <ChevronRight className="w-4 h-4" />

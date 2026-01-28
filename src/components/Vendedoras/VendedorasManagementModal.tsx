@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X, Search, User, Check, XCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { ventasVendedorasService } from '@/services/vendedoras/ventasVendedorasService';
-import type { VendedorGestion } from '@/types/vendedoras/ventaVendedoraTypes';
 
 interface VendedorasManagementModalProps {
     isOpen: boolean;
@@ -10,56 +8,33 @@ interface VendedorasManagementModalProps {
     onUpdate: () => void;
 }
 
+import { useVendedoresGestionQuery, useToggleVendedoraMutation } from '@/hooks/vendedoras/useVentasVendedoras';
+
 export const VendedorasManagementModal: React.FC<VendedorasManagementModalProps> = ({
     isOpen,
     onClose,
     onUpdate
 }) => {
-    const [vendedoras, setVendedoras] = useState<VendedorGestion[]>([]);
-    const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const [togglingId, setTogglingId] = useState<number | null>(null);
 
-    useEffect(() => {
-        if (isOpen) {
-            cargarVendedoras();
-        } else {
-            setVendedoras([]);
-            setSearchTerm('');
-        }
-    }, [isOpen]);
+    const {
+        data: vendedoras = [],
+        isLoading: loading
+    } = useVendedoresGestionQuery(isOpen);
 
-    const cargarVendedoras = async () => {
-        try {
-            setLoading(true);
-            const data = await ventasVendedorasService.obtenerVendedoresGestion();
-            setVendedoras(data);
-        } catch (error) {
-            console.error('Error cargando vendedoras:', error);
-            toast.error('Error al cargar lista de vendedoras');
-        } finally {
-            setLoading(false);
-        }
-    };
+    const toggleMutation = useToggleVendedoraMutation();
 
-    const handleToggle = async (vendedora: VendedorGestion) => {
-        try {
-            setTogglingId(vendedora.id);
-            await ventasVendedorasService.toggleEstadoVendedora(vendedora.id);
-
-            // Actualizar estado local
-            setVendedoras(prev => prev.map(v =>
-                v.id === vendedora.id ? { ...v, activo: !v.activo } : v
-            ));
-
-            toast.success(`Vendedora ${vendedora.activo ? 'desactivada' : 'activada'} correctamente`);
-            onUpdate(); // Notificar al padre para recargar listas
-        } catch (error) {
-            console.error('Error cambiando estado:', error);
-            toast.error('Error al cambiar el estado de la vendedora');
-        } finally {
-            setTogglingId(null);
-        }
+    const handleToggle = async (vendedora: import('@/types/vendedoras/ventaVendedoraTypes').VendedorGestion) => {
+        toggleMutation.mutate(vendedora.id, {
+            onSuccess: () => {
+                toast.success(`Vendedora ${vendedora.activo ? 'desactivada' : 'activada'} correctamente`);
+                onUpdate();
+            },
+            onError: (error) => {
+                console.error('Error cambiando estado:', error);
+                toast.error('Error al cambiar el estado de la vendedora');
+            }
+        });
     };
 
     const filteredVendedoras = vendedoras.filter(v =>
@@ -132,14 +107,14 @@ export const VendedorasManagementModal: React.FC<VendedorasManagementModalProps>
 
                                 <button
                                     onClick={() => handleToggle(vendedora)}
-                                    disabled={togglingId === vendedora.id}
+                                    disabled={toggleMutation.isPending && toggleMutation.variables === vendedora.id}
                                     className={`p-2 rounded-lg transition-colors ${vendedora.activo
                                         ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400'
                                         : 'bg-green-500/10 hover:bg-green-500/20 text-green-400'
                                         }`}
                                     title={vendedora.activo ? 'Desactivar' : 'Activar'}
                                 >
-                                    {togglingId === vendedora.id ? (
+                                    {toggleMutation.isPending && toggleMutation.variables === vendedora.id ? (
                                         <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                                     ) : vendedora.activo ? (
                                         <XCircle className="w-5 h-5" />

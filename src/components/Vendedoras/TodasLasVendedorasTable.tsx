@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  Users, 
-  ChevronDown, 
-  Building2, 
+import {
+  Users,
+  ChevronDown,
+  Building2,
   TrendingUp,
   Search,
   ArrowUp,
@@ -20,9 +20,9 @@ interface Props {
 type OrdenPor = 'nombre' | 'montoTotal' | 'totalVentas' | 'promedio' | 'sucursales';
 type DireccionOrden = 'asc' | 'desc';
 
-export const TodasLasVendedorasTable: React.FC<Props> = ({ 
-  vendedoras = [], 
-  loading = false 
+export const TodasLasVendedorasTable: React.FC<Props> = ({
+  vendedoras = [],
+  loading = false
 }) => {
   const [busqueda, setBusqueda] = useState('');
   const [ordenPor, setOrdenPor] = useState<OrdenPor>('montoTotal');
@@ -32,7 +32,7 @@ export const TodasLasVendedorasTable: React.FC<Props> = ({
   // Filtrar por búsqueda
   const vendedorasFiltradas = vendedoras.filter(vendedora =>
     vendedora.vendedorNombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-    vendedora.sucursalesQueTrabaja.some(sucursal => 
+    vendedora.sucursalesQueTrabaja.some(sucursal =>
       sucursal.toLowerCase().includes(busqueda.toLowerCase())
     )
   );
@@ -40,7 +40,7 @@ export const TodasLasVendedorasTable: React.FC<Props> = ({
   // Ordenar vendedoras
   const vendedorasOrdenadas = [...vendedorasFiltradas].sort((a, b) => {
     let valorA: any, valorB: any;
-    
+
     switch (ordenPor) {
       case 'nombre':
         valorA = a.vendedorNombre.toLowerCase();
@@ -75,8 +75,8 @@ export const TodasLasVendedorasTable: React.FC<Props> = ({
   });
 
   // Controlar cuántas mostrar
-  const vendedorasParaMostrar = mostrandoTodas 
-    ? vendedorasOrdenadas 
+  const vendedorasParaMostrar = mostrandoTodas
+    ? vendedorasOrdenadas
     : vendedorasOrdenadas.slice(0, 10);
 
   const handleOrdenar = (campo: OrdenPor) => {
@@ -92,7 +92,7 @@ export const TodasLasVendedorasTable: React.FC<Props> = ({
     if (ordenPor !== campo) {
       return <ArrowUpDown className="w-4 h-4 text-white/40" />;
     }
-    return direccion === 'desc' 
+    return direccion === 'desc'
       ? <ArrowDown className="w-4 h-4 text-yellow-400" />
       : <ArrowUp className="w-4 h-4 text-yellow-400" />;
   };
@@ -109,7 +109,7 @@ export const TodasLasVendedorasTable: React.FC<Props> = ({
             <p className="text-sm text-white/60">Cargando datos...</p>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="h-16 bg-white/5 rounded-xl animate-pulse" />
@@ -131,7 +131,7 @@ export const TodasLasVendedorasTable: React.FC<Props> = ({
             <p className="text-sm text-white/60">Sin datos en el período seleccionado</p>
           </div>
         </div>
-        
+
         <div className="text-center py-8">
           <Users className="w-12 h-12 text-white/20 mx-auto mb-4" />
           <p className="text-white/60">No hay vendedoras con ventas en este período</p>
@@ -185,7 +185,7 @@ export const TodasLasVendedorasTable: React.FC<Props> = ({
                   {getSortIcon('nombre')}
                 </button>
               </th>
-              
+
               <th className="px-6 py-4 text-left">
                 <button
                   onClick={() => handleOrdenar('sucursales')}
@@ -231,11 +231,11 @@ export const TodasLasVendedorasTable: React.FC<Props> = ({
           </thead>
 
           <tbody>
-            {vendedorasParaMostrar.map((vendedora) => {
-              const posicion = vendedorasOrdenadas.findIndex(v => v.vendedorNombre === vendedora.vendedorNombre) + 1;
+            {vendedorasParaMostrar.map((vendedora, index) => {
+              const posicion = index + 1;
               const emojiPosicion = estadisticasHelpers.obtenerEmojiPosicion(posicion);
               return (
-                <tr 
+                <tr
                   key={vendedora.vendedorNombre}
                   className="border-b border-white/10 hover:bg-white/5 transition-colors group"
                 >
@@ -254,7 +254,7 @@ export const TodasLasVendedorasTable: React.FC<Props> = ({
                   <td className="px-6 py-4">
                     <div className="space-y-1">
                       {vendedora.sucursalesQueTrabaja.map((sucursal, idx) => (
-                        <span 
+                        <span
                           key={idx}
                           className="inline-block px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-xs mr-1"
                         >
@@ -343,7 +343,7 @@ export const TodasLasVendedorasTable: React.FC<Props> = ({
           <div>
             <p className="text-lg font-bold text-blue-400">
               {estadisticasHelpers.formatearMoneda(
-                vendedorasFiltradas.length > 0 
+                vendedorasFiltradas.length > 0
                   ? vendedorasFiltradas.reduce((sum, v) => sum + v.promedio, 0) / vendedorasFiltradas.length
                   : 0
               )}

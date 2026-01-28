@@ -121,7 +121,7 @@ export const Hero: React.FC<HeroProps> = ({ onLoginClick }) => {
 
           {/* Description */}
           <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-12 leading-relaxed">
-            No hay que dar pan al que muere de sed.
+            Notizap, mi querido Notizap.
           </p>
 
           {/* CTA Buttons */}

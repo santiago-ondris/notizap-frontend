@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, RefreshCw, AlertCircle, Megaphone, Pencil, Trash2, Image, Play, Loader2, History, CheckCircle2, XCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, RefreshCw, AlertCircle, Megaphone, Pencil, Trash2, Image, Play, Loader2, History, CheckCircle2, XCircle, HelpCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
 import metaCatalogService from '@/services/metaCatalog/metaCatalogService';
 import type { MetaCampaignDto, MetaCampaignExecutionDto } from '@/types/metaCatalog/metaCatalogTypes';
@@ -28,7 +29,7 @@ const MetaCatalogPage: React.FC = () => {
             const data = await metaCatalogService.obtenerTodas();
             setCampaigns(data);
         } catch (err) {
-            const msg = err instanceof Error ? err.message : 'Error al cargar campañas';
+            const msg = err instanceof Error ? err.message : 'Error al cargar conjuntos';
             setError(msg);
             toast.error(msg);
         } finally {
@@ -55,12 +56,12 @@ const MetaCatalogPage: React.FC = () => {
     };
 
     const handleDelete = async (campaign: MetaCampaignDto) => {
-        if (!window.confirm(`¿Eliminar la campaña "${campaign.name}"? Esta acción no se puede deshacer.`)) {
+        if (!window.confirm(`¿Eliminar el conjunto "${campaign.name}"? Esta acción no se puede deshacer.`)) {
             return;
         }
         try {
             await metaCatalogService.eliminar(campaign.id);
-            toast.success('Campaña eliminada');
+            toast.success('Conjunto eliminado');
             loadCampaigns();
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Error al eliminar';
@@ -99,7 +100,7 @@ const MetaCatalogPage: React.FC = () => {
                     });
 
                     if (execution.status === 'Completed') {
-                        toast.success(`Campaña procesada: ${execution.processedProducts} productos`);
+                        toast.success(`Conjunto procesado: ${execution.processedProducts} productos`);
                     } else {
                         toast.error(`Error en ejecución: ${execution.errorMessage}`);
                     }
@@ -193,7 +194,7 @@ const MetaCatalogPage: React.FC = () => {
                                 📢 Meta Catalog
                             </h1>
                             <p className="text-white/60 text-sm">
-                                Configurá campañas para procesar productos del catálogo de Meta con plantillas de diseño
+                                Configurá conjuntos para procesar productos del catálogo de Meta con plantillas de diseño
                             </p>
                         </div>
                     </div>
@@ -209,12 +210,21 @@ const MetaCatalogPage: React.FC = () => {
                             <span className="hidden sm:inline">Actualizar</span>
                         </button>
 
+                        <Link
+                            to="/meta-catalog/help"
+                            className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 border border-white/20 rounded-lg text-white/80 transition-all"
+                            title="Ayuda"
+                        >
+                            <HelpCircle className="w-4 h-4" />
+                            <span className="hidden sm:inline">Ayuda</span>
+                        </Link>
+
                         <button
                             onClick={handleCreate}
                             className="flex items-center gap-2 px-6 py-2 bg-[#6366F1]/20 hover:bg-[#6366F1]/30 border border-[#6366F1]/30 rounded-lg text-white transition-all"
                         >
                             <Plus className="w-4 h-4" />
-                            <span>Nueva Campaña</span>
+                            <span>Nuevo Conjunto</span>
                         </button>
                     </div>
                 </div>
@@ -251,16 +261,16 @@ const MetaCatalogPage: React.FC = () => {
                 {!loading && !error && campaigns.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-16 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl">
                         <Megaphone className="w-12 h-12 text-white/30 mb-4" />
-                        <h3 className="text-lg font-semibold text-white mb-2">No hay campañas</h3>
+                        <h3 className="text-lg font-semibold text-white mb-2">No hay conjuntos</h3>
                         <p className="text-white/60 text-sm mb-6 text-center max-w-md">
-                            Creá tu primera campaña para empezar a procesar productos del catálogo de Meta con plantillas de diseño.
+                            Creá tu primer conjunto para empezar a procesar productos del catálogo de Meta con plantillas de diseño.
                         </p>
                         <button
                             onClick={handleCreate}
                             className="flex items-center gap-2 px-6 py-2 bg-[#6366F1]/20 hover:bg-[#6366F1]/30 border border-[#6366F1]/30 rounded-lg text-white transition-all"
                         >
                             <Plus className="w-4 h-4" />
-                            <span>Crear Campaña</span>
+                            <span>Crear Conjunto</span>
                         </button>
                     </div>
                 )}
@@ -397,7 +407,7 @@ const MetaCatalogPage: React.FC = () => {
                                                         ? 'hover:bg-emerald-500/20 text-white/60 hover:text-emerald-400'
                                                         : 'text-white/20 cursor-not-allowed'
                                                     }`}
-                                                title={isExecuting ? 'Ejecutando...' : 'Ejecutar campaña'}
+                                                title={isExecuting ? 'Ejecutando...' : 'Ejecutar conjunto'}
                                             >
                                                 {isExecuting
                                                     ? <Loader2 className="w-4 h-4 animate-spin" />

@@ -5,6 +5,7 @@ import {
   Grid3X3,
   Lock,
   Fish,
+  ShoppingBag,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -32,6 +33,14 @@ const modules = [
     color: "#B695BF",
     to: "/vendedoras",
     roles: ["admin", "superadmin", "hr"]
+  },
+  {
+    title: "Catálogo Meta",
+    description: "Gestión de catálogo para anuncios",
+    icon: ShoppingBag,
+    color: "#1877F2",
+    to: "/meta-catalog",
+    roles: ["admin", "superadmin"]
   }
 ];
 
@@ -80,7 +89,7 @@ export const ModulesGrid: React.FC = () => {
   const filteredModules = modules.filter((mod) => mod.roles.includes(role!));
 
   return (
-    <section id="modules-section" className="py-20 max-w-6xl mx-auto px-6">
+    <section id="modules-section" className="py-20 max-w-4xl mx-auto px-6">
       {/* Header */}
       <div className="text-center mb-16">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-6">
@@ -93,7 +102,7 @@ export const ModulesGrid: React.FC = () => {
       </div>
 
       {/* Modules grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {filteredModules.map((module, index) => (
           <div
             key={module.title}

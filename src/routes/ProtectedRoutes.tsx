@@ -14,6 +14,7 @@ const ReposicionNinosPage = lazy(() => import("@/pages/Reposicion/ReposicionNino
 const ReposicionLogicaPage = lazy(() => import("@/pages/Reposicion/ReposicionLogicaPage").then(m => ({ default: m.ReposicionLogicaPage })));
 const InfoComisionesPage = lazy(() => import("@/pages/Vendedoras/InfoComisionesPage").then(m => ({ default: m.InfoComisionesPage })));
 const MetaCatalogPage = lazy(() => import("@/pages/MetaCatalog/MetaCatalogPage"));
+const MetaCatalogHelpPage = lazy(() => import("@/pages/MetaCatalog/MetaCatalogHelpPage"));
 
 export const ProtectedRoutes = (
   <>
@@ -35,6 +36,9 @@ export const ProtectedRoutes = (
       <Route path="ninos" element={<ReposicionNinosPage />} />
       <Route path="logica" element={<ReposicionLogicaPage />} />
     </Route>
-    <Route path="meta-catalog" element={<MetaCatalogPage />} />
+    <Route path="meta-catalog">
+      <Route index element={<MetaCatalogPage />} />
+      <Route path="help" element={<MetaCatalogHelpPage />} />
+    </Route>
   </>
 );

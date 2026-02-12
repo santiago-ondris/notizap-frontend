@@ -8,6 +8,7 @@ export interface CreateMetaCampaignDto {
     name: string;
     templateUrl: string;
     filters: MetaCampaignFilters;
+    frequencyHours: number;
 }
 
 export interface UpdateMetaCampaignDto {
@@ -15,6 +16,7 @@ export interface UpdateMetaCampaignDto {
     templateUrl: string;
     filters: MetaCampaignFilters;
     isActive: boolean;
+    frequencyHours: number;
 }
 
 export interface MetaCampaignDto {
@@ -23,6 +25,7 @@ export interface MetaCampaignDto {
     templateUrl: string;
     filters: MetaCampaignFilters;
     isActive: boolean;
+    frequencyHours: number;
     createdAt: string;
     updatedAt: string;
 }

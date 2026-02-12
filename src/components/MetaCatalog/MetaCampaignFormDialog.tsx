@@ -24,6 +24,7 @@ const FILTER_KEYS: FilterKey[] = ['brand', 'category', 'nameContains'];
 const MetaCampaignFormDialog: React.FC<Props> = ({ isOpen, onClose, onSaved, campaign }) => {
     const [name, setName] = useState('');
     const [templateUrl, setTemplateUrl] = useState('');
+    const [frequencyHours, setFrequencyHours] = useState(24);
     const [isActive, setIsActive] = useState(true);
     const [filters, setFilters] = useState<MetaCampaignFilters>({});
     const [filterInputs, setFilterInputs] = useState<Record<FilterKey, string>>({
@@ -43,12 +44,14 @@ const MetaCampaignFormDialog: React.FC<Props> = ({ isOpen, onClose, onSaved, cam
             if (campaign) {
                 setName(campaign.name);
                 setTemplateUrl(campaign.templateUrl);
+                setFrequencyHours(campaign.frequencyHours || 24);
                 setIsActive(campaign.isActive);
                 setFilters({ ...campaign.filters });
                 setTemplatePreview(campaign.templateUrl || null);
             } else {
                 setName('');
                 setTemplateUrl('');
+                setFrequencyHours(24);
                 setIsActive(true);
                 setFilters({});
                 setTemplatePreview(null);
@@ -122,7 +125,7 @@ const MetaCampaignFormDialog: React.FC<Props> = ({ isOpen, onClose, onSaved, cam
 
     const handleSubmit = async () => {
         if (!name.trim()) {
-            toast.error('El nombre de la campaña es obligatorio');
+            toast.error('El nombre del conjunto es obligatorio');
             return;
         }
 
@@ -141,17 +144,19 @@ const MetaCampaignFormDialog: React.FC<Props> = ({ isOpen, onClose, onSaved, cam
                     templateUrl,
                     filters,
                     isActive,
+                    frequencyHours,
                 };
                 await metaCatalogService.actualizar(campaign.id, dto);
-                toast.success('Campaña actualizada');
+                toast.success('Conjunto actualizado');
             } else {
                 const dto: CreateMetaCampaignDto = {
                     name: name.trim(),
                     templateUrl,
                     filters,
+                    frequencyHours,
                 };
                 await metaCatalogService.crear(dto);
-                toast.success('Campaña creada');
+                toast.success('Conjunto creado');
             }
             onSaved();
         } catch (err) {
@@ -174,7 +179,7 @@ const MetaCampaignFormDialog: React.FC<Props> = ({ isOpen, onClose, onSaved, cam
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
                     <h2 className="text-xl font-semibold text-white">
-                        {isEditing ? 'Editar Campaña' : 'Nueva Campaña'}
+                        {isEditing ? 'Editar Conjunto' : 'Nuevo Conjunto'}
                     </h2>
                     <button
                         onClick={onClose}
@@ -192,13 +197,27 @@ const MetaCampaignFormDialog: React.FC<Props> = ({ isOpen, onClose, onSaved, cam
                     {/* Name */}
                     <div>
                         <label className="block text-sm font-medium text-white/70 mb-1.5">
-                            Nombre de la campaña
+                            Nombre del conjunto
                         </label>
                         <input
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="ej: hot-sale-kids"
+                            className="w-full px-4 py-2.5 bg-white/5 border border-white/15 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-[#6366F1]/50 focus:ring-1 focus:ring-[#6366F1]/30 transition-all"
+                        />
+                    </div>
+
+                    {/* Frequency */}
+                    <div>
+                        <label className="block text-sm font-medium text-white/70 mb-1.5">
+                            Frecuencia de ejecución (horas)
+                        </label>
+                        <input
+                            type="number"
+                            min="1"
+                            value={frequencyHours}
+                            onChange={(e) => setFrequencyHours(parseInt(e.target.value) || 24)}
                             className="w-full px-4 py-2.5 bg-white/5 border border-white/15 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-[#6366F1]/50 focus:ring-1 focus:ring-[#6366F1]/30 transition-all"
                         />
                     </div>
@@ -249,7 +268,7 @@ const MetaCampaignFormDialog: React.FC<Props> = ({ isOpen, onClose, onSaved, cam
                     {/* Active toggle (only when editing) */}
                     {isEditing && (
                         <div className="flex items-center justify-between">
-                            <label className="text-sm font-medium text-white/70">Campaña activa</label>
+                            <label className="text-sm font-medium text-white/70">Conjunto activo</label>
                             <button
                                 type="button"
                                 onClick={() => setIsActive(!isActive)}
@@ -342,7 +361,7 @@ const MetaCampaignFormDialog: React.FC<Props> = ({ isOpen, onClose, onSaved, cam
                         disabled={saving}
                         className="px-5 py-2.5 bg-[#6366F1] hover:bg-[#5558E3] rounded-lg text-white font-medium transition-all disabled:opacity-50"
                     >
-                        {saving ? 'Guardando...' : isEditing ? 'Guardar Cambios' : 'Crear Campaña'}
+                        {saving ? 'Guardando...' : isEditing ? 'Guardar Cambios' : 'Crear Conjunto'}
                     </button>
                 </div>
             </div>

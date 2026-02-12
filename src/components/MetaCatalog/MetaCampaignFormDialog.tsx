@@ -19,7 +19,7 @@ interface Props {
 
 type FilterKey = keyof MetaCampaignFilters;
 
-const FILTER_KEYS: FilterKey[] = ['brand', 'category', 'nameContains'];
+const FILTER_KEYS: FilterKey[] = ['brand', 'nameContains', 'nameNotContains'];
 
 const MetaCampaignFormDialog: React.FC<Props> = ({ isOpen, onClose, onSaved, campaign }) => {
     const [name, setName] = useState('');
@@ -29,8 +29,8 @@ const MetaCampaignFormDialog: React.FC<Props> = ({ isOpen, onClose, onSaved, cam
     const [filters, setFilters] = useState<MetaCampaignFilters>({});
     const [filterInputs, setFilterInputs] = useState<Record<FilterKey, string>>({
         brand: '',
-        category: '',
         nameContains: '',
+        nameNotContains: '',
     });
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
@@ -56,7 +56,7 @@ const MetaCampaignFormDialog: React.FC<Props> = ({ isOpen, onClose, onSaved, cam
                 setFilters({});
                 setTemplatePreview(null);
             }
-            setFilterInputs({ brand: '', category: '', nameContains: '' });
+            setFilterInputs({ brand: '', nameContains: '', nameNotContains: '' });
         }
     }, [isOpen, campaign]);
 
@@ -67,6 +67,16 @@ const MetaCampaignFormDialog: React.FC<Props> = ({ isOpen, onClose, onSaved, cam
         const current = filters[key] || [];
         if (current.includes(value)) {
             toast.warning(`"${value}" ya existe en ${FILTER_FIELD_LABELS[key]}`);
+            return;
+        }
+
+        // Validación de conflictos (Contiene vs No Contiene)
+        if (key === 'nameContains' && filters.nameNotContains?.some(v => v.toLowerCase() === value.toLowerCase())) {
+            toast.error(`"${value}" no puede agregarse porque ya está excluido en "Nombre NO contiene"`);
+            return;
+        }
+        if (key === 'nameNotContains' && filters.nameContains?.some(v => v.toLowerCase() === value.toLowerCase())) {
+            toast.error(`"${value}" no puede excluirse porque es requerido en "Nombre contiene"`);
             return;
         }
 

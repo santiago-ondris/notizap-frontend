@@ -1,7 +1,7 @@
 export interface MetaCampaignFilters {
     brand?: string[];
-    category?: string[];
     nameContains?: string[];
+    nameNotContains?: string[];
 }
 
 export interface CreateMetaCampaignDto {
@@ -32,8 +32,8 @@ export interface MetaCampaignDto {
 
 export const FILTER_FIELD_LABELS: Record<keyof MetaCampaignFilters, string> = {
     brand: 'Marca',
-    category: 'Categoría',
     nameContains: 'Nombre contiene',
+    nameNotContains: 'Nombre NO contiene',
 };
 
 export interface MetaCampaignExecutionDto {

@@ -2,12 +2,13 @@ import React from 'react';
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Calendar, User, Building2, DollarSign, Loader2, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { comisionFormato } from '@/utils/vendedoras/comisionHelpers';
+import { batchHelpers } from '@/services/vendedoras/comisionesBatchService';
 import { PAGE_SIZE_COMISIONES } from '@/types/vendedoras/comisionFiltersTypes';
-import type { 
+import type {
   ComisionesResponse,
 } from '@/types/vendedoras/comisionTypes';
-import type { 
-  ComisionVendedoraFilters 
+import type {
+  ComisionVendedoraFilters
 } from '@/types/vendedoras/comisionFiltersTypes';
 
 interface Props {
@@ -34,9 +35,9 @@ export const ComisionesTable: React.FC<Props> = ({
   className
 }) => {
   const handleOrdenarPor = (campo: ComisionVendedoraFilters['orderBy']) => {
-    const nuevaDireccion = 
+    const nuevaDireccion =
       filtros.orderBy === campo && filtros.orderDesc ? false : true;
-    
+
     onFiltrosChange({
       orderBy: campo,
       orderDesc: nuevaDireccion,
@@ -49,9 +50,9 @@ export const ComisionesTable: React.FC<Props> = ({
   };
 
   const handleCambiarTamaño = (nuevoTamaño: number) => {
-    onFiltrosChange({ 
+    onFiltrosChange({
       pageSize: nuevoTamaño,
-      page: 1 
+      page: 1
     });
   };
 
@@ -59,9 +60,9 @@ export const ComisionesTable: React.FC<Props> = ({
     if (filtros.orderBy !== campo) {
       return <div className="w-4 h-4" />; // Espacio en blanco
     }
-    
-    return filtros.orderDesc ? 
-      <ChevronDown className="w-4 h-4" /> : 
+
+    return filtros.orderDesc ?
+      <ChevronDown className="w-4 h-4" /> :
       <ChevronUp className="w-4 h-4" />;
   };
 
@@ -98,7 +99,7 @@ export const ComisionesTable: React.FC<Props> = ({
 
   return (
     <div className={cn('space-y-4', className)}>
-      
+
       {/* Header con información */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4 text-sm text-white/60">
@@ -235,10 +236,10 @@ export const ComisionesTable: React.FC<Props> = ({
               </th>
             </tr>
           </thead>
-          
+
           <tbody>
             {data.data.map((comision, index) => (
-              <tr 
+              <tr
                 key={comision.id}
                 className={cn(
                   'border-t border-white/10 hover:bg-white/5 transition-colors',
@@ -249,7 +250,7 @@ export const ComisionesTable: React.FC<Props> = ({
                 <td className="px-4 py-3">
                   <div className="flex flex-col">
                     <span className="text-white font-medium">
-                      {comisionFormato.formatearFecha(comision.fecha)}
+                      {batchHelpers.formatearFechaDisplay(comision.fecha)}
                     </span>
                     <span className="text-white/60 text-xs">
                       {new Date(comision.fecha).toLocaleDateString('es-AR', { weekday: 'short' })}
@@ -333,7 +334,7 @@ export const ComisionesTable: React.FC<Props> = ({
       {/* Paginación */}
       {showPagination && data.totalPaginas > 1 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          
+
           {/* Info de páginas */}
           <div className="text-sm text-white/60">
             Página {filtros.page} de {data.totalPaginas}
@@ -341,7 +342,7 @@ export const ComisionesTable: React.FC<Props> = ({
 
           {/* Controles de paginación */}
           <div className="flex items-center gap-2">
-            
+
             {/* Primera página */}
             <button
               onClick={() => handleCambiarPagina(1)}
@@ -365,10 +366,10 @@ export const ComisionesTable: React.FC<Props> = ({
               const totalPaginas = data.totalPaginas;
               const paginaActual = filtros.page;
               const maxPaginas = 5;
-              
+
               let inicio = Math.max(1, paginaActual - Math.floor(maxPaginas / 2));
               let fin = Math.min(totalPaginas, inicio + maxPaginas - 1);
-              
+
               if (fin - inicio + 1 < maxPaginas) {
                 inicio = Math.max(1, fin - maxPaginas + 1);
               }
@@ -391,7 +392,7 @@ export const ComisionesTable: React.FC<Props> = ({
                   </button>
                 );
               }
-              
+
               return paginas;
             })()}
 

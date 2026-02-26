@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, Building2, Clock, Users, Calculator, AlertTriangle, CheckCircle2, Loader2, Search, Plus, Minus } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { comisionesVendedorasService } from '@/services/vendedoras/comisionesVendedorasService';
 import { comisionFormato, comisionPreview, comisionVendedoras } from '@/utils/vendedoras/comisionHelpers';
 import { toast } from 'react-toastify';
@@ -203,11 +204,15 @@ export const ComisionesCalculadora: React.FC<Props> = ({
             </button>
           </div>
 
-          {esRecalculo && datosVendedoras?.yaExistenComisiones && (
+          {datosVendedoras?.yaExistenComisiones && (
             <div className="mt-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
               <div className="flex items-center gap-2 text-yellow-300 text-sm">
                 <AlertTriangle className="w-4 h-4" />
-                <span>Ya existen comisiones calculadas. Se sobrescribirán con los nuevos valores.</span>
+                <span>
+                  {esRecalculo
+                    ? 'Ya existen comisiones calculadas. Se sobrescribirán con los nuevos valores.'
+                    : 'Atención: Ya existen comisiones para este turno. Si continúa, se crearán registros duplicados o podría haber conflictos.'}
+                </span>
               </div>
             </div>
           )}
@@ -289,6 +294,11 @@ export const ComisionesCalculadora: React.FC<Props> = ({
                         Individual
                       </button>
                     </div>
+                    <p className="mt-2 text-[10px] text-white/40 leading-tight">
+                      {modoCalculo === 'Compartido'
+                        ? '💡 El total se divide equitativamente entre las vendedoras seleccionadas.'
+                        : '💡 Cada vendedora recibe comisión según sus ventas individuales (1% por defecto).'}
+                    </p>
                   </div>
                 </div>
 
@@ -321,7 +331,7 @@ export const ComisionesCalculadora: React.FC<Props> = ({
                     <div className="text-white/60 text-sm">Total comisiones</div>
                     <div className="text-green-400 font-semibold">
                       {modoCalculo === 'Individual'
-                        ? 'Depende total'
+                        ? `~ ${comisionFormato.formatearMoneda(previewTotal)}`
                         : comisionFormato.formatearMoneda(previewTotal)
                       }
                     </div>
@@ -344,30 +354,44 @@ export const ComisionesCalculadora: React.FC<Props> = ({
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {vendedorasSeleccionadas.map(vendedora => (
-                      <div
-                        key={vendedora.id}
-                        className="flex items-center justify-between p-3 bg-green-500/10 border border-green-500/20 rounded-lg"
-                      >
-                        <div className="flex items-center gap-3">
-                          <CheckCircle2 className="w-4 h-4 text-green-400" />
-                          <span className="text-white/90">{vendedora.nombre}</span>
-                          {vendedora.tieneVentasEnElDia && (
-                            <span className="px-2 py-1 bg-blue-500/20 border border-blue-500/40 text-blue-300 text-xs rounded">
-                              Con ventas
-                            </span>
+                    {vendedorasSeleccionadas.map(vendedora => {
+                      const advertenciaSinVentas = modoCalculo === 'Individual' && !vendedora.tieneVentasEnElDia;
+                      return (
+                        <div
+                          key={vendedora.id}
+                          className={cn(
+                            "flex items-center justify-between p-3 border rounded-lg",
+                            advertenciaSinVentas ? "bg-red-500/10 border-red-500/20" : "bg-green-500/10 border-green-500/20"
                           )}
-                        </div>
-
-                        <button
-                          onClick={() => toggleVendedora(vendedora)}
-                          className="p-1 hover:bg-red-500/20 rounded transition-colors"
-                          disabled={calculando}
                         >
-                          <Minus className="w-4 h-4 text-red-400" />
-                        </button>
-                      </div>
-                    ))}
+                          <div className="flex items-center gap-3">
+                            {advertenciaSinVentas ? (
+                              <AlertTriangle className="w-4 h-4 text-red-500" />
+                            ) : (
+                              <CheckCircle2 className="w-4 h-4 text-green-400" />
+                            )}
+                            <span className="text-white/90">{vendedora.nombre}</span>
+                            {vendedora.tieneVentasEnElDia ? (
+                              <span className="px-2 py-1 bg-blue-500/20 border border-blue-500/40 text-blue-300 text-xs rounded">
+                                Con ventas
+                              </span>
+                            ) : advertenciaSinVentas ? (
+                              <span className="px-2 py-1 bg-red-500/20 border border-red-500/40 text-red-300 text-xs rounded">
+                                Sin ventas — se calculará $0
+                              </span>
+                            ) : null}
+                          </div>
+
+                          <button
+                            onClick={() => toggleVendedora(vendedora)}
+                            className="p-1 hover:bg-red-500/20 rounded transition-colors"
+                            disabled={calculando}
+                          >
+                            <Minus className="w-4 h-4 text-red-400" />
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -414,17 +438,28 @@ export const ComisionesCalculadora: React.FC<Props> = ({
                           e.stopPropagation();
                         }}
                       >
-                        {vendedorasParaAgregar.map(vendedora => (
-                          <button
-                            key={vendedora.id}
-                            onClick={() => toggleVendedora(vendedora)}
-                            className="w-full flex items-center justify-between p-2 hover:bg-white/10 rounded-lg transition-colors"
-                            disabled={calculando}
-                          >
-                            <span className="text-white/80">{vendedora.nombre}</span>
-                            <Plus className="w-4 h-4 text-green-400" />
-                          </button>
-                        ))}
+                        {vendedorasParaAgregar.map(vendedora => {
+                          const advertenciaQuitadaConVentas = modoCalculo === 'Individual' && vendedora.tieneVentasEnElDia;
+                          return (
+                            <button
+                              key={vendedora.id}
+                              onClick={() => toggleVendedora(vendedora)}
+                              className="w-full flex items-center justify-between p-2 hover:bg-white/10 rounded-lg transition-colors"
+                              disabled={calculando}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="text-white/80">{vendedora.nombre}</span>
+                                {advertenciaQuitadaConVentas && (
+                                  <span className="px-2 py-0.5 bg-yellow-500/20 border border-yellow-500/40 text-yellow-300 text-[10px] rounded flex items-center gap-1">
+                                    <AlertTriangle className="w-3 h-3" />
+                                    Tiene ventas, no recibirá comisión
+                                  </span>
+                                )}
+                              </div>
+                              <Plus className="w-4 h-4 text-green-400" />
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

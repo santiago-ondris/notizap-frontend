@@ -10,7 +10,7 @@ import {
   calendarioNavegacion,
   calendarioAnalisis
 } from '@/utils/vendedoras/calendarioHelpers';
-import { comisionFormato } from '@/utils/vendedoras/comisionHelpers';
+import { batchHelpers } from '@/services/vendedoras/comisionesBatchService';
 import type {
   DiaCalendario,
   DatosMaestrosComisiones
@@ -208,6 +208,7 @@ export const ComisionesCalendario: React.FC<Props> = ({
         onFiltrosChange={handleFiltrosChange}
         sucursales={datosMaestros?.sucursales || []}
         loading={loading}
+        showDateFilters={false}
       />
 
       {/* Header del calendario */}
@@ -384,7 +385,7 @@ export const ComisionesCalendario: React.FC<Props> = ({
                 onClick={() => handleDiaClick(dia)}
                 className="px-3 py-1 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/40 rounded-lg text-yellow-300 text-sm transition-colors"
               >
-                {comisionFormato.formatearFecha(dia.fecha)}
+                {batchHelpers.formatearFechaDisplay(dia.fecha)}
               </button>
             ))}
           </div>

@@ -4,7 +4,9 @@ import { cn } from '@/lib/utils';
 import { ComisionesFilters } from './ComisionesFilters';
 import { ComisionesTable } from './ComisionesTable';
 import { comisionesVendedorasService } from '@/services/vendedoras/comisionesVendedorasService';
-import { comisionFormato, comisionFechas, comisionEstadisticas } from '@/utils/vendedoras/comisionHelpers';
+import { comisionFormato, comisionEstadisticas, comisionFechas } from '@/utils/vendedoras/comisionHelpers';
+import { batchHelpers } from '@/services/vendedoras/comisionesBatchService';
+import { ShadcnDatePicker } from '@/components/ui/ShadcnDatePicker';
 import { toast } from 'react-toastify';
 import { TURNOS_COMISIONES } from '@/types/vendedoras/comisionFiltersTypes';
 import type {
@@ -35,19 +37,18 @@ export const ComisionesPorSucursal: React.FC<Props> = ({ className }) => {
   const [turnoSeleccionado, setTurnoSeleccionado] = useState<string>('');
 
   // Estados de filtros
-  const rangoMesAnterior = comisionFechas.rangoMesAnterior();
   const [filtrosSucursal, setFiltrosSucursal] = useState<FiltrosSucursalTurno>({
     sucursalNombre: '',
     turno: 'Mañana' as 'Mañana' | 'Tarde',
-    fechaInicio: comisionFechas.formatearParaApi(rangoMesAnterior.inicio),
-    fechaFin: comisionFechas.formatearParaApi(rangoMesAnterior.fin)
+    fechaInicio: batchHelpers.obtenerPrimerDiaMesActual(),
+    fechaFin: batchHelpers.obtenerAyer()
   });
 
   const [filtrosDetalle, setFiltrosDetalle] = useState<ComisionVendedoraFilters>({
     sucursalNombre: '',
     turno: '',
-    fechaInicio: comisionFechas.formatearParaApi(rangoMesAnterior.inicio),
-    fechaFin: comisionFechas.formatearParaApi(rangoMesAnterior.fin),
+    fechaInicio: batchHelpers.obtenerPrimerDiaMesActual(),
+    fechaFin: batchHelpers.obtenerAyer(),
     excluirDomingos: true,
     orderBy: 'fecha',
     orderDesc: true,
@@ -276,36 +277,33 @@ export const ComisionesPorSucursal: React.FC<Props> = ({ className }) => {
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="block text-xs text-white/60 mb-1">Desde</label>
-                    <input
-                      type="date"
-                      value={filtrosSucursal.fechaInicio || ''}
-                      onChange={(e) => handleCambiarRangoFechas(e.target.value, filtrosSucursal.fechaFin)}
-                      className="w-full px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:border-blue-400 transition-colors"
+                    <ShadcnDatePicker
+                      value={filtrosSucursal.fechaInicio ? new Date(filtrosSucursal.fechaInicio + 'T12:00:00') : null}
+                      onChange={(date) => handleCambiarRangoFechas(date ? comisionFechas.formatearParaApi(date) : undefined, filtrosSucursal.fechaFin)}
+                      className="w-full px-2 py-1 bg-white/10 border border-white/20 text-white text-sm"
                     />
                   </div>
 
                   <div>
                     <label className="block text-xs text-white/60 mb-1">Hasta</label>
-                    <input
-                      type="date"
-                      value={filtrosSucursal.fechaFin || ''}
-                      onChange={(e) => handleCambiarRangoFechas(filtrosSucursal.fechaInicio, e.target.value)}
-                      className="w-full px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:border-blue-400 transition-colors"
+                    <ShadcnDatePicker
+                      value={filtrosSucursal.fechaFin ? new Date(filtrosSucursal.fechaFin + 'T12:00:00') : null}
+                      onChange={(date) => handleCambiarRangoFechas(filtrosSucursal.fechaInicio, date ? comisionFechas.formatearParaApi(date) : undefined)}
+                      className="w-full px-2 py-1 bg-white/10 border border-white/20 text-white text-sm"
                     />
                   </div>
                 </div>
 
                 <button
                   onClick={() => {
-                    const rango = comisionFechas.rangoMesAnterior();
                     handleCambiarRangoFechas(
-                      comisionFechas.formatearParaApi(rango.inicio),
-                      comisionFechas.formatearParaApi(rango.fin)
+                      batchHelpers.obtenerPrimerDiaMesActual(),
+                      batchHelpers.obtenerAyer()
                     );
                   }}
                   className="w-full px-3 py-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/40 rounded text-blue-300 text-sm transition-colors"
                 >
-                  📅 Mes anterior
+                  📅 Restablecer Fechas
                 </button>
               </div>
             </div>

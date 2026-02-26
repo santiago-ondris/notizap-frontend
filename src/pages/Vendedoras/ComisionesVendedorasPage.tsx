@@ -33,7 +33,7 @@ interface OpcionVista {
   descripcion: string;
 }
 
-const OPCIONES_VISTA: OpcionVista[] = [
+const ACCIONES_PRINCIPALES: OpcionVista[] = [
   {
     key: 'calculo-rapido',
     label: 'Cálculo Rápido',
@@ -51,7 +51,10 @@ const OPCIONES_VISTA: OpcionVista[] = [
     label: 'Exportar liquidación',
     icono: FileSpreadsheet,
     descripcion: 'Generar archivo Excel de liquidación'
-  },
+  }
+];
+
+const CONSULTAS_SECUNDARIAS: OpcionVista[] = [
   {
     key: 'por-vendedora',
     label: 'Por vendedora',
@@ -66,9 +69,9 @@ const OPCIONES_VISTA: OpcionVista[] = [
   },
   {
     key: 'tabla-general',
-    label: 'Tabla general',
+    label: 'Historial',
     icono: Table,
-    descripcion: 'Vista completa de todas las comisiones'
+    descripcion: 'Historial completo de comisiones'
   }
 ];
 
@@ -315,27 +318,54 @@ export const ComisionesVendedorasPage: React.FC = () => {
 
               </div>
 
-              {/* Selector de vista */}
-              <div className="flex flex-wrap gap-2">
-                {OPCIONES_VISTA.map(opcion => {
-                  const IconComponent = opcion.icono;
-                  return (
-                    <button
-                      key={opcion.key}
-                      onClick={() => setVistaActual(opcion.key)}
-                      className={cn(
-                        'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all',
-                        vistaActual === opcion.key
-                          ? 'bg-blue-500/20 border border-blue-500/40 text-blue-300'
-                          : 'bg-white/10 hover:bg-white/20 border border-white/20 text-white/80 hover:text-white'
-                      )}
-                      title={opcion.descripcion}
-                    >
-                      <IconComponent className="w-4 h-4" />
-                      {opcion.label}
-                    </button>
-                  );
-                })}
+              {/* Selectores de vista: Principales y Secundarios */}
+              <div className="flex flex-col gap-4">
+                {/* Acciones principales */}
+                <div className="flex flex-wrap gap-2 items-center">
+                  {ACCIONES_PRINCIPALES.map(opcion => {
+                    const IconComponent = opcion.icono;
+                    return (
+                      <button
+                        key={opcion.key}
+                        onClick={() => setVistaActual(opcion.key)}
+                        className={cn(
+                          'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all',
+                          vistaActual === opcion.key
+                            ? 'bg-blue-500/20 border border-blue-500/40 text-blue-300'
+                            : 'bg-white/10 hover:bg-white/20 border border-white/20 text-white/80 hover:text-white'
+                        )}
+                        title={opcion.descripcion}
+                      >
+                        <IconComponent className="w-4 h-4" />
+                        {opcion.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Consultas (Secundarias) */}
+                <div className="flex flex-wrap gap-2 items-center">
+                  <span className="text-white/40 text-xs font-semibold uppercase tracking-wider mr-2 ml-1">Consultas</span>
+                  {CONSULTAS_SECUNDARIAS.map(opcion => {
+                    const IconComponent = opcion.icono;
+                    return (
+                      <button
+                        key={opcion.key}
+                        onClick={() => setVistaActual(opcion.key)}
+                        className={cn(
+                          'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-all',
+                          vistaActual === opcion.key
+                            ? 'bg-blue-500/10 border border-blue-500/30 text-blue-300'
+                            : 'bg-transparent hover:bg-white/5 border border-transparent text-white/60 hover:text-white/90'
+                        )}
+                        title={opcion.descripcion}
+                      >
+                        <IconComponent className="w-4 h-4" />
+                        {opcion.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>

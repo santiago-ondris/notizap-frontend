@@ -14,6 +14,8 @@ interface ShadcnDatePickerProps {
   min?: Date;
   max?: Date;
   placeholder?: string;
+  className?: string;
+  disabled?: boolean;
 }
 
 export const ShadcnDatePicker: React.FC<ShadcnDatePickerProps> = ({
@@ -22,13 +24,16 @@ export const ShadcnDatePicker: React.FC<ShadcnDatePickerProps> = ({
   min,
   max,
   placeholder = "Elegir fecha",
+  className,
+  disabled = false,
 }) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className="w-full justify-start text-left font-normal bg-white/10 border border-white/10 rounded-lg text-white/80"
+          disabled={disabled}
+          className={`justify-start text-left font-normal bg-white/10 border border-white/10 rounded-lg text-white/80 ${className || "w-full"}`}
         >
           <CalendarIcon className="mr-2 h-4 w-4 text-white/50" />
           {value ? (
@@ -38,7 +43,7 @@ export const ShadcnDatePicker: React.FC<ShadcnDatePickerProps> = ({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 bg-[#212026] border border-white/20 rounded-xl shadow-2xl">
+      <PopoverContent className="dark w-auto p-0 bg-[#212026] border border-white/20 rounded-xl shadow-2xl text-white">
         <Calendar
           mode="single"
           required

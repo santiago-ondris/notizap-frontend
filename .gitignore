@@ -27,3 +27,5 @@ deprecated
 .env
 
 src/components/Vendedoras/SincronizarPalabrasEspeciales.tsx
+
+*.tsbuildinfo

@@ -3,6 +3,7 @@ import { X, Calendar, Building2, Clock, Calculator, AlertTriangle, CheckCircle2,
 import { ComisionEstadoChip } from './ComisionEstadoChip';
 import { comisionesVendedorasService } from '@/services/vendedoras/comisionesVendedorasService';
 import { comisionFormato } from '@/utils/vendedoras/comisionHelpers';
+import { batchHelpers } from '@/services/vendedoras/comisionesBatchService';
 import { calendarioDetalle } from '@/utils/vendedoras/calendarioHelpers';
 import { AjusteManualModal } from './AjusteManualModal';
 import { toast } from 'react-toastify';
@@ -34,6 +35,8 @@ export const ComisionDiaModal: React.FC<Props> = ({
   const [vendedorasData, setVendedorasData] = useState<Map<string, VendedorasDisponiblesResponse>>(new Map());
   const [ajustesData, setAjustesData] = useState<Map<string, AjusteComisionManual[]>>(new Map());
   const [error, setError] = useState<string | null>(null);
+
+  const [expandedSucursales, setExpandedSucursales] = useState<Set<string>>(new Set());
 
   // Estado para el modal de ajuste manual
   const [ajusteModalConfig, setAjusteModalConfig] = useState<{
@@ -69,19 +72,19 @@ export const ComisionDiaModal: React.FC<Props> = ({
       setError(null);
 
       const vendedorasDisponibles = await comisionesVendedorasService.obtenerDetalleDia(dia.fecha);
+      const todosLosAjustes = await comisionesVendedorasService.obtenerAjustesDia(dia.fecha);
+
       const nuevasVendedoras = new Map<string, VendedorasDisponiblesResponse>();
       const nuevosAjustes = new Map<string, AjusteComisionManual[]>();
 
-      // Cargar ajustes para cada estado que tenga ventas o comisiones
-      await Promise.all(dia.estadosPorSucursalTurno.map(async (estado) => {
-        const ajustes = await comisionesVendedorasService.obtenerAjustesPorDia(
-          dia.fecha,
-          estado.sucursalNombre,
-          estado.turno
-        );
-        const key = `${estado.sucursalNombre}-${estado.turno}`;
-        nuevosAjustes.set(key, ajustes);
-      }));
+      // Agrupar ajustes por sucursal-turno localmente
+      todosLosAjustes.forEach(ajuste => {
+        const key = `${ajuste.sucursalNombre}-${ajuste.turno}`;
+        if (!nuevosAjustes.has(key)) {
+          nuevosAjustes.set(key, []);
+        }
+        nuevosAjustes.get(key)!.push(ajuste);
+      });
 
       vendedorasDisponibles.forEach(vendedora => {
         const key = `${vendedora.sucursalNombre}-${vendedora.turno}`;
@@ -143,8 +146,11 @@ export const ComisionDiaModal: React.FC<Props> = ({
             <div className="flex items-center gap-3">
               <Calendar className="w-6 h-6 text-blue-400" />
               <div>
+                <h2 className="text-xl font-bold text-white uppercase text-sm tracking-wider opacity-80 mb-1">
+                  Resumen del día
+                </h2>
                 <h2 className="text-xl font-bold text-white">
-                  {comisionFormato.formatearFechaCompleta(dia.fecha)}
+                  {batchHelpers.formatearFechaDisplay(dia.fecha)}
                 </h2>
                 <div className="flex items-center gap-2 mt-1">
                   <ComisionEstadoChip estado={dia.estado} />
@@ -254,130 +260,155 @@ export const ComisionDiaModal: React.FC<Props> = ({
                 );
 
                 return (
-                  <div key={total.sucursal} className="bg-white/5 rounded-xl p-5">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="font-medium text-white">{total.sucursal}</h4>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-white">
-                          {comisionFormato.formatearMoneda(total.montoTotal)}
-                        </div>
-                        <div className="text-xs text-white/60">Facturado total</div>
-                      </div>
-                    </div>
-
-                    {/* Turnos de la sucursal */}
-                    <div className="space-y-3">
-                      {estadosSucursal.map(estado => {
-                        const key = `${estado.sucursalNombre}-${estado.turno}`;
-                        const vendedorasInfo = vendedorasData.get(key);
-
-                        return (
-                          <div key={estado.turno} className="bg-white/5 rounded-lg p-4">
-                            <div className="flex items-center justify-between mb-3">
-                              <div className="flex items-center gap-3">
-                                <Clock className="w-4 h-4 text-white/60" />
-                                <span className="font-medium text-white">
-                                  {comisionFormato.formatearTurno(estado.turno)}
-                                </span>
-                                <ComisionEstadoChip
-                                  estado={estado.tieneComisionesCalculadas ? 'completo' : 'pendiente'}
-                                  size="sm"
-                                />
-                              </div>
-
-                              <div className="text-right">
-                                <div className="font-medium text-white">
-                                  {comisionFormato.formatearMoneda(estado.montoFacturado)}
-                                </div>
-                                <div className="text-xs text-white/60">
-                                  {estado.vendedorasConVentas} vendedoras
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Información adicional */}
-                            {vendedorasInfo && (
-                              <div className="grid grid-cols-2 gap-4 mb-3 text-sm">
-                                <div>
-                                  <span className="text-white/60">Vendedoras con ventas: </span>
-                                  <span className="text-white">{vendedorasInfo.vendedorasConVentas.length}</span>
-                                </div>
-                                <div>
-                                  <span className="text-white/60">Total disponibles: </span>
-                                  <span className="text-white">{vendedorasInfo.vendedorasDisponibles.length}</span>
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Acciones */}
-                            <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5 mt-3">
-                              {estado.tieneComisionesCalculadas ? (
-                                <button
-                                  onClick={() => handleRecalcularClick(estado)}
-                                  className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/40 rounded-lg text-yellow-300 text-xs transition-colors"
-                                >
-                                  <Calculator className="w-3.5 h-3.5" />
-                                  Recalcular
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => handleCalcularClick(estado)}
-                                  className="flex items-center gap-2 px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 border border-green-500/40 rounded-lg text-green-300 text-xs transition-colors"
-                                >
-                                  <Calculator className="w-3.5 h-3.5" />
-                                  Calcular comisiones
-                                </button>
-                              )}
-
-                              {vendedorasInfo && (
-                                <button
-                                  onClick={() => abrirAjusteModal(vendedorasInfo)}
-                                  className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-500/40 rounded-lg text-indigo-300 text-xs transition-colors"
-                                >
-                                  <PlusCircle className="w-3.5 h-3.5" />
-                                  Añadir Ajuste
-                                </button>
-                              )}
-
-                              {vendedorasInfo && vendedorasInfo.yaExistenComisiones && (
-                                <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 border border-blue-500/40 rounded-lg text-blue-300 text-xs">
-                                  <CheckCircle2 className="w-3.5 h-3.5" />
-                                  Ya calculadas
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Mostrar Ajustes Manuales si existen */}
-                            {ajustesData.get(key) && ajustesData.get(key)!.length > 0 && (
-                              <div className="mt-4 space-y-2">
-                                <h5 className="text-[10px] uppercase tracking-wider text-white/40 font-bold px-1">Ajustes Manuales</h5>
-                                <div className="space-y-1">
-                                  {ajustesData.get(key)!.map(ajuste => (
-                                    <div key={ajuste.id} className="flex items-center justify-between bg-white/5 border border-white/5 rounded-lg px-3 py-2 text-xs">
-                                      <div className="flex flex-col">
-                                        <span className="text-white font-medium">{ajuste.vendedorNombre}</span>
-                                        <span className="text-[10px] text-white/40">Por {ajuste.creadoPorNombre}</span>
-                                      </div>
-                                      <div className="flex items-center gap-3">
-                                        <span className={ajuste.montoAjuste >= 0 ? 'text-green-400 font-bold' : 'text-red-400 font-bold'}>
-                                          {ajuste.montoAjuste >= 0 ? '+' : ''}{comisionFormato.formatearMoneda(ajuste.montoAjuste)}
-                                        </span>
-                                        <button
-                                          onClick={() => handleEliminarAjuste(ajuste.id)}
-                                          className="p-1 hover:bg-red-500/20 rounded transition-colors text-white/40 hover:text-red-400"
-                                        >
-                                          <Trash2 className="w-3.5 h-3.5" />
-                                        </button>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
+                  <div key={total.sucursal} className="bg-white/5 rounded-xl border border-white/5 overflow-hidden">
+                    <button
+                      onClick={() => {
+                        const newExpanded = new Set(expandedSucursales);
+                        if (newExpanded.has(total.sucursal)) {
+                          newExpanded.delete(total.sucursal);
+                        } else {
+                          newExpanded.add(total.sucursal);
+                        }
+                        setExpandedSucursales(newExpanded);
+                      }}
+                      className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors focus:outline-none text-left"
+                    >
+                      <h4 className="font-medium text-white text-lg flex items-center gap-2">
+                        {total.sucursal}
+                        {!expandedSucursales.has(total.sucursal) && <span className="text-xs text-white/40 font-normal">({estadosSucursal.length} turnos)</span>}
+                      </h4>
+                      <div className="flex items-center gap-4 text-right">
+                        <div>
+                          <div className="text-lg font-bold text-white">
+                            {comisionFormato.formatearMoneda(total.montoTotal)}
                           </div>
-                        );
-                      })}
-                    </div>
+                          <div className="text-xs text-white/60">Facturado total</div>
+                        </div>
+                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+                          {expandedSucursales.has(total.sucursal) ? (
+                            <span className="text-white/40">▼</span>
+                          ) : (
+                            <span className="text-white/40">▶</span>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* Turnos de la sucursal (Colapsables) */}
+                    {expandedSucursales.has(total.sucursal) && (
+                      <div className="space-y-3 p-5 pt-0 border-t border-white/5">
+                        {estadosSucursal.map(estado => {
+                          const key = `${estado.sucursalNombre}-${estado.turno}`;
+                          const vendedorasInfo = vendedorasData.get(key);
+
+                          return (
+                            <div key={estado.turno} className="bg-white/5 rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-3">
+                                  <Clock className="w-4 h-4 text-white/60" />
+                                  <span className="font-medium text-white">
+                                    {comisionFormato.formatearTurno(estado.turno)}
+                                  </span>
+                                  <ComisionEstadoChip
+                                    estado={estado.tieneComisionesCalculadas ? 'completo' : 'pendiente'}
+                                    size="sm"
+                                  />
+                                </div>
+
+                                <div className="text-right">
+                                  <div className="font-medium text-white">
+                                    {comisionFormato.formatearMoneda(estado.montoFacturado)}
+                                  </div>
+                                  <div className="text-xs text-white/60">
+                                    {estado.vendedorasConVentas} vendedoras
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Información adicional */}
+                              {vendedorasInfo && (
+                                <div className="grid grid-cols-2 gap-4 mb-3 text-sm">
+                                  <div>
+                                    <span className="text-white/60">Vendedoras con ventas: </span>
+                                    <span className="text-white">{vendedorasInfo.vendedorasConVentas.length}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-white/60">Total disponibles: </span>
+                                    <span className="text-white">{vendedorasInfo.vendedorasDisponibles.length}</span>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Acciones */}
+                              <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5 mt-3">
+                                {estado.tieneComisionesCalculadas ? (
+                                  <button
+                                    onClick={() => handleRecalcularClick(estado)}
+                                    className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/40 rounded-lg text-yellow-300 text-xs transition-colors"
+                                  >
+                                    <Calculator className="w-3.5 h-3.5" />
+                                    Recalcular
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => handleCalcularClick(estado)}
+                                    className="flex items-center gap-2 px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 border border-green-500/40 rounded-lg text-green-300 text-xs transition-colors"
+                                  >
+                                    <Calculator className="w-3.5 h-3.5" />
+                                    Calcular comisiones
+                                  </button>
+                                )}
+
+                                {vendedorasInfo && (
+                                  <button
+                                    onClick={() => abrirAjusteModal(vendedorasInfo)}
+                                    className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-500/40 rounded-lg text-indigo-300 text-xs transition-colors"
+                                  >
+                                    <PlusCircle className="w-3.5 h-3.5" />
+                                    Añadir Ajuste
+                                  </button>
+                                )}
+
+                                {vendedorasInfo && vendedorasInfo.yaExistenComisiones && (
+                                  <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 border border-blue-500/40 rounded-lg text-blue-300 text-xs">
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    Ya calculadas
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Mostrar Ajustes Manuales si existen */}
+                              {ajustesData.get(key) && ajustesData.get(key)!.length > 0 && (
+                                <div className="mt-4 space-y-2">
+                                  <h5 className="text-[10px] uppercase tracking-wider text-white/40 font-bold px-1">Ajustes Manuales</h5>
+                                  <div className="space-y-1">
+                                    {ajustesData.get(key)!.map(ajuste => (
+                                      <div key={ajuste.id} className="flex items-center justify-between bg-white/5 border border-white/5 rounded-lg px-3 py-2 text-xs">
+                                        <div className="flex flex-col">
+                                          <span className="text-white font-medium">{ajuste.vendedorNombre}</span>
+                                          <span className="text-[10px] text-white/40">Por {ajuste.creadoPorNombre}</span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                          <span className={ajuste.montoAjuste >= 0 ? 'text-green-400 font-bold' : 'text-red-400 font-bold'}>
+                                            {ajuste.montoAjuste >= 0 ? '+' : ''}{comisionFormato.formatearMoneda(ajuste.montoAjuste)}
+                                          </span>
+                                          <button
+                                            onClick={() => handleEliminarAjuste(ajuste.id)}
+                                            className="p-1 hover:red-500/20 rounded transition-colors text-white/40 hover:text-red-400"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 );
               })}

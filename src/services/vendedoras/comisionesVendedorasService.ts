@@ -176,6 +176,13 @@ export const comisionesVendedorasService = {
     return response.data;
   },
 
+  async obtenerAjustesDia(fecha: string): Promise<AjusteComisionManual[]> {
+    const response = await api.get(`${BASE_URL}/ajuste-dia`, {
+      params: { fecha }
+    });
+    return response.data;
+  },
+
   async eliminarAjusteManual(id: number): Promise<boolean> {
     const response = await api.delete(`${BASE_URL}/ajuste-manual/${id}`);
     return response.data;

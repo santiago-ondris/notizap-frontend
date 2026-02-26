@@ -12,10 +12,15 @@ import {
     Users,
     Search,
     CheckSquare,
-    Square
+    Square,
+    AlertTriangle,
+    X,
+    Info
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { comisionesBatchService, batchHelpers } from '@/services/vendedoras/comisionesBatchService';
+import { comisionPreview, comisionFechas } from '@/utils/vendedoras/comisionHelpers';
+import { ShadcnDatePicker } from '@/components/ui/ShadcnDatePicker';
 import { toast } from 'react-toastify';
 import type {
     TurnosPendientesBatch,
@@ -29,8 +34,8 @@ interface Props {
 }
 
 export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
-    const [fechaInicio, setFechaInicio] = useState(batchHelpers.obtenerFechaInicioDefault());
-    const [fechaFin, setFechaFin] = useState(batchHelpers.obtenerFechaFinDefault());
+    const [fechaInicio, setFechaInicio] = useState(batchHelpers.obtenerPrimerDiaMesActual());
+    const [fechaFin, setFechaFin] = useState(batchHelpers.obtenerAyer());
     const [loading, setLoading] = useState(false);
     const [calculando, setCalculando] = useState(false);
     const [datos, setDatos] = useState<TurnosPendientesBatch | null>(null);
@@ -38,6 +43,12 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
     const [turnosSeleccionados, setTurnosSeleccionados] = useState<Map<string, TurnoPendiente>>(new Map());
     const [porcentajeGlobal, setPorcentajeGlobal] = useState<number>(1);
     const [modoGlobal, setModoGlobal] = useState<import('@/types/vendedoras/comisionTypes').ModoCalculoComision>('Compartido');
+
+    // Estado para UX
+    const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
+    const [turnosConfirmar, setTurnosConfirmar] = useState<TurnoParaCalcular[]>([]);
+    const [totalEstimadoConfirmacion, setTotalEstimadoConfirmacion] = useState(0);
+    const [resultadosBatch, setResultadosBatch] = useState<any>(null);
 
     // Filtros de visualización
     const [filtroSucursal, setFiltroSucursal] = useState<string | null>(null);
@@ -202,17 +213,27 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
             return;
         }
 
+        // mostramos validación
+        setTurnosConfirmar(turnosParaCalcular);
+        setTotalEstimadoConfirmacion(estimacionSeleccionada);
+        setMostrarConfirmacion(true);
+    };
+
+    const ejecutarCalculoBatch = async () => {
         try {
+            setMostrarConfirmacion(false);
             setCalculando(true);
-            const resultado = await comisionesBatchService.calcularBatch({ turnos: turnosParaCalcular });
+            setResultadosBatch(null);
+            const resultado = await comisionesBatchService.calcularBatch({ turnos: turnosConfirmar });
+
+            setResultadosBatch(resultado);
 
             if (resultado.turnosConError === 0) {
-                toast.success(resultado.mensaje);
+                toast.success('Cálculo finalizado exitosamente');
             } else {
-                toast.warning(resultado.mensaje);
+                toast.warning('El cálculo finalizó con algunas advertencias');
             }
 
-            // Recargar para ver los turnos restantes
             await cargarTurnosPendientes();
             onCalculoExitoso?.();
 
@@ -237,9 +258,37 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
     } : null;
 
     const turnosFiltradosCount = datosFiltrados?.porSucursal.reduce((acc, s) => acc + s.turnos.length, 0) || 0;
-    const turnosSeleccionadosVisibles = datosFiltrados?.porSucursal.reduce((acc, s) => {
-        return acc + s.turnos.filter(t => turnosSeleccionados.get(generarKeyTurno(t))?.seleccionado).length;
-    }, 0) || 0;
+
+    // Calcular estadística sobre turnos seleccionados Y visibles
+    let turnosSeleccionadosVisibles = 0;
+    let estimacionSeleccionada = 0;
+    let turnosOcultosPeroSeleccionados = 0;
+
+    datos?.porSucursal.forEach(s => {
+        s.turnos.forEach(t => {
+            const key = generarKeyTurno(t);
+            const st = turnosSeleccionados.get(key);
+
+            if (st?.seleccionado) {
+                const esVisible = (!filtroSucursal || t.sucursalNombre === filtroSucursal) &&
+                    (!filtroTurno || t.turno === filtroTurno);
+
+                if (esVisible) {
+                    turnosSeleccionadosVisibles++;
+
+                    // Solo sumar vendedoras seleccionadas reales
+                    const c = comisionPreview.previewComisionTotal(
+                        t.montoFacturado,
+                        st.porcentajeComision || porcentajeGlobal
+                    );
+                    estimacionSeleccionada += c;
+                } else {
+                    turnosOcultosPeroSeleccionados++;
+                }
+            }
+        });
+    });
+
     const totalTurnos = turnosSeleccionados.size;
 
     return (
@@ -250,21 +299,19 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
                     <div className="flex-1 grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm text-white/60 mb-1">Fecha inicio</label>
-                            <input
-                                type="date"
-                                value={fechaInicio}
-                                onChange={(e) => setFechaInicio(e.target.value)}
-                                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
+                            <ShadcnDatePicker
+                                value={fechaInicio ? new Date(fechaInicio + 'T12:00:00') : null}
+                                onChange={(date) => setFechaInicio(date ? comisionFechas.formatearParaApi(date) : '')}
+                                className="w-full px-3 py-2 bg-white/10 border border-white/20 text-white"
                                 disabled={loading || calculando}
                             />
                         </div>
                         <div>
                             <label className="block text-sm text-white/60 mb-1">Fecha fin</label>
-                            <input
-                                type="date"
-                                value={fechaFin}
-                                onChange={(e) => setFechaFin(e.target.value)}
-                                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
+                            <ShadcnDatePicker
+                                value={fechaFin ? new Date(fechaFin + 'T12:00:00') : null}
+                                onChange={(date) => setFechaFin(date ? comisionFechas.formatearParaApi(date) : '')}
+                                className="w-full px-3 py-2 bg-white/10 border border-white/20 text-white"
                                 disabled={loading || calculando}
                             />
                         </div>
@@ -308,6 +355,48 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
                     </button>
                 </div>
             </div>
+
+            {/* Panel de Resultados Batch */}
+            {resultadosBatch && (
+                <div className={cn(
+                    "border rounded-xl p-4 animate-in fade-in slide-in-from-top-4",
+                    resultadosBatch.turnosConError === 0
+                        ? "bg-green-500/10 border-green-500/20"
+                        : "bg-yellow-500/10 border-yellow-500/20"
+                )}>
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <div className="flex items-center gap-2 mb-2">
+                                {resultadosBatch.turnosConError === 0 ? (
+                                    <CheckCircle2 className="w-5 h-5 text-green-400" />
+                                ) : (
+                                    <AlertTriangle className="w-5 h-5 text-yellow-400" />
+                                )}
+                                <h3 className={cn("font-medium", resultadosBatch.turnosConError === 0 ? "text-green-300" : "text-yellow-300")}>
+                                    {resultadosBatch.mensaje}
+                                </h3>
+                            </div>
+
+                            {(resultadosBatch.errores?.length > 0) && (
+                                <div className="mt-3 space-y-1">
+                                    <div className="text-sm font-medium text-white/80 mb-2">Errores específicos ({resultadosBatch.turnosConError}):</div>
+                                    <ul className="text-sm text-yellow-200/80 list-disc list-inside space-y-1">
+                                        {resultadosBatch.errores.map((err: string, idx: number) => (
+                                            <li key={idx}>{err}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                        <button
+                            onClick={() => setResultadosBatch(null)}
+                            className="text-white/40 hover:text-white transition-colors"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Estado inicial */}
             {!datos && !loading && (
@@ -464,7 +553,7 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
                                                     <div className="flex-1 grid grid-cols-4 gap-2 text-sm">
                                                         <div className="flex items-center gap-2">
                                                             <Calendar className="w-4 h-4 text-white/40" />
-                                                            <span className="text-white/80">{batchHelpers.formatearFecha(turno.fecha)}</span>
+                                                            <span className="text-white/80">{batchHelpers.formatearFechaDisplay(turno.fecha)}</span>
                                                         </div>
                                                         <div className="text-white/60">{turno.turno}</div>
                                                         <div className="text-white/80">{batchHelpers.formatearMoneda(turno.montoFacturado)}</div>
@@ -529,24 +618,42 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
                                                                 <div className="flex flex-wrap gap-2">
                                                                     {turno.vendedoras.map(vendedora => {
                                                                         const seleccionada = vendedorasSeleccionadas.some(v => v.id === vendedora.id);
+                                                                        const modoActual = turnoSeleccionado?.modoCalculo || modoGlobal;
+                                                                        const advertenciaSinVentas = modoActual === 'Individual' && seleccionada && !vendedora.tieneVentasEnElDia;
+                                                                        const advertenciaQuitadaConVentas = modoActual === 'Individual' && !seleccionada && vendedora.tieneVentasEnElDia;
+
                                                                         return (
-                                                                            <button
-                                                                                key={vendedora.id}
-                                                                                onClick={() => toggleVendedora(key, vendedora)}
-                                                                                disabled={calculando}
-                                                                                className={cn(
-                                                                                    "px-2 py-1 text-xs rounded border transition-colors",
-                                                                                    seleccionada
-                                                                                        ? "bg-green-500/20 border-green-500/40 text-green-300"
-                                                                                        : "bg-white/5 border-white/20 text-white/60 hover:bg-white/10",
-                                                                                    vendedora.tieneVentasEnElDia && !seleccionada && "border-blue-500/40"
+                                                                            <div key={vendedora.id} className="relative group flex items-center">
+                                                                                <button
+                                                                                    onClick={() => toggleVendedora(key, vendedora)}
+                                                                                    disabled={calculando}
+                                                                                    className={cn(
+                                                                                        "px-2 py-1 text-xs rounded border transition-colors flex items-center gap-1",
+                                                                                        seleccionada
+                                                                                            ? (advertenciaSinVentas ? "bg-red-500/10 border-red-500/40 text-red-300" : "bg-green-500/20 border-green-500/40 text-green-300")
+                                                                                            : "bg-white/5 border-white/20 text-white/60 hover:bg-white/10",
+                                                                                        vendedora.tieneVentasEnElDia && !seleccionada && !advertenciaQuitadaConVentas && "border-blue-500/40",
+                                                                                        advertenciaQuitadaConVentas && "border-yellow-500/40 text-yellow-300 hover:bg-yellow-500/10"
+                                                                                    )}
+                                                                                >
+                                                                                    {advertenciaQuitadaConVentas && <AlertTriangle className="w-3 h-3" />}
+                                                                                    {vendedora.nombre}
+                                                                                    {vendedora.tieneVentasEnElDia && !advertenciaQuitadaConVentas && (
+                                                                                        <span className="text-blue-300">•</span>
+                                                                                    )}
+                                                                                </button>
+
+                                                                                {/* Tooltip de error/advertencia */}
+                                                                                {(advertenciaSinVentas || advertenciaQuitadaConVentas) && (
+                                                                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-[#1A1A20] border border-white/10 text-[10px] rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10 flex items-center shadow-lg">
+                                                                                        {advertenciaQuitadaConVentas ? (
+                                                                                            <span className="text-yellow-300">⚠️ Tiene ventas, no recibirá comisión</span>
+                                                                                        ) : (
+                                                                                            <span className="text-red-300">Sin ventas — se calculará $0</span>
+                                                                                        )}
+                                                                                    </div>
                                                                                 )}
-                                                                            >
-                                                                                {vendedora.nombre}
-                                                                                {vendedora.tieneVentasEnElDia && (
-                                                                                    <span className="ml-1 text-blue-300">•</span>
-                                                                                )}
-                                                                            </button>
+                                                                            </div>
                                                                         );
                                                                     })}
                                                                 </div>
@@ -563,24 +670,95 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
                     </div>
 
                     {/* Footer con botón calcular */}
-                    <div className="sticky bottom-0 bg-[#1A1A20] border-t border-white/10 p-4 flex items-center justify-between">
-                        <div className="text-sm text-white/60">
-                            {turnosSeleccionadosVisibles} turnos pendientes de calcular
+                    <div className="sticky bottom-0 bg-[#1A1A20] border-t border-white/10 p-4 flex flex-col md:flex-row items-center justify-between gap-4 z-10 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+                        <div className="flex flex-col">
+                            <div className="text-sm text-white/80 font-medium">
+                                {turnosSeleccionadosVisibles} turnos seleccionados
+                            </div>
+
+                            <div className="text-lg font-bold text-green-400">
+                                ~{batchHelpers.formatearMoneda(estimacionSeleccionada)} <span className="text-xs font-normal text-white/40 ml-1">(estimación)</span>
+                            </div>
+
+                            {turnosOcultosPeroSeleccionados > 0 && (
+                                <div className="flex items-center gap-1.5 text-xs text-yellow-400/80 mt-1">
+                                    <AlertTriangle className="w-3.5 h-3.5" />
+                                    No se calcularán {turnosOcultosPeroSeleccionados} turnos ocultos por los filtros activos.
+                                </div>
+                            )}
                         </div>
 
                         <button
                             onClick={calcularBatch}
                             disabled={calculando || turnosSeleccionadosVisibles === 0}
-                            className="px-6 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/40 text-green-300 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
+                            className="px-6 py-3 bg-green-500 text-white font-medium rounded-lg flex items-center gap-2 hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-green-500/20"
                         >
                             {calculando ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <Loader2 className="w-5 h-5 animate-spin" />
                             ) : (
-                                <Calculator className="w-4 h-4" />
+                                <Calculator className="w-5 h-5" />
                             )}
-                            Calcular Selección
+                            Calcular ({turnosSeleccionadosVisibles})
                         </button>
                     </div>
+
+                    {mostrarConfirmacion && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+                            <div className="bg-[#1A1A20] border border-white/10 rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95">
+                                <div className="p-6 border-b border-white/10">
+                                    <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+                                        <Calculator className="w-6 h-6 text-green-400" />
+                                        Confirmar Cálculo Rápido
+                                    </h2>
+                                </div>
+                                <div className="p-6 space-y-4">
+                                    <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 text-center">
+                                        <p className="text-white/60 mb-1">Total estimado a generar</p>
+                                        <p className="text-4xl font-bold text-green-400">
+                                            {batchHelpers.formatearMoneda(totalEstimadoConfirmacion)}
+                                        </p>
+                                    </div>
+                                    <div className="space-y-2 text-white/80 bg-white/5 rounded-lg p-4">
+                                        <div className="flex justify-between items-center pb-2 border-b border-white/10">
+                                            <span className="text-white/60">Turnos a calcular:</span>
+                                            <span className="font-semibold">{turnosConfirmar.length}</span>
+                                        </div>
+                                        {/* Agrupación rápida por sucursal */}
+                                        {Array.from(new Set(turnosConfirmar.map(t => t.sucursalNombre))).map(sucursal => {
+                                            const turnos = turnosConfirmar.filter(t => t.sucursalNombre === sucursal).length;
+                                            return (
+                                                <div key={sucursal} className="flex justify-between items-center text-sm">
+                                                    <span className="text-white/60 truncate mr-4">{sucursal}</span>
+                                                    <span>{turnos}</span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    <p className="text-sm text-yellow-300 flex items-start gap-2 bg-yellow-400/10 p-3 rounded">
+                                        <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                        Esta acción generará registros definitivos de liquidación para los turnos y vendedoras seleccionados.
+                                    </p>
+                                </div>
+                                <div className="p-4 border-t border-white/10 flex items-center justify-end gap-3 bg-black/20">
+                                    <button
+                                        onClick={() => setMostrarConfirmacion(false)}
+                                        disabled={calculando}
+                                        className="px-4 py-2 text-white/60 hover:text-white transition-colors disabled:opacity-50"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        onClick={ejecutarCalculoBatch}
+                                        disabled={calculando}
+                                        className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2 font-medium disabled:opacity-50"
+                                    >
+                                        {calculando ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                                        Sí, Confirmar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </>
             )}
         </div>

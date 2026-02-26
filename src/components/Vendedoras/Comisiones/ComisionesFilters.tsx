@@ -3,9 +3,11 @@ import { Filter, X, Calendar, Building2, Clock, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { comisionFechas } from '@/utils/vendedoras/comisionHelpers';
 import { TURNOS_COMISIONES } from '@/types/vendedoras/comisionFiltersTypes';
-import type { 
+import { batchHelpers } from '@/services/vendedoras/comisionesBatchService';
+import { ShadcnDatePicker } from '@/components/ui/ShadcnDatePicker';
+import type {
   ComisionVendedoraFilters,
-  FiltrosForm 
+  FiltrosForm
 } from '@/types/vendedoras/comisionFiltersTypes';
 
 interface Props {
@@ -17,6 +19,7 @@ interface Props {
   showVendedorFilter?: boolean;
   showMontoFilters?: boolean;
   showAdvancedFilters?: boolean;
+  showDateFilters?: boolean;
   className?: string;
 }
 
@@ -29,6 +32,7 @@ export const ComisionesFilters: React.FC<Props> = ({
   showVendedorFilter = false,
   showMontoFilters = false,
   showAdvancedFilters = false,
+  showDateFilters = true,
   className
 }) => {
   const [mostrarFiltrosAvanzados, setMostrarFiltrosAvanzados] = useState(false);
@@ -46,24 +50,23 @@ export const ComisionesFilters: React.FC<Props> = ({
   const handleInputChange = (field: keyof FiltrosForm, value: any) => {
     const nuevosFiltros = { ...filtrosForm, [field]: value };
     setFiltrosForm(nuevosFiltros);
-    
+
     // Convertir y enviar al parent
     const filtrosParaApi: Partial<ComisionVendedoraFilters> = {
-      [field === 'fechaInicio' ? 'fechaInicio' : 
-       field === 'fechaFin' ? 'fechaFin' :
-       field]: field === 'fechaInicio' || field === 'fechaFin' 
-        ? (value ? comisionFechas.formatearParaApi(value) : undefined)
-        : value || undefined,
+      [field === 'fechaInicio' ? 'fechaInicio' :
+        field === 'fechaFin' ? 'fechaFin' :
+          field]: field === 'fechaInicio' || field === 'fechaFin'
+          ? (value ? comisionFechas.formatearParaApi(value) : undefined)
+          : value || undefined,
       page: 1 // Reset página al cambiar filtros
     };
-    
+
     onFiltrosChange(filtrosParaApi);
   };
 
-  const aplicarRangoMesAnterior = () => {
-    const rango = comisionFechas.rangoMesAnterior();
-    handleInputChange('fechaInicio', rango.inicio);
-    handleInputChange('fechaFin', rango.fin);
+  const restablecerFechas = () => {
+    handleInputChange('fechaInicio', new Date(batchHelpers.obtenerPrimerDiaMesActual()));
+    handleInputChange('fechaFin', new Date(batchHelpers.obtenerAyer()));
   };
 
   const limpiarFiltros = () => {
@@ -77,7 +80,7 @@ export const ComisionesFilters: React.FC<Props> = ({
       montoComisionMaximo: undefined,
       excluirDomingos: true
     };
-    
+
     setFiltrosForm(filtrosLimpios);
     onFiltrosChange({
       fechaInicio: undefined,
@@ -110,29 +113,31 @@ export const ComisionesFilters: React.FC<Props> = ({
       {/* Filtros principales */}
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
         <div className="flex flex-col lg:flex-row gap-4">
-          
+
           {/* Rango de fechas */}
-          <div className="flex flex-col sm:flex-row gap-2 min-w-0">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-white/60" />
-              <span className="text-sm text-white/80 whitespace-nowrap">Desde:</span>
+          {showDateFilters && (
+            <div className="flex flex-col sm:flex-row gap-2 min-w-0">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-white/60" />
+                <span className="text-sm text-white/80 whitespace-nowrap">Desde:</span>
+              </div>
+              <ShadcnDatePicker
+                value={filtrosForm.fechaInicio || null}
+                onChange={(date) => handleInputChange('fechaInicio', date || undefined)}
+                className="w-[140px] px-3 py-2 bg-white/10 border border-white/20 text-white text-sm"
+                disabled={loading}
+                placeholder="Desde"
+              />
+              <span className="text-white/60 self-center">hasta</span>
+              <ShadcnDatePicker
+                value={filtrosForm.fechaFin || null}
+                onChange={(date) => handleInputChange('fechaFin', date || undefined)}
+                className="w-[140px] px-3 py-2 bg-white/10 border border-white/20 text-white text-sm"
+                disabled={loading}
+                placeholder="Hasta"
+              />
             </div>
-            <input
-              type="date"
-              value={filtrosForm.fechaInicio ? comisionFechas.formatearParaApi(filtrosForm.fechaInicio) : ''}
-              onChange={(e) => handleInputChange('fechaInicio', e.target.value ? new Date(e.target.value) : undefined)}
-              className="px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm placeholder-white/50 focus:outline-none focus:border-blue-400 transition-colors"
-              disabled={loading}
-            />
-            <span className="text-white/60 self-center">hasta</span>
-            <input
-              type="date"
-              value={filtrosForm.fechaFin ? comisionFechas.formatearParaApi(filtrosForm.fechaFin) : ''}
-              onChange={(e) => handleInputChange('fechaFin', e.target.value ? new Date(e.target.value) : undefined)}
-              className="px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm placeholder-white/50 focus:outline-none focus:border-blue-400 transition-colors"
-              disabled={loading}
-            />
-          </div>
+          )}
 
           {/* Sucursal */}
           <div className="flex items-center gap-2 min-w-0">
@@ -167,14 +172,16 @@ export const ComisionesFilters: React.FC<Props> = ({
 
           {/* Botones de acción */}
           <div className="flex gap-2 items-center">
-            <button
-              onClick={aplicarRangoMesAnterior}
-              className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/40 rounded-lg text-blue-300 text-sm transition-colors whitespace-nowrap"
-              disabled={loading}
-            >
-              📅 Mes anterior
-            </button>
-            
+            {showDateFilters && (
+              <button
+                onClick={restablecerFechas}
+                className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/40 rounded-lg text-blue-300 text-sm transition-colors whitespace-nowrap"
+                disabled={loading}
+              >
+                📅 Restablecer Fechas
+              </button>
+            )}
+
             {filtrosActivos > 0 && (
               <button
                 onClick={limpiarFiltros}
@@ -191,7 +198,7 @@ export const ComisionesFilters: React.FC<Props> = ({
                 onClick={() => setMostrarFiltrosAvanzados(!mostrarFiltrosAvanzados)}
                 className={cn(
                   'px-3 py-2 border rounded-lg text-sm transition-colors flex items-center gap-1',
-                  mostrarFiltrosAvanzados 
+                  mostrarFiltrosAvanzados
                     ? 'bg-blue-500/20 border-blue-500/40 text-blue-300'
                     : 'bg-white/10 hover:bg-white/20 border-white/20 text-white/80'
                 )}
@@ -227,7 +234,7 @@ export const ComisionesFilters: React.FC<Props> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            
+
             {/* Filtro por vendedora */}
             {showVendedorFilter && (
               <div className="space-y-2">

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Download, FileSpreadsheet, Loader2, Calendar, Building2, Clock, User, ArrowUpDown } from 'lucide-react';
 import { comisionesVendedorasService } from '@/services/vendedoras/comisionesVendedorasService';
 import { comisionFechas } from '@/utils/vendedoras/comisionHelpers';
+import { batchHelpers } from '@/services/vendedoras/comisionesBatchService';
+import { ShadcnDatePicker } from '@/components/ui/ShadcnDatePicker';
 import { TURNOS_COMISIONES } from '@/types/vendedoras/comisionFiltersTypes';
 import { toast } from 'react-toastify';
 import { cn } from '@/lib/utils';
@@ -19,11 +21,10 @@ export const ExportarLiquidacionVista: React.FC<Props> = ({ className }) => {
   const [loadingDatos, setLoadingDatos] = useState(true);
   const [datosMaestros, setDatosMaestros] = useState<DatosMaestrosComisiones | null>(null);
 
-  // Período por defecto: mes anterior
-  const rangoMesAnterior = comisionFechas.rangoMesAnterior();
+  // Período por defecto: mes actual hasta ayer
   const [filtros, setFiltros] = useState({
-    fechaInicio: rangoMesAnterior.inicio,
-    fechaFin: rangoMesAnterior.fin,
+    fechaInicio: new Date(batchHelpers.obtenerPrimerDiaMesActual()),
+    fechaFin: new Date(batchHelpers.obtenerAyer()),
     sucursalNombre: '',
     turno: '' as '' | 'Mañana' | 'Tarde',
     vendedorNombre: '',
@@ -92,8 +93,8 @@ export const ExportarLiquidacionVista: React.FC<Props> = ({ className }) => {
 
     switch (tipo) {
       case 'actual':
-        inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-        fin = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+        inicio = new Date(batchHelpers.obtenerPrimerDiaMesActual());
+        fin = new Date(batchHelpers.obtenerAyer());
         break;
       case 'anterior':
         inicio = comisionFechas.primerDiaMesAnterior();
@@ -117,8 +118,8 @@ export const ExportarLiquidacionVista: React.FC<Props> = ({ className }) => {
     }));
   };
 
-  const handleFechaChange = (tipo: 'inicio' | 'fin', fecha: string) => {
-    const date = new Date(fecha);
+  const handleFechaChange = (tipo: 'inicio' | 'fin', date: Date | null) => {
+    if (!date) return;
 
     if (tipo === 'inicio') {
       const fechaFin = new Date(filtros.fechaFin);
@@ -159,17 +160,17 @@ export const ExportarLiquidacionVista: React.FC<Props> = ({ className }) => {
             </button>
             <button
               onClick={() => handleMesPredefinido('anterior')}
-              className="px-4 py-3 bg-green-500/20 hover:bg-green-500/30 border border-green-500/40 rounded-xl text-green-300 text-sm transition-all"
+              className="px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white/80 text-sm transition-all"
             >
-              <div className="font-semibold">{comisionFechas.nombreMes(new Date().getMonth() || 12)}</div>
-              <div className="text-xs">✨ Mes anterior (Recomendado)</div>
+              <div className="font-medium">{comisionFechas.nombreMes(new Date().getMonth() || 12)}</div>
+              <div className="text-xs text-white/40">Mes anterior</div>
             </button>
             <button
               onClick={() => handleMesPredefinido('actual')}
-              className="px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white/80 text-sm transition-all"
+              className="px-4 py-3 bg-green-500/20 hover:bg-green-500/30 border border-green-500/40 rounded-xl text-green-300 text-sm transition-all"
             >
-              <div className="font-medium">{comisionFechas.nombreMes(new Date().getMonth() + 1)}</div>
-              <div className="text-xs text-white/40">Mes actual</div>
+              <div className="font-semibold">{comisionFechas.nombreMes(new Date().getMonth() + 1)}</div>
+              <div className="text-xs">✨ Mes actual (Recomendado)</div>
             </button>
           </div>
 
@@ -179,22 +180,20 @@ export const ExportarLiquidacionVista: React.FC<Props> = ({ className }) => {
               <label className="block text-xs font-medium text-white/60 mb-2">
                 Fecha inicio
               </label>
-              <input
-                type="date"
-                value={comisionFechas.formatearParaApi(filtros.fechaInicio)}
-                onChange={(e) => handleFechaChange('inicio', e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-green-500/40"
+              <ShadcnDatePicker
+                value={filtros.fechaInicio}
+                onChange={(date) => handleFechaChange('inicio', date)}
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 text-white"
               />
             </div>
             <div>
               <label className="block text-xs font-medium text-white/60 mb-2">
                 Fecha fin
               </label>
-              <input
-                type="date"
-                value={comisionFechas.formatearParaApi(filtros.fechaFin)}
-                onChange={(e) => handleFechaChange('fin', e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-green-500/40"
+              <ShadcnDatePicker
+                value={filtros.fechaFin}
+                onChange={(date) => handleFechaChange('fin', date)}
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 text-white"
               />
             </div>
           </div>

@@ -33,25 +33,38 @@ export const comisionesBatchService = {
 // Helpers para el manejo de fechas del batch
 export const batchHelpers = {
     /**
-     * Obtiene el primer día de hace un mes
+     * Obtiene el primer día del mes actual (YYYY-MM-DD)
      */
-    obtenerFechaInicioDefault(): string {
+    obtenerPrimerDiaMesActual(): string {
         const hoy = new Date();
-        const hace30Dias = new Date(hoy.getTime() - 30 * 24 * 60 * 60 * 1000);
-        return hace30Dias.toISOString().split('T')[0];
+        return new Date(hoy.getFullYear(), hoy.getMonth(), 1)
+            .toISOString().split('T')[0];
     },
 
     /**
-     * Obtiene la fecha de ayer
+     * Obtiene la fecha de ayer (YYYY-MM-DD)
      */
-    obtenerFechaFinDefault(): string {
+    obtenerAyer(): string {
         const hoy = new Date();
-        const ayer = new Date(hoy.getTime() - 24 * 60 * 60 * 1000);
-        return ayer.toISOString().split('T')[0];
+        return new Date(hoy.getTime() - 24 * 60 * 60 * 1000)
+            .toISOString().split('T')[0];
     },
 
     /**
-     * Formatea la fecha para mostrar (corrige timezone)
+     * Formatea una fecha ISO para mostrar siempre como DD/MM/YYYY
+     */
+    formatearFechaDisplay(fechaIso: string): string {
+        if (!fechaIso) return '';
+        const soloFecha = fechaIso.split('T')[0];
+        const partes = soloFecha.split('-');
+        if (partes.length !== 3) return fechaIso;
+
+        const [year, month, day] = partes;
+        return `${day}/${month}/${year}`;
+    },
+
+    /**
+     * Formatea la fecha para mostrar con el nombre del día
      */
     formatearFecha(fechaIso: string): string {
         // Extraer solo la parte de fecha (YYYY-MM-DD) para evitar problemas de timezone

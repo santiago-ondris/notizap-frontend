@@ -42,6 +42,9 @@ export interface MetaCampaignExecutionDto {
     status: 'Pending' | 'Running' | 'Completed' | 'Failed';
     totalProducts: number;
     processedProducts: number;
+    addedProducts: number;
+    deletedProducts: number;
+    skippedProducts: number;
     errorMessage: string | null;
     startedAt: string;
     completedAt: string | null;

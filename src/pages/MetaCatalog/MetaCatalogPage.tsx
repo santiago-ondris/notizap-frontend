@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, RefreshCw, AlertCircle, Megaphone, Pencil, Trash2, Image, Play, Loader2, History, CheckCircle2, XCircle, HelpCircle } from 'lucide-react';
+import { Plus, RefreshCw, AlertCircle, Megaphone, Pencil, Trash2, Image, Play, Loader2, History, CheckCircle2, XCircle, HelpCircle, ChevronDown, ChevronRight } from 'lucide-react';
 import { toast } from 'react-toastify';
 import metaCatalogService from '@/services/metaCatalog/metaCatalogService';
 import type { MetaCampaignDto, MetaCampaignExecutionDto } from '@/types/metaCatalog/metaCatalogTypes';
@@ -21,6 +21,7 @@ const MetaCatalogPage: React.FC = () => {
     const [executionHistory, setExecutionHistory] = useState<Record<number, MetaCampaignExecutionDto[]>>({});
     const [showHistoryFor, setShowHistoryFor] = useState<number | null>(null);
     const pollingRef = useRef<Record<number, NodeJS.Timeout>>({});
+    const [expandedExecutionId, setExpandedExecutionId] = useState<number | null>(null);
 
     const loadCampaigns = async () => {
         setLoading(true);
@@ -126,6 +127,9 @@ const MetaCatalogPage: React.FC = () => {
                 status: 'Pending',
                 totalProducts: 0,
                 processedProducts: 0,
+                addedProducts: 0,
+                deletedProducts: 0,
+                skippedProducts: 0,
                 errorMessage: null,
                 startedAt: new Date().toISOString(),
                 completedAt: null,
@@ -334,11 +338,21 @@ const MetaCatalogPage: React.FC = () => {
 
                                     {/* Completed/Failed execution result */}
                                     {activeExec && activeExec.status === 'Completed' && (
-                                        <div className="mb-4 p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-center gap-2">
-                                            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                                            <span className="text-xs text-emerald-400">
-                                                Completada — {activeExec.processedProducts} productos procesados
-                                            </span>
+                                        <div className="mb-4 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                                                <span className="text-xs font-semibold text-emerald-400">Completada</span>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs pl-6">
+                                                <span className="text-white/50">Se vieron</span>
+                                                <span className="text-white/80 font-medium">{activeExec.totalProducts} productos</span>
+                                                <span className="text-white/50">Se añadieron/actualizaron</span>
+                                                <span className="text-emerald-400 font-medium">{activeExec.addedProducts} productos</span>
+                                                <span className="text-white/50">Se eliminaron</span>
+                                                <span className="text-red-400 font-medium">{activeExec.deletedProducts} productos</span>
+                                                <span className="text-white/50">Se saltaron</span>
+                                                <span className="text-white/40 font-medium">{activeExec.skippedProducts} productos</span>
+                                            </div>
                                         </div>
                                     )}
 
@@ -450,22 +464,51 @@ const MetaCatalogPage: React.FC = () => {
                                             {executionHistory[campaign.id].length === 0 ? (
                                                 <p className="text-xs text-white/30 italic">Sin ejecuciones previas</p>
                                             ) : (
-                                                <div className="space-y-1.5">
+                                                <div className="space-y-1">
                                                     {executionHistory[campaign.id].slice(0, 5).map((exec) => {
                                                         const colors = EXECUTION_STATUS_COLORS[exec.status] || EXECUTION_STATUS_COLORS.Pending;
+                                                        const isExpanded = expandedExecutionId === exec.id;
+                                                        const isExpandable = exec.status === 'Completed';
                                                         return (
-                                                            <div key={exec.id} className="flex items-center justify-between text-xs">
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className={`px-1.5 py-0.5 rounded ${colors.bg} ${colors.text} border ${colors.border}`}>
-                                                                        {exec.status}
+                                                            <div key={exec.id}>
+                                                                <button
+                                                                    className={`w-full flex items-center justify-between text-xs px-2 py-1 rounded-lg transition-colors ${isExpandable ? 'hover:bg-white/5 cursor-pointer' : 'cursor-default'
+                                                                        }`}
+                                                                    onClick={() => isExpandable && setExpandedExecutionId(isExpanded ? null : exec.id)}
+                                                                >
+                                                                    <div className="flex items-center gap-2">
+                                                                        {isExpandable ? (
+                                                                            isExpanded
+                                                                                ? <ChevronDown className="w-3 h-3 text-white/30" />
+                                                                                : <ChevronRight className="w-3 h-3 text-white/30" />
+                                                                        ) : (
+                                                                            <span className="w-3" />
+                                                                        )}
+                                                                        <span className={`px-1.5 py-0.5 rounded ${colors.bg} ${colors.text} border ${colors.border}`}>
+                                                                            {exec.status}
+                                                                        </span>
+                                                                        <span className="text-white/40">
+                                                                            {formatDateTime(exec.startedAt)}
+                                                                        </span>
+                                                                    </div>
+                                                                    <span className="text-white/50">
+                                                                        {exec.processedProducts}/{exec.totalProducts}
                                                                     </span>
-                                                                    <span className="text-white/40">
-                                                                        {formatDateTime(exec.startedAt)}
-                                                                    </span>
-                                                                </div>
-                                                                <span className="text-white/50">
-                                                                    {exec.processedProducts}/{exec.totalProducts}
-                                                                </span>
+                                                                </button>
+                                                                {isExpanded && (
+                                                                    <div className="mx-7 mt-1 mb-2 p-2 bg-white/5 border border-white/10 rounded-lg">
+                                                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                                                                            <span className="text-white/40">Se vieron</span>
+                                                                            <span className="text-white/70">{exec.totalProducts} productos</span>
+                                                                            <span className="text-white/40">Se añadieron/actualizaron</span>
+                                                                            <span className="text-emerald-400">{exec.addedProducts} productos</span>
+                                                                            <span className="text-white/40">Se eliminaron</span>
+                                                                            <span className="text-red-400">{exec.deletedProducts} productos</span>
+                                                                            <span className="text-white/40">Se saltaron</span>
+                                                                            <span className="text-white/40">{exec.skippedProducts} productos</span>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         );
                                                     })}

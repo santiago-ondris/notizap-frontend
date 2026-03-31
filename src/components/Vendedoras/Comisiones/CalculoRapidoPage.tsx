@@ -66,11 +66,11 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
 
             // Pre-seleccionar todos los turnos con vendedoras por defecto
             const nuevaSeleccion = new Map<string, TurnoPendiente>();
-            resultado.porSucursal.forEach(sucursal => {
-                sucursal.turnos.forEach(turno => {
+            (resultado.porSucursal || []).forEach(sucursal => {
+                (sucursal.turnos || []).forEach(turno => {
                     const key = generarKeyTurno(turno);
                     // Pre-seleccionar solo vendedoras con ventas
-                    const vendedorasConVentas = turno.vendedoras.filter(v => v.tieneVentasEnElDia);
+                    const vendedorasConVentas = (turno.vendedoras || []).filter(v => v.tieneVentasEnElDia);
                     nuevaSeleccion.set(key, {
                         ...turno,
                         seleccionado: true,
@@ -248,13 +248,13 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
     // Filtrar datos según filtros activos
     const datosFiltrados = datos ? {
         ...datos,
-        porSucursal: datos.porSucursal
+        porSucursal: (datos.porSucursal || [])
             .filter(s => !filtroSucursal || s.sucursalNombre === filtroSucursal)
             .map(s => ({
                 ...s,
-                turnos: s.turnos.filter(t => !filtroTurno || t.turno === filtroTurno)
+                turnos: (s.turnos || []).filter(t => !filtroTurno || t.turno === filtroTurno)
             }))
-            .filter(s => s.turnos.length > 0)
+            .filter(s => (s.turnos || []).length > 0)
     } : null;
 
     const turnosFiltradosCount = datosFiltrados?.porSucursal.reduce((acc, s) => acc + s.turnos.length, 0) || 0;
@@ -264,8 +264,8 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
     let estimacionSeleccionada = 0;
     let turnosOcultosPeroSeleccionados = 0;
 
-    datos?.porSucursal.forEach(s => {
-        s.turnos.forEach(t => {
+    (datos?.porSucursal || []).forEach(s => {
+        (s.turnos || []).forEach(t => {
             const key = generarKeyTurno(t);
             const st = turnosSeleccionados.get(key);
 
@@ -468,7 +468,7 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
                         {/* Filtros por sucursal */}
                         <div className="flex flex-wrap gap-2 pt-2 border-t border-white/10">
                             <span className="text-xs text-white/40 mr-1">Filtrar sucursal:</span>
-                            {datos.porSucursal.map(sucursal => (
+                            {(datos.porSucursal || []).map(sucursal => (
                                 <button
                                     key={sucursal.sucursalNombre}
                                     onClick={() => setFiltroSucursal(
@@ -526,7 +526,7 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
 
                                 {/* Turnos */}
                                 <div className="divide-y divide-white/5">
-                                    {sucursal.turnos.map(turno => {
+                                    {(sucursal.turnos || []).map(turno => {
                                         const key = generarKeyTurno(turno);
                                         const turnoSeleccionado = turnosSeleccionados.get(key);
                                         const expandido = turnosExpandidos.has(key);
@@ -559,7 +559,7 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
                                                         <div className="text-white/80">{batchHelpers.formatearMoneda(turno.montoFacturado)}</div>
                                                         <div className="flex items-center gap-1 text-white/60">
                                                             <Users className="w-4 h-4" />
-                                                            <span>{vendedorasSeleccionadas.length} / {turno.vendedoras.filter(v => v.tieneVentasEnElDia).length}</span>
+                                                            <span>{vendedorasSeleccionadas.length} / {(turno.vendedoras || []).filter(v => v.tieneVentasEnElDia).length}</span>
                                                             {turnoSeleccionado?.modificado && (
                                                                 <span className="text-yellow-400 text-xs ml-1">✏️</span>
                                                             )}
@@ -616,7 +616,7 @@ export const CalculoRapidoPage: React.FC<Props> = ({ onCalculoExitoso }) => {
                                                             <div>
                                                                 <label className="block text-sm text-white/60 mb-1">Vendedoras</label>
                                                                 <div className="flex flex-wrap gap-2">
-                                                                    {turno.vendedoras.map(vendedora => {
+                                                                    {(turno.vendedoras || []).map(vendedora => {
                                                                         const seleccionada = vendedorasSeleccionadas.some(v => v.id === vendedora.id);
                                                                         const modoActual = turnoSeleccionado?.modoCalculo || modoGlobal;
                                                                         const advertenciaSinVentas = modoActual === 'Individual' && seleccionada && !vendedora.tieneVentasEnElDia;

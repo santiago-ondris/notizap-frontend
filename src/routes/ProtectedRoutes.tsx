@@ -15,6 +15,7 @@ const ReposicionLogicaPage = lazy(() => import("@/pages/Reposicion/ReposicionLog
 const InfoComisionesPage = lazy(() => import("@/pages/Vendedoras/InfoComisionesPage").then(m => ({ default: m.InfoComisionesPage })));
 const MetaCatalogPage = lazy(() => import("@/pages/MetaCatalog/MetaCatalogPage"));
 const MetaCatalogHelpPage = lazy(() => import("@/pages/MetaCatalog/MetaCatalogHelpPage"));
+const ImageConverterPage = lazy(() => import("@/pages/ImageConverter/ImageConverterPage"));
 
 export const ProtectedRoutes = (
   <>
@@ -40,5 +41,6 @@ export const ProtectedRoutes = (
       <Route index element={<MetaCatalogPage />} />
       <Route path="help" element={<MetaCatalogHelpPage />} />
     </Route>
+    <Route path="conversor-imagenes" element={<ImageConverterPage />} />
   </>
 );

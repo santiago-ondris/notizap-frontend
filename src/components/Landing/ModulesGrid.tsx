@@ -6,6 +6,7 @@ import {
   Lock,
   Fish,
   ShoppingBag,
+  ImagePlus,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -40,6 +41,14 @@ const modules = [
     icon: ShoppingBag,
     color: "#1877F2",
     to: "/meta-catalog",
+    roles: ["admin", "superadmin"]
+  },
+  {
+    title: "Conversor de Imagenes",
+    description: "Optimizacion de imagenes a WebP",
+    icon: ImagePlus,
+    color: "#22C55E",
+    to: "/conversor-imagenes",
     roles: ["admin", "superadmin"]
   }
 ];

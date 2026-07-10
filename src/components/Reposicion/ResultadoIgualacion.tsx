@@ -45,42 +45,58 @@ export const ResultadoIgualacion: React.FC<Props> = ({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Estadísticas */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[
-          { label: 'Variantes analizadas', valor: estadisticas.totalVariantesAnalizadas, color: '#B695BF' },
-          { label: 'Con movimientos', valor: estadisticas.variantesConMovimientos, color: '#51590E' },
-          { label: 'Ya equitativas', valor: estadisticas.variantesYaEquitativas, color: '#4CAF50' },
-          { label: 'Unidades a mover', valor: estadisticas.totalUnidadesAMover, color: '#F59E0B' },
-        ].map(({ label, valor, color }) => (
-          <div
-            key={label}
-            className="rounded-xl bg-white/5 border border-white/10 p-4 text-center"
+    <div className="space-y-5">
+      {/* Header: stats + botón de descarga */}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 flex-1">
+          {[
+            { label: 'Variantes analizadas', valor: estadisticas.totalVariantesAnalizadas, color: '#B695BF' },
+            { label: 'Con movimientos', valor: estadisticas.variantesConMovimientos, color: '#F59E0B' },
+            { label: 'Ya equitativas', valor: estadisticas.variantesYaEquitativas, color: '#4CAF50' },
+            { label: 'Unidades a mover', valor: estadisticas.totalUnidadesAMover, color: '#B695BF' },
+          ].map(({ label, valor, color }) => (
+            <div
+              key={label}
+              className="rounded-xl bg-white/5 border border-white/10 p-3 text-center"
+            >
+              <p className="text-xl font-bold" style={{ color }}>{valor}</p>
+              <p className="text-xs text-white/50 mt-1 leading-tight">{label}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+          <button
+            onClick={onDescargar}
+            disabled={descargando || incluidas.length === 0}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#B695BF]/20 hover:bg-[#B695BF]/30 border border-[#B695BF]/30 text-[#B695BF] hover:text-white transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <p className="text-2xl font-bold" style={{ color }}>
-              {valor}
-            </p>
-            <p className="text-xs text-white/50 mt-1">{label}</p>
-          </div>
-        ))}
+            {descargando ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
+            {descargando ? 'Generando...' : 'Descargar Excel'}
+          </button>
+          <span className="text-xs text-white/30">
+            {incluidas.length} transferencias · {incluidas.reduce((a, t) => a + t.cantidadEditada, 0)} uds · {tiempoEjecucion}ms
+          </span>
+        </div>
       </div>
 
       {mensajesInformativos.map((msg, i) => (
-        <p
-          key={i}
-          className="text-sm text-amber-400/80 bg-amber-400/10 border border-amber-400/20 rounded-lg px-4 py-3"
-        >
+        <p key={i} className="text-sm text-amber-400/80 bg-amber-400/10 border border-amber-400/20 rounded-lg px-4 py-3">
           {msg}
         </p>
       ))}
 
-      {/* Tabla editable */}
+      {/* Tabla con tabs */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <ArrowRightLeft className="w-4 h-4 text-[#B695BF]" />
-          <h3 className="text-base font-semibold text-white">Transferencias sugeridas</h3>
-          <span className="text-xs text-white/40 ml-auto">
+          <h3 className="text-sm font-semibold text-white">Transferencias sugeridas</h3>
+          <span className="text-xs text-white/40 ml-auto flex items-center gap-1">
+            <Package className="w-3 h-3" />
             Podés vetar o ajustar cantidades antes de descargar
           </span>
         </div>
@@ -88,30 +104,6 @@ export const ResultadoIgualacion: React.FC<Props> = ({
           transferencias={transferenciasEditables}
           onChange={onTransferenciasChange}
         />
-      </div>
-
-      {/* Acciones */}
-      <div className="flex items-center justify-between pt-4 border-t border-white/10">
-        <div className="flex items-center gap-2 text-sm text-white/50">
-          <Package className="w-4 h-4" />
-          <span>
-            {incluidas.length} transferencias · {incluidas.reduce((a, t) => a + t.cantidadEditada, 0)} uds
-          </span>
-          <span className="text-white/30">· {tiempoEjecucion}ms</span>
-        </div>
-
-        <button
-          onClick={onDescargar}
-          disabled={descargando || incluidas.length === 0}
-          className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#B695BF]/20 hover:bg-[#B695BF]/30 border border-[#B695BF]/30 text-[#B695BF] hover:text-white transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {descargando ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Download className="w-4 h-4" />
-          )}
-          {descargando ? 'Generando...' : 'Descargar Excel'}
-        </button>
       </div>
     </div>
   );

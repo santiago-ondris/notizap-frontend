@@ -113,7 +113,6 @@ export const ConfiguracionPrioridad: React.FC<Props> = ({
   };
 
   const participantes = configuracion.sucursalesParticipantes;
-  const noParticipantes = sucursalesDisponibles.filter((s) => !participantes.includes(s));
 
   // Filtrar las listas de prioridad a solo las que participan
   const receptoras = configuracion.ordenPrioridad.filter((s) => participantes.includes(s));

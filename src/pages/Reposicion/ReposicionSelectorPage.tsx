@@ -7,11 +7,12 @@ import {
   Target,
   MapPin,
   Settings,
-  BarChart3
+  BarChart3,
+  ArrowRightLeft
 } from 'lucide-react';
 
 interface OpcionReposicion {
-  tipo: 'adultos' | 'ninos';
+  tipo: 'adultos' | 'ninos' | 'igualacion';
   titulo: string;
   descripcion: string;
   icono: React.ElementType;
@@ -55,6 +56,22 @@ const opciones: OpcionReposicion[] = [
     ],
     sucursales: ['GENERAL PAZ', 'BARRIO JARDIN'],
     logica: 'Intentar 2 unidades por talle, si no es posible 1 unidad'
+  },
+  {
+    tipo: 'igualacion',
+    titulo: 'Igualación de Stock',
+    descripcion: 'Redistribuí el stock equitativamente entre sucursales de venta',
+    icono: ArrowRightLeft,
+    color: '#F59E0B',
+    colorHover: '#D97706',
+    ruta: '/reposicion/igualacion',
+    caracteristicas: [
+      'Transferencias entre sucursales',
+      'Prioridad configurable por el usuario',
+      'Preview editable antes de exportar'
+    ],
+    sucursales: ['DEAN FUNES', 'GENERAL PAZ', 'BARRIO JARDIN', '25 DE MAYO', 'ITUZAINGO NVA CBA'],
+    logica: 'Reparte el stock total de cada variante 1 a 1 entre sucursales; el resto va a las de mayor prioridad'
   }
 ];
 
@@ -105,7 +122,7 @@ export const ReposicionSelectorPage: React.FC = () => {
         </div>
 
         {/* Opciones */}
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {opciones.map((opcion) => {
             const Icono = opcion.icono;
 
@@ -233,7 +250,7 @@ export const ReposicionSelectorPage: React.FC = () => {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10">
             <Package className="w-4 h-4 text-white/40" />
             <span className="text-sm text-white/60">
-              Ambos módulos procesan archivos Excel desde CASA CENTRAL
+              Los tres módulos procesan archivos Excel con el mismo formato de inventario
             </span>
           </div>
         </div>

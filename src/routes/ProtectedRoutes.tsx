@@ -12,6 +12,7 @@ const ReposicionPage = lazy(() => import("@/pages/Reposicion/ReposicionPage").th
 const ReposicionSelectorPage = lazy(() => import("@/pages/Reposicion/ReposicionSelectorPage").then(m => ({ default: m.ReposicionSelectorPage })));
 const ReposicionNinosPage = lazy(() => import("@/pages/Reposicion/ReposicionNinosPage").then(m => ({ default: m.ReposicionNinosPage })));
 const ReposicionLogicaPage = lazy(() => import("@/pages/Reposicion/ReposicionLogicaPage").then(m => ({ default: m.ReposicionLogicaPage })));
+const IgualacionStockPage = lazy(() => import("@/pages/Reposicion/IgualacionStockPage").then(m => ({ default: m.IgualacionStockPage })));
 const InfoComisionesPage = lazy(() => import("@/pages/Vendedoras/InfoComisionesPage").then(m => ({ default: m.InfoComisionesPage })));
 const MetaCatalogPage = lazy(() => import("@/pages/MetaCatalog/MetaCatalogPage"));
 const MetaCatalogHelpPage = lazy(() => import("@/pages/MetaCatalog/MetaCatalogHelpPage"));
@@ -36,6 +37,7 @@ export const ProtectedRoutes = (
       <Route path="adultos" element={<ReposicionPage />} />
       <Route path="ninos" element={<ReposicionNinosPage />} />
       <Route path="logica" element={<ReposicionLogicaPage />} />
+      <Route path="igualacion" element={<IgualacionStockPage />} />
     </Route>
     <Route path="meta-catalog">
       <Route index element={<MetaCatalogPage />} />

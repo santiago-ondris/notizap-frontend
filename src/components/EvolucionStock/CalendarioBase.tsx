@@ -109,7 +109,7 @@ export const CalendarioBase: React.FC<Props> = ({
                 dia.esHoy && 'ring-2 ring-[#B695BF]',
                 clickable ? 'hover:bg-white/10 cursor-pointer' : 'cursor-default',
                 estado === 'Pendiente' && dia.esDelMes && 'bg-[#FFD700]/10',
-                estado === 'Cargado' && dia.esDelMes && 'bg-[#51590E]/10'
+                estado === 'Cargado' && dia.esDelMes && 'bg-[#22C55E]/15'
               )}
             >
               <span className={cn('font-medium', dia.esHoy && 'text-[#B695BF]')}>{dia.dia}</span>

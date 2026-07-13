@@ -33,7 +33,7 @@ export const EstadoDiaChip: React.FC<Props> = ({ estado, showText = true, size =
   }[estadoNormalizado];
 
   const color = {
-    Cargado: 'bg-[#51590E]/20 border-[#51590E]/40 text-[#DDE8A2]',
+    Cargado: 'bg-[#22C55E]/20 border-[#22C55E]/40 text-[#86EFAC]',
     SinMovimientos: 'bg-white/10 border-white/20 text-white/60',
     Pendiente: 'bg-[#FFD700]/15 border-[#FFD700]/40 text-[#FFD700]',
     Futuro: 'bg-white/5 border-white/10 text-white/35'

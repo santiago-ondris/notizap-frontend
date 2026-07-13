@@ -7,6 +7,7 @@ import {
   Fish,
   ShoppingBag,
   ImagePlus,
+  LineChart,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -49,6 +50,14 @@ const modules = [
     icon: ImagePlus,
     color: "#22C55E",
     to: "/conversor-imagenes",
+    roles: ["admin", "superadmin"]
+  },
+  {
+    title: "Evolucion stock",
+    description: "Cruce de compras y ventas por producto",
+    icon: LineChart,
+    color: "#F23D5E",
+    to: "/evolucion-stock",
     roles: ["admin", "superadmin"]
   }
 ];

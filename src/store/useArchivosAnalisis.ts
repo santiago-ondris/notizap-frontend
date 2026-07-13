@@ -4,10 +4,6 @@ type ArchivosAnalisis = {
   cabecera?: File;
   detalle?: File;
   ventas?: File;
-  archivoVentasEvolucion?: File;
-  archivoEvolucionStockCabecera?: File;
-  archivoEvolucionStockDetalles?: File;
-  archivoEvolucionStockVentas?: File;
 };
 
 type RotacionResult = {
@@ -16,7 +12,6 @@ type RotacionResult = {
 };
 
 type VentasEvolucionResult = any;
-type EvolucionStockResult = any;
 
 interface ArchivosAnalisisStore {
   archivos: ArchivosAnalisis;
@@ -30,10 +25,6 @@ interface ArchivosAnalisisStore {
   fechaVentas?: string;
   setResultadoVentas: (resultado: VentasEvolucionResult) => void;
   limpiarResultadoVentas: () => void;
-  resultadoEvolucionStock?: EvolucionStockResult;
-  fechaEvolucionStock?: string;
-  setResultadoEvolucionStock: (resultado: EvolucionStockResult) => void;
-  limpiarResultadoEvolucionStock: () => void;
 }
 
 export const useArchivosAnalisis = create<ArchivosAnalisisStore>((set) => ({
@@ -51,9 +42,4 @@ export const useArchivosAnalisis = create<ArchivosAnalisisStore>((set) => ({
   fechaVentas: undefined,
   setResultadoVentas: (resultado) => set({ resultadoVentas: resultado, fechaVentas: new Date().toISOString() }),
   limpiarResultadoVentas: () => set({ resultadoVentas: undefined, fechaVentas: undefined }),
-  resultadoEvolucionStock: undefined,
-  fechaEvolucionStock: undefined,
-  setResultadoEvolucionStock: (resultado) =>
-    set({ resultadoEvolucionStock: resultado, fechaEvolucionStock: new Date().toISOString() }),
-  limpiarResultadoEvolucionStock: () => set({ resultadoEvolucionStock: undefined, fechaEvolucionStock: undefined }),
 }));

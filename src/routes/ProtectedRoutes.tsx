@@ -17,6 +17,11 @@ const InfoComisionesPage = lazy(() => import("@/pages/Vendedoras/InfoComisionesP
 const MetaCatalogPage = lazy(() => import("@/pages/MetaCatalog/MetaCatalogPage"));
 const MetaCatalogHelpPage = lazy(() => import("@/pages/MetaCatalog/MetaCatalogHelpPage"));
 const ImageConverterPage = lazy(() => import("@/pages/ImageConverter/ImageConverterPage"));
+const CargaArchivosEvolucionStockPage = lazy(() => import("@/pages/EvolucionStock/CargaArchivosPage"));
+const EvolucionStockSelectorPage = lazy(() => import("@/pages/EvolucionStock/EvolucionStockSelectorPage"));
+const DetalleProductoEvolucionStockPage = lazy(() => import("@/pages/EvolucionStock/DetalleProductoPage"));
+const RankingRotacionEvolucionStockPage = lazy(() => import("@/pages/EvolucionStock/RankingRotacionPage"));
+const RotacionMarcaProveedorEvolucionStockPage = lazy(() => import("@/pages/EvolucionStock/RotacionMarcaProveedorPage"));
 
 export const ProtectedRoutes = (
   <>
@@ -42,6 +47,13 @@ export const ProtectedRoutes = (
     <Route path="meta-catalog">
       <Route index element={<MetaCatalogPage />} />
       <Route path="help" element={<MetaCatalogHelpPage />} />
+    </Route>
+    <Route path="evolucion-stock">
+      <Route index element={<EvolucionStockSelectorPage />} />
+      <Route path="carga" element={<CargaArchivosEvolucionStockPage />} />
+      <Route path="producto/:codigo" element={<DetalleProductoEvolucionStockPage />} />
+      <Route path="ranking" element={<RankingRotacionEvolucionStockPage />} />
+      <Route path="rotacion" element={<RotacionMarcaProveedorEvolucionStockPage />} />
     </Route>
     <Route path="conversor-imagenes" element={<ImageConverterPage />} />
   </>

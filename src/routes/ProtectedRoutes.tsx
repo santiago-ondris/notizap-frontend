@@ -22,6 +22,8 @@ const EvolucionStockSelectorPage = lazy(() => import("@/pages/EvolucionStock/Evo
 const DetalleProductoEvolucionStockPage = lazy(() => import("@/pages/EvolucionStock/DetalleProductoPage"));
 const RankingRotacionEvolucionStockPage = lazy(() => import("@/pages/EvolucionStock/RankingRotacionPage"));
 const RotacionMarcaProveedorEvolucionStockPage = lazy(() => import("@/pages/EvolucionStock/RotacionMarcaProveedorPage"));
+const TransferenciasEvolucionStockPage = lazy(() => import("@/pages/EvolucionStock/TransferenciasPage"));
+const ResumenEvolucionStockPage = lazy(() => import("@/pages/EvolucionStock/ResumenPage"));
 
 export const ProtectedRoutes = (
   <>
@@ -54,6 +56,8 @@ export const ProtectedRoutes = (
       <Route path="producto/:codigo" element={<DetalleProductoEvolucionStockPage />} />
       <Route path="ranking" element={<RankingRotacionEvolucionStockPage />} />
       <Route path="rotacion" element={<RotacionMarcaProveedorEvolucionStockPage />} />
+      <Route path="transferencias" element={<TransferenciasEvolucionStockPage />} />
+      <Route path="resumen" element={<ResumenEvolucionStockPage />} />
     </Route>
     <Route path="conversor-imagenes" element={<ImageConverterPage />} />
   </>

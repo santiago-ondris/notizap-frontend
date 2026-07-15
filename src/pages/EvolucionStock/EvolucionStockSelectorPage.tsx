@@ -1,12 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, FileSpreadsheet, LineChart, PackageSearch, Scale, ArrowRight } from 'lucide-react';
+import { ArrowRight, ArrowRightLeft, BarChart3, FileBarChart, FileSpreadsheet, LineChart, PackageSearch, Scale } from 'lucide-react';
 import { ProductoSearch } from '@/components/EvolucionStock/ProductoSearch';
 
 const opciones = [
-  { titulo: 'Cargar datos del ERP', descripcion: 'Subi compras y ventas antes de analizar decisiones.', icono: FileSpreadsheet, ruta: '/evolucion-stock/carga', color: '#F23D5E' },
+  { titulo: 'Cargar datos del ERP', descripcion: 'Subí compras, ventas y remitos antes de analizar decisiones.', icono: FileSpreadsheet, ruta: '/evolucion-stock/carga', color: '#F23D5E' },
   { titulo: 'Decidir recompras', descripcion: 'Ordena productos por rotacion, velocidad y unidades vendidas.', icono: BarChart3, ruta: '/evolucion-stock/ranking', color: '#B695BF' },
-  { titulo: 'Evaluar proveedores', descripcion: 'Compara marcas y proveedores por comprado, vendido y rotacion.', icono: Scale, ruta: '/evolucion-stock/rotacion', color: '#51590E' }
+  { titulo: 'Evaluar proveedores', descripcion: 'Compara marcas y proveedores por comprado, vendido y rotacion.', icono: Scale, ruta: '/evolucion-stock/rotacion', color: '#51590E' },
+  { titulo: 'Analizar transferencias', descripcion: 'Revisa el flujo entre depositos y los productos de cada ruta.', icono: ArrowRightLeft, ruta: '/evolucion-stock/transferencias', color: '#38BDF8' },
+  { titulo: 'Resumen ejecutivo', descripcion: 'Reune oportunidades, alertas y flujo logistico del periodo.', icono: FileBarChart, ruta: '/evolucion-stock/resumen', color: '#FFD166' }
 ];
 
 export const EvolucionStockSelectorPage: React.FC = () => {
@@ -20,9 +22,9 @@ export const EvolucionStockSelectorPage: React.FC = () => {
             <LineChart className="h-4 w-4 text-[#F23D5E]" />
             Evolucion de stock
           </div>
-          <h1 className="mt-2 text-3xl font-bold text-white">Compras: que rota, donde rota y que recomprar</h1>
+          <h1 className="mt-2 text-3xl font-bold text-white">Stock: que rota, donde esta y como se mueve</h1>
           <p className="mt-3 max-w-3xl text-sm text-white/55">
-            Usa este modulo para cruzar lo comprado contra lo vendido. Primero busca un producto puntual, o entra al ranking para detectar oportunidades y problemas de rotacion.
+            Cruza compras, ventas y remitos internos para analizar productos, rotacion y movimientos entre depositos.
           </p>
         </div>
 
@@ -37,7 +39,7 @@ export const EvolucionStockSelectorPage: React.FC = () => {
           <ProductoSearch />
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {opciones.map(opcion => {
             const Icon = opcion.icono;
             return (

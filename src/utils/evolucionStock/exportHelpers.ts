@@ -6,6 +6,7 @@ import type {
   RankingRotacionFiltros,
   RotacionAgregado
 } from '@/types/evolucionStock/evolucionStockTypes';
+import type { ResumenEjecutivo } from '@/types/evolucionStock/resumenTypes';
 import { evolucionStockService } from '@/services/evolucionStock/evolucionStockService';
 
 export const exportRankingRotacion = async (filtros: RankingRotacionFiltros) => {
@@ -62,6 +63,7 @@ export const exportRankingRotacion = async (filtros: RankingRotacionFiltros) => 
 export const exportDetalleProducto = (detalle: ProductoDetalle, periodo: { desde?: string; hasta?: string }) => {
   const workbook = XLSX.utils.book_new();
   const layouts: ReportSheetLayout[] = [];
+  const sucursalesConRemitos = detalle.desglosePorSucursal.some(row => row.recibido != null);
 
   layouts.push(appendReportSheet(workbook, {
     sheetName: 'Resumen',
@@ -116,11 +118,26 @@ export const exportDetalleProducto = (detalle: ProductoDetalle, periodo: { desde
     meta: [['Producto', `${detalle.codigoProducto} - ${detalle.nombreProducto}`]],
     rows: detalle.desglosePorSucursal.map(row => ({
       Sucursal: row.sucursal,
+      ...(sucursalesConRemitos ? { Recibido: row.recibido ?? 0 } : {}),
       Vendido: row.vendido,
       Devoluciones: row.devolucionesCliente,
-      'Vendido neto': row.netoVendido
+      'Vendido neto': row.netoVendido,
+      ...(sucursalesConRemitos ? {
+        Enviado: row.enviadoAOtras ?? 0,
+        'Sell-through': row.sellThrough == null ? '-' : `${row.sellThrough}%`
+      } : {})
     })),
-    columns: [['Sucursal', 24], ['Vendido', 12], ['Devoluciones', 14], ['Vendido neto', 14]]
+    columns: [
+      ['Sucursal', 24],
+      ...(sucursalesConRemitos ? [['Recibido', 12] as [string, number]] : []),
+      ['Vendido', 12],
+      ['Devoluciones', 14],
+      ['Vendido neto', 14],
+      ...(sucursalesConRemitos ? [
+        ['Enviado', 12] as [string, number],
+        ['Sell-through', 14] as [string, number]
+      ] : [])
+    ]
   }));
 
   layouts.push(appendReportSheet(workbook, {
@@ -149,6 +166,49 @@ export const exportRotacionAgregada = (marcas: RotacionAgregado[], proveedores: 
   writeStyledWorkbook(workbook, `rotacion-marca-proveedor-${fechaArchivo()}.xlsx`, layouts);
 };
 
+export const exportResumenEjecutivo = (resumen: ResumenEjecutivo) => {
+  const workbook = XLSX.utils.book_new();
+  const layouts: ReportSheetLayout[] = [];
+
+  resumen.secciones.forEach((seccion, index) => {
+    const clavesContexto = [...new Set(seccion.insights.flatMap(insight => Object.keys(insight.contexto)))];
+    const clavesValores = [...new Set(seccion.insights.flatMap(insight => Object.keys(insight.valores)))];
+    const rows = seccion.insights.length > 0
+      ? seccion.insights.map(insight => ({
+          Frase: insight.frase,
+          Codigo: insight.codigoProducto ?? '',
+          Producto: insight.nombreProducto ?? '',
+          ...Object.fromEntries(clavesContexto.map(clave => [etiquetaMetrica(clave), insight.contexto[clave] ?? ''])),
+          ...Object.fromEntries(clavesValores.map(clave => [etiquetaMetrica(clave), insight.valores[clave] ?? '']))
+        }))
+      : [{ Frase: seccion.mensaje ?? 'Sin conclusiones para el periodo.' }];
+    const columns: ColumnSpec[] = [
+      ['Frase', 72],
+      ...(seccion.insights.length > 0 ? [
+        ['Codigo', 12] as ColumnSpec,
+        ['Producto', 36] as ColumnSpec,
+        ...clavesContexto.map(clave => [etiquetaMetrica(clave), 20] as ColumnSpec),
+        ...clavesValores.map(clave => [etiquetaMetrica(clave), 18] as ColumnSpec)
+      ] : [])
+    ];
+
+    layouts.push(appendReportSheet(workbook, {
+      sheetName: `${String(index + 1).padStart(2, '0')} ${seccion.titulo}`.slice(0, 31),
+      title: seccion.titulo,
+      meta: [
+        ['Generado', fechaDisplay(resumen.generadoEn)],
+        ['Desde', resumen.desde ? fechaDisplay(resumen.desde) : 'Sin filtro'],
+        ['Hasta', resumen.hasta ? fechaDisplay(resumen.hasta) : 'Sin filtro'],
+        ['Datos suficientes', seccion.datosSuficientes ? 'Si' : 'No']
+      ],
+      rows,
+      columns
+    }));
+  });
+
+  writeStyledWorkbook(workbook, `resumen-ejecutivo-${fechaArchivo()}.xlsx`, layouts);
+};
+
 const mapRankingRow = (row: RankingRotacion) => ({
   Codigo: row.codigoProducto,
   Producto: row.nombreProducto,
@@ -170,6 +230,10 @@ export const porcentaje = (numerador: number, denominador: number) => {
 };
 
 const fechaArchivo = () => new Date().toISOString().slice(0, 10);
+
+const etiquetaMetrica = (clave: string) => clave
+  .replace(/([a-záéíóú])([A-Z])/g, '$1 $2')
+  .replace(/^./, letra => letra.toUpperCase());
 
 type ColumnSpec = [key: string, width: number];
 
@@ -228,7 +292,10 @@ const appendReportSheet = (workbook: XLSX.WorkBook, config: ReportSheetConfig): 
   worksheet['!cols'] = config.columns.map(([, width]) => ({ wch: width }));
   worksheet['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: Math.max(config.columns.length - 1, 1) } }];
   worksheet['!rows'] = sheetData.map((_, index) => ({ hpt: index === 0 ? 26 : index === tableStartRow ? 21 : 18 }));
-  worksheet['!freeze'] = { xSplit: 0, ySplit: tableStartRow + 1 } as any;
+  const worksheetConFreeze = worksheet as XLSX.WorkSheet & {
+    '!freeze'?: { xSplit: number; ySplit: number };
+  };
+  worksheetConFreeze['!freeze'] = { xSplit: 0, ySplit: tableStartRow + 1 };
 
   applyBasicStyles(worksheet, tableStartRow, config.columns.length, metaRows.length);
   XLSX.utils.book_append_sheet(workbook, worksheet, config.sheetName);

@@ -1,7 +1,7 @@
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQueries } from '@tanstack/react-query';
-import { ArrowLeft, Download, Loader2 } from 'lucide-react';
+import { ArrowLeft, CircleHelp, Download, Loader2 } from 'lucide-react';
 import { evolucionStockKeys, useDetalleProductoStock } from '@/hooks/evolucionStock/useCargaArchivos';
 import { evolucionStockService } from '@/services/evolucionStock/evolucionStockService';
 import { ProductoSearch } from '@/components/EvolucionStock/ProductoSearch';
@@ -16,9 +16,13 @@ const COLORES_SUCURSALES = ['#B695BF', '#F23D5E', '#51590E', '#FFD700', '#38BDF8
 
 export const DetalleProductoPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { codigo } = useParams();
   const codigoProducto = Number(codigo);
-  const [filtros, setFiltros] = React.useState<ProductoDetalleFiltros>({});
+  const [filtros, setFiltros] = React.useState<ProductoDetalleFiltros>(() => ({
+    desde: searchParams.get('desde') ?? undefined,
+    hasta: searchParams.get('hasta') ?? undefined
+  }));
   const [mostrarTotal, setMostrarTotal] = React.useState(true);
   const [exportando, setExportando] = React.useState(false);
   const [sucursalesSeleccionadas, setSucursalesSeleccionadas] = React.useState<string[]>([]);
@@ -38,6 +42,10 @@ export const DetalleProductoPage: React.FC = () => {
   const colores = React.useMemo(
     () => dataSinFiltroColor?.desglosePorColor ?? data?.desglosePorColor ?? [],
     [dataSinFiltroColor?.desglosePorColor, data?.desglosePorColor]
+  );
+  const tieneDatosRemitos = React.useMemo(
+    () => data?.desglosePorSucursal.some(sucursal => sucursal.recibido != null) ?? false,
+    [data?.desglosePorSucursal]
   );
 
   React.useEffect(() => {
@@ -343,9 +351,36 @@ export const DetalleProductoPage: React.FC = () => {
                 data={data.desglosePorSucursal}
                 columns={[
                   { key: 'sucursal', header: 'Sucursal', render: row => row.sucursal },
+                  ...(tieneDatosRemitos ? [{
+                    key: 'recibido',
+                    header: (
+                      <span className="inline-flex items-center gap-1">
+                        Recibido
+                        <span title="Surge de remitos internos y puede no cubrir periodos anteriores a la primera carga.">
+                          <CircleHelp className="h-3.5 w-3.5 text-white/35" />
+                        </span>
+                      </span>
+                    ),
+                    align: 'right' as const,
+                    render: (row: DesgloseSucursal) => row.recibido ?? 0
+                  }] : []),
                   { key: 'vendido', header: 'Vendido', align: 'right', render: row => row.vendido },
                   { key: 'devoluciones', header: 'Dev.', align: 'right', render: row => row.devolucionesCliente },
-                  { key: 'neto', header: 'Neto', align: 'right', render: row => row.netoVendido }
+                  { key: 'neto', header: 'Neto', align: 'right', render: row => row.netoVendido },
+                  ...(tieneDatosRemitos ? [
+                    {
+                      key: 'enviado',
+                      header: 'Enviado',
+                      align: 'right' as const,
+                      render: (row: DesgloseSucursal) => row.enviadoAOtras ?? 0
+                    },
+                    {
+                      key: 'sellThrough',
+                      header: 'Sell-through',
+                      align: 'right' as const,
+                      render: (row: DesgloseSucursal) => <SellThroughBadge valor={row.sellThrough} />
+                    }
+                  ] : [])
                 ]}
               />
             </div>
@@ -357,6 +392,22 @@ export const DetalleProductoPage: React.FC = () => {
 };
 
 const keySucursal = (sucursal: string) => `sucursal_${sucursal.replace(/[^a-zA-Z0-9]/g, '_')}`;
+
+const SellThroughBadge = ({ valor }: { valor?: number | null }) => {
+  if (valor == null) return <span className="text-white/30">-</span>;
+
+  const clases = valor >= 70
+    ? 'border-[#7A8420]/45 bg-[#51590E]/25 text-[#DDE8A2]'
+    : valor >= 40
+      ? 'border-[#FFD166]/40 bg-[#FFD166]/10 text-[#FFE3A1]'
+      : 'border-[#D94854]/40 bg-[#D94854]/10 text-[#FFADB5]';
+
+  return (
+    <span className={`inline-flex rounded-md border px-2 py-1 text-xs font-semibold ${clases}`}>
+      {valor}%
+    </span>
+  );
+};
 
 const formatearFecha = (fecha?: string) => {
   if (!fecha) return 'Cargando periodo';

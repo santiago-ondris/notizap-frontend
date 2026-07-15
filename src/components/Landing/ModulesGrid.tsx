@@ -54,7 +54,7 @@ const modules = [
   },
   {
     title: "Evolucion stock",
-    description: "Cruce de compras y ventas por producto",
+    description: "Compras, ventas, remitos y resumen ejecutivo",
     icon: LineChart,
     color: "#F23D5E",
     to: "/evolucion-stock",

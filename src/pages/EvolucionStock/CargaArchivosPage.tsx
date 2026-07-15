@@ -5,14 +5,16 @@ import { CalendarioCompras } from '@/components/EvolucionStock/CalendarioCompras
 import { CalendarioVentas } from '@/components/EvolucionStock/CalendarioVentas';
 import { CargaComprasModal } from '@/components/EvolucionStock/CargaComprasModal';
 import { CargaVentasDropzone } from '@/components/EvolucionStock/CargaVentasDropzone';
+import { CargaRemitosDropzone } from '@/components/EvolucionStock/CargaRemitosDropzone';
 import { ResumenCarga } from '@/components/EvolucionStock/ResumenCarga';
 import type { DiaCalendarioUi, ResultadoCargaStock } from '@/types/evolucionStock/evolucionStockTypes';
+import type { ResultadoCargaRemitos } from '@/types/evolucionStock/remitosTypes';
 
 export const CargaArchivosPage: React.FC = () => {
   const navigate = useNavigate();
   const [mesActual, setMesActual] = React.useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const [diaSeleccionado, setDiaSeleccionado] = React.useState<DiaCalendarioUi | null>(null);
-  const [resultado, setResultado] = React.useState<ResultadoCargaStock | null>(null);
+  const [resultado, setResultado] = React.useState<ResultadoCargaStock | ResultadoCargaRemitos | null>(null);
 
   return (
     <div className="min-h-screen bg-[#1A1A20] px-4 py-8">
@@ -30,7 +32,7 @@ export const CargaArchivosPage: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2 text-sm text-white/50">
                   <FileSpreadsheet className="w-4 h-4 text-[#F23D5E]" />
-                  Evolucion de stock
+                  Evolución de stock
                 </div>
                 <h1 className="text-2xl font-bold text-white md:text-3xl">Carga de archivos</h1>
               </div>
@@ -39,7 +41,7 @@ export const CargaArchivosPage: React.FC = () => {
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
-          <div className="space-y-6">
+          <div>
             <div className="grid gap-6 lg:grid-cols-2">
               <CalendarioCompras
                 mesActual={mesActual}
@@ -52,11 +54,14 @@ export const CargaArchivosPage: React.FC = () => {
               />
             </div>
 
-            <ResumenCarga resultado={resultado} />
           </div>
 
           <CargaVentasDropzone onSuccess={setResultado} />
         </div>
+
+        <ResumenCarga resultado={resultado} />
+
+        <CargaRemitosDropzone onSuccess={setResultado} />
 
         <CargaComprasModal
           dia={diaSeleccionado}

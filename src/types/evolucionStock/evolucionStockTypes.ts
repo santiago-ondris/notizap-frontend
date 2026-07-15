@@ -81,6 +81,9 @@ export interface DesgloseSucursal {
   vendido: number;
   devolucionesCliente: number;
   netoVendido: number;
+  recibido?: number | null;
+  enviadoAOtras?: number | null;
+  sellThrough?: number | null;
 }
 
 export interface ProductoDetalle {

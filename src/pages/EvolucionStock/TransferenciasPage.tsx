@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import * as Switch from '@radix-ui/react-switch';
 import {
   ArrowDown,
   ArrowLeft,
@@ -34,6 +35,7 @@ export const TransferenciasPage: React.FC = () => {
   const [periodo, setPeriodo] = React.useState<TransferenciasPeriodoFiltros>({});
   const [rutaSeleccionada, setRutaSeleccionada] = React.useState<RutaTransferencia | null>(null);
   const [ranking, setRanking] = React.useState(rankingInicial);
+  const [incluirSalidasDeposito, setIncluirSalidasDeposito] = React.useState(false);
   const { data: matriz, isLoading: cargandoMatriz, isError: errorMatriz } = useMatrizTransferencias(periodo);
 
   const filtrosProductos = React.useMemo<ProductosTransferidosFiltros>(() => ({
@@ -45,14 +47,31 @@ export const TransferenciasPage: React.FC = () => {
   const { data: productos, isLoading: cargandoProductos, isError: errorProductos } =
     useProductosTransferidos(filtrosProductos);
 
-  const rutasPorClave = React.useMemo(() => new Map(
-    matriz?.rutas.map(ruta => [claveRuta(ruta.origen, ruta.destino), ruta] as const) ?? []
-  ), [matriz?.rutas]);
-  const maximoRuta = React.useMemo(
-    () => Math.max(0, ...(matriz?.rutas.map(ruta => ruta.unidadesRecibidas) ?? [])),
-    [matriz?.rutas]
+  const sucursales = React.useMemo(() => matriz?.sucursales ?? [], [matriz?.sucursales]);
+  const origenesVisibles = React.useMemo(
+    () => sucursales.filter(origen => incluirSalidasDeposito || !esDeposito(origen)),
+    [incluirSalidasDeposito, sucursales]
   );
-  const sucursales = matriz?.sucursales ?? [];
+  const rutasVisibles = React.useMemo(
+    () => matriz?.rutas.filter(ruta => incluirSalidasDeposito || !esDeposito(ruta.origen)) ?? [],
+    [incluirSalidasDeposito, matriz?.rutas]
+  );
+  const rutasPorClave = React.useMemo(() => new Map(
+    rutasVisibles.map(ruta => [claveRuta(ruta.origen, ruta.destino), ruta] as const)
+  ), [rutasVisibles]);
+  const extremos = React.useMemo(() => {
+    const cantidades = rutasVisibles
+      .map(ruta => ruta.unidadesRecibidas)
+      .filter(unidades => unidades > 0);
+
+    return cantidades.length === 0
+      ? { minimo: 0, maximo: 0 }
+      : { minimo: Math.min(...cantidades), maximo: Math.max(...cantidades) };
+  }, [rutasVisibles]);
+  const totalUnidadesVisible = React.useMemo(
+    () => rutasVisibles.reduce((total, ruta) => total + ruta.unidadesRecibidas, 0),
+    [rutasVisibles]
+  );
 
   const actualizarPeriodo = (cambio: TransferenciasPeriodoFiltros) => {
     setPeriodo(cambio);
@@ -63,6 +82,14 @@ export const TransferenciasPage: React.FC = () => {
   const seleccionarRuta = (ruta: RutaTransferencia) => {
     setRutaSeleccionada(ruta);
     setRanking(prev => ({ ...prev, page: 1 }));
+  };
+
+  const cambiarVisibilidadDeposito = (incluir: boolean) => {
+    setIncluirSalidasDeposito(incluir);
+    if (!incluir && rutaSeleccionada && esDeposito(rutaSeleccionada.origen)) {
+      setRutaSeleccionada(null);
+      setRanking(prev => ({ ...prev, page: 1 }));
+    }
   };
 
   const sort = (orderBy: string) => {
@@ -152,9 +179,32 @@ export const TransferenciasPage: React.FC = () => {
             </div>
             {matriz && (
               <div className="flex gap-6 text-right">
-                <Metric label="Unidades" value={matriz.totalUnidades} />
-                <Metric label="Rutas" value={matriz.rutas.length} />
-                <Metric label="Depositos" value={matriz.sucursales.length} />
+                <Metric label="Unidades" value={totalUnidadesVisible} />
+                <Metric label="Rutas" value={rutasVisibles.length} />
+                <Metric label="Origenes" value={origenesVisibles.length} />
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 border-y border-white/10 py-3">
+            <label className="inline-flex cursor-pointer items-center gap-3 text-sm text-white/70">
+              <Switch.Root
+                checked={incluirSalidasDeposito}
+                onCheckedChange={cambiarVisibilidadDeposito}
+                className="relative h-6 w-11 rounded-full border border-white/15 bg-white/10 transition-colors data-[state=checked]:border-[#F23D5E]/60 data-[state=checked]:bg-[#F23D5E]"
+              >
+                <Switch.Thumb className="block h-4 w-4 translate-x-1 rounded-full bg-white shadow-sm transition-transform data-[state=checked]:translate-x-6" />
+              </Switch.Root>
+              Incluir salidas desde Deposito
+            </label>
+            {rutasVisibles.length > 0 && (
+              <div className="flex flex-wrap items-center gap-4 text-xs text-white/55" aria-label="Referencias de la matriz">
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-sm bg-[#F59E0B]" /> Mayor flujo
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-sm bg-[#14B8A6]" /> Menor flujo
+                </span>
               </div>
             )}
           </div>
@@ -181,7 +231,7 @@ export const TransferenciasPage: React.FC = () => {
                     </td>
                   </tr>
                 )}
-                {!cargandoMatriz && sucursales.map(origen => (
+                {!cargandoMatriz && origenesVisibles.map(origen => (
                   <tr key={origen} className="border-b border-white/5 last:border-0">
                     <th className="sticky left-0 z-10 bg-[#202026] px-4 py-3 text-left text-sm font-medium text-white/75">
                       {origen}
@@ -189,14 +239,16 @@ export const TransferenciasPage: React.FC = () => {
                     {sucursales.map(destino => {
                       const ruta = rutasPorClave.get(claveRuta(origen, destino));
                       const seleccionada = rutaSeleccionada?.origen === origen && rutaSeleccionada.destino === destino;
+                      const esMaximo = ruta?.unidadesRecibidas === extremos.maximo;
+                      const esMinimo = ruta?.unidadesRecibidas === extremos.minimo;
                       return (
                         <td key={destino} className="h-16 border-l border-white/5 p-1.5 text-center">
                           {ruta ? (
                             <button
                               onClick={() => seleccionarRuta(ruta)}
-                              title={`${origen} a ${destino}: ${ruta.unidadesRecibidas} unidades en ${ruta.remitosInvolucrados} remitos`}
+                              title={`${origen} a ${destino}: ${ruta.unidadesRecibidas} unidades en ${ruta.remitosInvolucrados} remitos${esMaximo ? ' - mayor flujo' : esMinimo ? ' - menor flujo' : ''}`}
                               className={`h-full w-full rounded-md border px-2 py-1 text-sm font-semibold transition-colors ${seleccionada ? 'border-white text-white ring-2 ring-[#F23D5E]/70' : 'border-white/10 text-white/85 hover:border-white/35'}`}
-                              style={{ backgroundColor: colorIntensidad(ruta.unidadesRecibidas, maximoRuta) }}
+                              style={{ backgroundColor: colorCelda(ruta.unidadesRecibidas, extremos, esMaximo, esMinimo) }}
                             >
                               <span className="block">{ruta.unidadesRecibidas}</span>
                               <span className="block text-[11px] font-normal text-white/55">{ruta.remitosInvolucrados} rem.</span>
@@ -351,10 +403,27 @@ const PresetButton = ({ label, onClick }: { label: string; onClick: () => void }
 
 const claveRuta = (origen: string, destino: string) => `${origen}\u0000${destino}`;
 
+const esDeposito = (sucursal: string) => sucursal
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .trim()
+  .toLocaleUpperCase('es-AR') === 'DEPOSITO';
+
 const colorIntensidad = (unidades: number, maximo: number) => {
   const intensidad = maximo > 0 ? unidades / maximo : 0;
   const alpha = 0.12 + intensidad * 0.58;
   return `rgba(242, 61, 94, ${alpha.toFixed(2)})`;
+};
+
+const colorCelda = (
+  unidades: number,
+  extremos: { minimo: number; maximo: number },
+  esMaximo: boolean,
+  esMinimo: boolean
+) => {
+  if (esMaximo) return 'rgba(245, 158, 11, 0.72)';
+  if (esMinimo) return 'rgba(20, 184, 166, 0.58)';
+  return colorIntensidad(unidades, extremos.maximo);
 };
 
 const toIsoDate = (date: Date) => date.toISOString().slice(0, 10);

@@ -35,7 +35,7 @@ export const TransferenciasPage: React.FC = () => {
   const [periodo, setPeriodo] = React.useState<TransferenciasPeriodoFiltros>({});
   const [rutaSeleccionada, setRutaSeleccionada] = React.useState<RutaTransferencia | null>(null);
   const [ranking, setRanking] = React.useState(rankingInicial);
-  const [incluirSalidasDeposito, setIncluirSalidasDeposito] = React.useState(false);
+  const [incluirDeposito, setIncluirDeposito] = React.useState(false);
   const { data: matriz, isLoading: cargandoMatriz, isError: errorMatriz } = useMatrizTransferencias(periodo);
 
   const filtrosProductos = React.useMemo<ProductosTransferidosFiltros>(() => ({
@@ -48,13 +48,15 @@ export const TransferenciasPage: React.FC = () => {
     useProductosTransferidos(filtrosProductos);
 
   const sucursales = React.useMemo(() => matriz?.sucursales ?? [], [matriz?.sucursales]);
-  const origenesVisibles = React.useMemo(
-    () => sucursales.filter(origen => incluirSalidasDeposito || !esDeposito(origen)),
-    [incluirSalidasDeposito, sucursales]
+  const sucursalesVisibles = React.useMemo(
+    () => sucursales.filter(sucursal => incluirDeposito || !esDeposito(sucursal)),
+    [incluirDeposito, sucursales]
   );
   const rutasVisibles = React.useMemo(
-    () => matriz?.rutas.filter(ruta => incluirSalidasDeposito || !esDeposito(ruta.origen)) ?? [],
-    [incluirSalidasDeposito, matriz?.rutas]
+    () => matriz?.rutas.filter(ruta => incluirDeposito || (
+      !esDeposito(ruta.origen) && !esDeposito(ruta.destino)
+    )) ?? [],
+    [incluirDeposito, matriz?.rutas]
   );
   const rutasPorClave = React.useMemo(() => new Map(
     rutasVisibles.map(ruta => [claveRuta(ruta.origen, ruta.destino), ruta] as const)
@@ -85,8 +87,10 @@ export const TransferenciasPage: React.FC = () => {
   };
 
   const cambiarVisibilidadDeposito = (incluir: boolean) => {
-    setIncluirSalidasDeposito(incluir);
-    if (!incluir && rutaSeleccionada && esDeposito(rutaSeleccionada.origen)) {
+    setIncluirDeposito(incluir);
+    if (!incluir && rutaSeleccionada && (
+      esDeposito(rutaSeleccionada.origen) || esDeposito(rutaSeleccionada.destino)
+    )) {
       setRutaSeleccionada(null);
       setRanking(prev => ({ ...prev, page: 1 }));
     }
@@ -181,7 +185,7 @@ export const TransferenciasPage: React.FC = () => {
               <div className="flex gap-6 text-right">
                 <Metric label="Unidades" value={totalUnidadesVisible} />
                 <Metric label="Rutas" value={rutasVisibles.length} />
-                <Metric label="Origenes" value={origenesVisibles.length} />
+                <Metric label="Sucursales" value={sucursalesVisibles.length} />
               </div>
             )}
           </div>
@@ -189,13 +193,13 @@ export const TransferenciasPage: React.FC = () => {
           <div className="flex flex-wrap items-center justify-between gap-3 border-y border-white/10 py-3">
             <label className="inline-flex cursor-pointer items-center gap-3 text-sm text-white/70">
               <Switch.Root
-                checked={incluirSalidasDeposito}
+                checked={incluirDeposito}
                 onCheckedChange={cambiarVisibilidadDeposito}
                 className="relative h-6 w-11 rounded-full border border-white/15 bg-white/10 transition-colors data-[state=checked]:border-[#F23D5E]/60 data-[state=checked]:bg-[#F23D5E]"
               >
                 <Switch.Thumb className="block h-4 w-4 translate-x-1 rounded-full bg-white shadow-sm transition-transform data-[state=checked]:translate-x-6" />
               </Switch.Root>
-              Incluir salidas desde Deposito
+              Incluir movimientos de Deposito
             </label>
             {rutasVisibles.length > 0 && (
               <div className="flex flex-wrap items-center gap-4 text-xs text-white/55" aria-label="Referencias de la matriz">
@@ -216,7 +220,7 @@ export const TransferenciasPage: React.FC = () => {
                   <th className="sticky left-0 z-10 min-w-44 bg-[#25252B] px-4 py-3 text-left text-xs font-medium uppercase text-white/45">
                     Origen / destino
                   </th>
-                  {sucursales.map(destino => (
+                  {sucursalesVisibles.map(destino => (
                     <th key={destino} className="min-w-32 max-w-40 px-3 py-3 text-center text-xs font-medium text-white/55">
                       {destino}
                     </th>
@@ -226,17 +230,17 @@ export const TransferenciasPage: React.FC = () => {
               <tbody>
                 {cargandoMatriz && (
                   <tr>
-                    <td colSpan={sucursales.length + 1} className="h-40 text-center">
+                    <td colSpan={sucursalesVisibles.length + 1} className="h-40 text-center">
                       <Loader2 className="mx-auto h-7 w-7 animate-spin text-white/45" />
                     </td>
                   </tr>
                 )}
-                {!cargandoMatriz && origenesVisibles.map(origen => (
+                {!cargandoMatriz && sucursalesVisibles.map(origen => (
                   <tr key={origen} className="border-b border-white/5 last:border-0">
                     <th className="sticky left-0 z-10 bg-[#202026] px-4 py-3 text-left text-sm font-medium text-white/75">
                       {origen}
                     </th>
-                    {sucursales.map(destino => {
+                    {sucursalesVisibles.map(destino => {
                       const ruta = rutasPorClave.get(claveRuta(origen, destino));
                       const seleccionada = rutaSeleccionada?.origen === origen && rutaSeleccionada.destino === destino;
                       const esMaximo = ruta?.unidadesRecibidas === extremos.maximo;
@@ -262,7 +266,7 @@ export const TransferenciasPage: React.FC = () => {
                   </tr>
                 ))}
                 {!cargandoMatriz && rutasPorClave.size === 0 && (
-                  <tr><td className="h-32 px-4 text-center text-sm text-white/45">Sin transferencias en el periodo.</td></tr>
+                  <tr><td colSpan={sucursalesVisibles.length + 1} className="h-32 px-4 text-center text-sm text-white/45">Sin transferencias en el periodo.</td></tr>
                 )}
               </tbody>
             </table>

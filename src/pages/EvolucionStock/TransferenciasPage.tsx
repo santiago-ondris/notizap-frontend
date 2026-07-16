@@ -114,7 +114,7 @@ export const TransferenciasPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#1A1A20] px-4 py-8">
-      <div className="mx-auto max-w-[1500px] space-y-6">
+      <div className="mx-auto max-w-375 space-y-6">
         <header className="border-b border-white/10 pb-6">
           <button
             onClick={() => navigate('/evolucion-stock')}
@@ -214,7 +214,7 @@ export const TransferenciasPage: React.FC = () => {
           </div>
 
           <div className="overflow-x-auto rounded-lg border border-white/10">
-            <table className="min-w-max border-collapse bg-white/[0.02]">
+            <table className="min-w-max border-collapse bg-white/2">
               <thead>
                 <tr className="border-b border-white/10 bg-white/5">
                   <th className="sticky left-0 z-10 min-w-44 bg-[#25252B] px-4 py-3 text-left text-xs font-medium uppercase text-white/45">
@@ -315,7 +315,7 @@ export const TransferenciasPage: React.FC = () => {
           )}
 
           <div className="overflow-x-auto rounded-lg border border-white/10">
-            <table className="w-full min-w-[760px] bg-white/[0.02]">
+            <table className="w-full min-w-190 bg-white/2">
               <thead className="border-b border-white/10 bg-white/5">
                 <tr>
                   <Th onClick={() => sort('codigo')} icon={sortIcon('codigo')}>Codigo</Th>
@@ -334,7 +334,7 @@ export const TransferenciasPage: React.FC = () => {
                   <tr><td colSpan={6} className="h-32 text-center text-sm text-white/45">Sin productos transferidos.</td></tr>
                 )}
                 {productos?.data.map(producto => (
-                  <tr key={`${producto.codigoProducto ?? 'pendiente'}-${producto.nombreProducto}`} className="border-b border-white/5 last:border-0 hover:bg-white/[0.04]">
+                  <tr key={`${producto.codigoProducto ?? 'pendiente'}-${producto.nombreProducto}`} className="border-b border-white/5 last:border-0 hover:bg-white/4">
                     <td className="px-4 py-3 text-sm font-medium text-white">
                       {producto.codigoProducto ?? <span className="text-xs text-[#FFD166]">Sin match</span>}
                     </td>

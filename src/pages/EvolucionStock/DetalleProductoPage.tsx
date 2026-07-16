@@ -1,7 +1,7 @@
 import React from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQueries } from '@tanstack/react-query';
-import { ArrowLeft, CircleHelp, Download, Loader2 } from 'lucide-react';
+import { ArrowLeft, CircleAlert, CircleHelp, Download, Loader2 } from 'lucide-react';
 import { evolucionStockKeys, useDetalleProductoStock } from '@/hooks/evolucionStock/useCargaArchivos';
 import { evolucionStockService } from '@/services/evolucionStock/evolucionStockService';
 import { ProductoSearch } from '@/components/EvolucionStock/ProductoSearch';
@@ -264,6 +264,24 @@ export const DetalleProductoPage: React.FC = () => {
 
         {data && (
           <>
+            {data.oculto && (
+              <section className="rounded-2xl border border-[#FFD700]/45 bg-[#FFD700]/10 p-5 text-[#FFF3A3]">
+                <div className="flex items-start gap-3">
+                  <CircleAlert className="mt-0.5 h-5 w-5 shrink-0 text-[#FFD700]" />
+                  <div>
+                    <p className="font-medium">
+                      Este producto está excluido de todos los análisis del módulo.
+                    </p>
+                    <p className="mt-1 text-sm text-[#FFF3A3]/75">
+                      Podés volver a incluirlo desde el{' '}
+                      <Link to="/evolucion-stock/productos" className="font-semibold underline underline-offset-2 hover:text-white">
+                        gestor de productos
+                      </Link>.
+                    </p>
+                  </div>
+                </div>
+              </section>
+            )}
             {data.netoNegativo && <AvisoNetoNegativo />}
             {resumenEjecutivo && (
               <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
@@ -376,9 +394,16 @@ export const DetalleProductoPage: React.FC = () => {
                     },
                     {
                       key: 'sellThrough',
-                      header: 'Sell-through',
+                      header: (
+                        <span className="inline-flex items-center gap-1">
+                          Vendido / Recibido
+                          <span title="Porcentaje de las unidades recibidas por remito que se vendieron en el período">
+                            <CircleHelp className="h-3.5 w-3.5 text-white/35" />
+                          </span>
+                        </span>
+                      ),
                       align: 'right' as const,
-                      render: (row: DesgloseSucursal) => <SellThroughBadge valor={row.sellThrough} />
+                      render: (row: DesgloseSucursal) => <VendidoRecibidoBadge valor={row.sellThrough} />
                     }
                   ] : [])
                 ]}
@@ -393,7 +418,7 @@ export const DetalleProductoPage: React.FC = () => {
 
 const keySucursal = (sucursal: string) => `sucursal_${sucursal.replace(/[^a-zA-Z0-9]/g, '_')}`;
 
-const SellThroughBadge = ({ valor }: { valor?: number | null }) => {
+const VendidoRecibidoBadge = ({ valor }: { valor?: number | null }) => {
   if (valor == null) return <span className="text-white/30">-</span>;
 
   const clases = valor >= 70

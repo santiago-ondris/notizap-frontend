@@ -89,6 +89,7 @@ export interface DesgloseSucursal {
 export interface ProductoDetalle {
   codigoProducto: number;
   nombreProducto: string;
+  oculto: boolean;
   netoNegativo: boolean;
   comprado: number;
   vendido: number;

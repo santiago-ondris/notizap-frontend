@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ArrowRightLeft, BarChart3, FileBarChart, FileSpreadsheet, LineChart, PackageSearch, Scale } from 'lucide-react';
+import { ArrowRight, ArrowRightLeft, BarChart3, FileSpreadsheet, LineChart, PackageSearch, PackageX, Scale } from 'lucide-react';
 import { ProductoSearch } from '@/components/EvolucionStock/ProductoSearch';
 
 const opciones = [
@@ -8,7 +8,7 @@ const opciones = [
   { titulo: 'Decidir recompras', descripcion: 'Ordena productos por rotacion, velocidad y unidades vendidas.', icono: BarChart3, ruta: '/evolucion-stock/ranking', color: '#B695BF' },
   { titulo: 'Evaluar proveedores', descripcion: 'Compara marcas y proveedores por comprado, vendido y rotacion.', icono: Scale, ruta: '/evolucion-stock/rotacion', color: '#51590E' },
   { titulo: 'Analizar transferencias', descripcion: 'Revisa el flujo entre depositos y los productos de cada ruta.', icono: ArrowRightLeft, ruta: '/evolucion-stock/transferencias', color: '#38BDF8' },
-  { titulo: 'Resumen ejecutivo', descripcion: 'Reune oportunidades, alertas y flujo logistico del periodo.', icono: FileBarChart, ruta: '/evolucion-stock/resumen', color: '#FFD166' }
+  { titulo: 'Gestionar productos', descripcion: 'Exclui productos basura de todos los analisis sin borrar sus movimientos.', icono: PackageX, ruta: '/evolucion-stock/productos', color: '#D94854' }
 ];
 
 export const EvolucionStockSelectorPage: React.FC = () => {

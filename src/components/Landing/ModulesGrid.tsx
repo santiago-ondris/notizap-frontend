@@ -54,7 +54,7 @@ const modules = [
   },
   {
     title: "Evolucion stock",
-    description: "Compras, ventas, remitos y resumen ejecutivo",
+    description: "Compras, ventas, rotacion y remitos internos",
     icon: LineChart,
     color: "#F23D5E",
     to: "/evolucion-stock",

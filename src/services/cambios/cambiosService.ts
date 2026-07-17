@@ -4,6 +4,7 @@ import {
   type CreateCambioSimpleDto, 
   type CambiosFiltros,
   type CambiosEstadisticasData,
+  type CambiosPaginadosResponse,
   type EstadosCambio,
   type EstadoCambioFiltro,
   MesesUtils
@@ -22,6 +23,17 @@ class CambiosService {
       console.error('❌ [CambiosService] Error al obtener cambios:', error);
       throw new Error('Error al cargar la lista de cambios');
     }
+  }
+
+  async obtenerPaginados(
+    filtros: CambiosFiltros,
+    page = 1,
+    pageSize = 50
+  ): Promise<CambiosPaginadosResponse> {
+    const response = await api.get<CambiosPaginadosResponse>(`${this.baseUrl}/paged`, {
+      params: { ...filtros, page, pageSize }
+    });
+    return response.data;
   }
 
   async obtenerPorMes(mes: number, año: number): Promise<CambioSimpleDto[]> {
@@ -63,11 +75,12 @@ class CambiosService {
       const response = await api.post<number>(this.baseUrl, cambio);
       
       return response.data;
-    } catch (error: any) {
-      if (error.response) {
+    } catch (error: unknown) {
+      const apiError = error as { response?: { status?: number; data?: unknown } };
+      if (apiError.response) {
         console.error('❌ [crear] Error del backend:', {
-          status: error.response.status,
-          data: error.response.data
+          status: apiError.response.status,
+          data: apiError.response.data
         });
       } else {
         console.error('❌ [crear] Error de red:', error);
@@ -128,17 +141,7 @@ class CambiosService {
 
   async actualizarEstados(id: number, estados: EstadosCambio): Promise<void> {
     try {
-      const cambioCompleto = await this.obtenerPorId(id);
-      
-      const cambioActualizado: CambioSimpleDto = {
-        ...cambioCompleto,
-        llegoAlDeposito: estados.llegoAlDeposito,
-        yaEnviado: estados.yaEnviado,
-        cambioRegistradoSistema: estados.cambioRegistradoSistema,
-        parPedido: estados.parPedido
-      };
-
-      await this.actualizarSinValidacionCompleta(id, cambioActualizado);
+      await api.put(`${this.baseUrl}/${id}/estados`, estados);
     } catch (error) {
       console.error('Error al actualizar estados:', error);
       throw new Error('Error al actualizar el estado del cambio');

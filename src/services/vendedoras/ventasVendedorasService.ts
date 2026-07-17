@@ -17,6 +17,11 @@ import type { VentaVendedoraFilters } from '@/types/vendedoras/filtrosTypes';
 const BASE_URL = '/api/v1/ventas-vendedoras';
 
 export const ventasVendedorasService = {
+  async obtenerDatosIniciales(): Promise<{ sucursales: string[]; vendedores: string[]; rangoFechas: RangoFechas }> {
+    const response = await api.get(`${BASE_URL}/initial-data`);
+    return response.data;
+  },
+
   async subirArchivo(uploadData: VentaVendedoraUpload): Promise<UploadResult> {
     const formData = new FormData();
     formData.append('archivo', uploadData.archivo);

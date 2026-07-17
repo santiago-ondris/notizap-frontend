@@ -7,6 +7,7 @@ import CambiosTabla from '@/components/Cambios/CambiosTabla';
 import CambiosFiltros from '@/components/Cambios/CambiosFiltros';
 import CambioModal from '@/components/Cambios/CambioModal';
 import SelectorMeses from '@/components/Cambios/SelectorMeses';
+import Paginacion from '@/components/ui/Paginacion';
 import cambiosService from '@/services/cambios/cambiosService';
 import { 
   type CambioSimpleDto, 
@@ -23,8 +24,11 @@ const CambiosPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [cambios, setCambios] = useState<CambioSimpleDto[]>([]);
-  const [cambiosFiltrados, setCambiosFiltrados] = useState<CambioSimpleDto[]>([]);
   const [estadisticas, setEstadisticas] = useState<EstadisticasType | null>(null);
+  const [pagina, setPagina] = useState(1);
+  const [totalRegistros, setTotalRegistros] = useState(0);
+  const [totalPaginas, setTotalPaginas] = useState(0);
+  const pageSize = 50;
 
   const [cargandoDatos, setCargandoDatos] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,17 +46,29 @@ const CambiosPage: React.FC = () => {
   const puedeEditar = role === 'admin' || role === 'superadmin';
   const puedeVer = role === 'viewer' || role === 'admin' || role === 'superadmin';
 
-  const cargarCambiosPorMes = async (valorMes: string) => {
+  const cargarCambiosPorMes = useCallback(async (
+    valorMes: string,
+    filtrosActuales: FiltrosType = filtros,
+    paginaActual: number = pagina
+  ) => {
     setCargandoDatos(true);
     setError(null);
     
     try {
       const [año, mes] = valorMes.split('-').map(Number);
       
-      const cambiosData = await cambiosService.obtenerPorMes(mes, año);
-      setCambios(cambiosData);
+      const filtrosMes = cambiosService.crearFiltrosDesdeMes(valorMes);
+      const resultado = await cambiosService.obtenerPaginados(
+        { ...filtrosMes, ...filtrosActuales },
+        paginaActual,
+        pageSize
+      );
+      setCambios(resultado.data);
+      setEstadisticas(resultado.estadisticas);
+      setTotalRegistros(resultado.totalRegistros);
+      setTotalPaginas(resultado.totalPaginas);
       
-      if (cambiosData.length === 0) {
+      if (resultado.totalRegistros === 0) {
         toast.info(`No hay cambios registrados en ${MesesUtils.formatearMes(mes, año)}`);
       }
       
@@ -61,37 +77,24 @@ const CambiosPage: React.FC = () => {
       setError(mensaje);
       toast.error(mensaje);
       setCambios([]);
+      setTotalRegistros(0);
+      setTotalPaginas(0);
     } finally {
       setCargandoDatos(false);
     }
-  };
+  }, [filtros, pagina]);
 
 
   const handleCambioMes = (nuevoMes: string) => {
     setMesSeleccionado(nuevoMes);
     
     setFiltros({});
-    
-    cargarCambiosPorMes(nuevoMes);
+    setPagina(1);
   };
-
-  const aplicarFiltros = useCallback(() => {
-    const filtrosMes = cambiosService.crearFiltrosDesdeMes(mesSeleccionado);
-    const filtrosCombinados: FiltrosType = {
-      ...filtrosMes,
-      ...filtros 
-    };
-    
-    const cambiosFiltradosResult = cambiosService.filtrarCambios(cambios, filtrosCombinados);
-    setCambiosFiltrados(cambiosFiltradosResult);
-    
-    const estadisticasCalculadas = cambiosService.calcularEstadisticas(cambiosFiltradosResult);
-    setEstadisticas(estadisticasCalculadas);
-  }, [cambios, filtros, mesSeleccionado]);
-
 
   const handleFiltrosChange = (nuevosFiltros: FiltrosType) => {
     setFiltros(nuevosFiltros);
+    setPagina(1);
   };
 
   const handleActualizarEnvio = async (id: number, envio: string): Promise<boolean> => {
@@ -229,16 +232,12 @@ const CambiosPage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (puedeVer) {
-      cargarCambiosPorMes(mesSeleccionado);
-    }
-  }, [puedeVer]);
-
-  useEffect(() => {
-    if (cambios.length > 0) {
-      aplicarFiltros();
-    }
-  }, [aplicarFiltros]);
+    if (!puedeVer) return;
+    const timeoutId = window.setTimeout(() => {
+      cargarCambiosPorMes(mesSeleccionado, filtros, pagina);
+    }, 250);
+    return () => window.clearTimeout(timeoutId);
+  }, [puedeVer, mesSeleccionado, filtros, pagina, cargarCambiosPorMes]);
 
   if (!puedeVer) {
     return (
@@ -345,11 +344,11 @@ const CambiosPage: React.FC = () => {
             {/* Contador de resultados del mes */}
             <div className="flex items-center gap-4 text-sm text-white/60">
               <span>
-                Total del mes: <strong className="text-white">{cambios.length}</strong>
+                Resultados: <strong className="text-white">{totalRegistros}</strong>
               </span>
               {filtros && Object.keys(filtros).length > 0 && (
                 <span>
-                  Filtrados: <strong className="text-[#B695BF]">{cambiosFiltrados.length}</strong>
+                  En esta pÃ¡gina: <strong className="text-[#B695BF]">{cambios.length}</strong>
                 </span>
               )}
             </div>
@@ -370,8 +369,8 @@ const CambiosPage: React.FC = () => {
         <CambiosFiltros
           filtros={filtros}
           onFiltrosChange={handleFiltrosChange}
-          totalCambios={cambios.length}
-          cambiosFiltrados={cambiosFiltrados.length}
+          totalCambios={totalRegistros}
+          cambiosFiltrados={cambios.length}
           cargando={cargandoDatos}
         />
 
@@ -390,7 +389,7 @@ const CambiosPage: React.FC = () => {
           </div>
         ) : (
           <CambiosTabla
-            cambios={cambiosFiltrados}
+            cambios={cambios}
             onActualizarEstados={handleActualizarEstados}
             onEliminar={handleEliminarCambio}
             onEditar={handleEditarModal}
@@ -400,6 +399,14 @@ const CambiosPage: React.FC = () => {
             onActualizarEtiqueta={handleActualizarEtiqueta}
           />
         )}
+        <Paginacion
+          paginaActual={pagina}
+          totalPaginas={totalPaginas}
+          totalElementos={totalRegistros}
+          elementosPorPagina={pageSize}
+          onCambioPagina={setPagina}
+          className="bg-white/5 border border-white/10 rounded-xl p-4"
+        />
         {/* Cards de estadísticas */}
         <CambiosEstadisticas
           estadisticas={estadisticas}

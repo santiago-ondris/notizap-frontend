@@ -1,6 +1,7 @@
 import React from "react";
 import { ArrowUpRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface ModuleCardProps {
   title: string;
@@ -8,6 +9,7 @@ interface ModuleCardProps {
   icon: LucideIcon;
   color?: string;
   to?: string;
+  onIntent?: () => void;
 }
 
 export const ModuleCard: React.FC<ModuleCardProps> = ({
@@ -16,12 +18,15 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
   icon: Icon,
   color = "#B695BF",
   to,
+  onIntent,
 }) => {
-  const CardWrapper = to ? 'a' : 'div';
+  const CardWrapper: React.ElementType = to ? Link : 'div';
   
   return (
     <CardWrapper
-      href={to}
+      {...(to ? { to } : {})}
+      onMouseEnter={onIntent}
+      onFocus={onIntent}
       className="group relative block"
     >
       {/* Main card */}

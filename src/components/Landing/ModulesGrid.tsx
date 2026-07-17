@@ -10,6 +10,9 @@ import {
   LineChart,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
+import { ventasVendedorasService } from "@/services/vendedoras/ventasVendedorasService";
+import { vendedorasKeys } from "@/hooks/vendedoras/useVentasVendedoras";
 
 const modules = [
   {
@@ -64,6 +67,20 @@ const modules = [
 
 export const ModulesGrid: React.FC = () => {
   const { isAuthenticated, role } = useAuth();
+  const queryClient = useQueryClient();
+
+  const precargarModulo = (ruta: string) => {
+    if (ruta === '/vendedoras') {
+      void import('@/pages/Vendedoras/VentasVendedorasPage');
+      void queryClient.prefetchQuery({
+        queryKey: vendedorasKeys.initialData(),
+        queryFn: () => ventasVendedorasService.obtenerDatosIniciales(),
+        staleTime: 1000 * 60 * 30
+      });
+    } else if (ruta === '/cambios') {
+      void import('@/pages/Cambios/CambiosPage');
+    }
+  };
 
   if (!isAuthenticated) {
     return (
@@ -130,7 +147,7 @@ export const ModulesGrid: React.FC = () => {
               animationFillMode: 'forwards'
             }}
           >
-            <ModuleCard {...module} />
+            <ModuleCard {...module} onIntent={() => precargarModulo(module.to)} />
           </div>
         ))}
       </div>

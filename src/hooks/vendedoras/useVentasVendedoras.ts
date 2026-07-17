@@ -13,14 +13,7 @@ export const vendedorasKeys = {
 export const useVentasVendedorasInitialData = () => {
     return useQuery({
         queryKey: vendedorasKeys.initialData(),
-        queryFn: async () => {
-            const [sucursales, vendedores, rangoFechas] = await Promise.all([
-                ventasVendedorasService.obtenerSucursales(),
-                ventasVendedorasService.obtenerVendedores(),
-                ventasVendedorasService.obtenerRangoFechas(),
-            ]);
-            return { sucursales, vendedores, rangoFechas };
-        },
+        queryFn: () => ventasVendedorasService.obtenerDatosIniciales(),
         staleTime: 1000 * 60 * 30, // 30 minutes for static data like sucursales/vendedores
     });
 };
@@ -46,16 +39,7 @@ export const useVentasVendedorasQuery = (filtros: VentaVendedoraFilters, enabled
 export const useVentasVendedorasStatsQuery = (filtros: Partial<VentaVendedoraFilters>, enabled: boolean = true) => {
     return useQuery({
         queryKey: vendedorasKeys.stats(filtros),
-        queryFn: async () => {
-            const [statsResponse, todasVendedorasResponse] = await Promise.all([
-                ventasVendedorasService.obtenerEstadisticas(filtros),
-                ventasVendedorasService.obtenerTodasLasVendedoras(filtros),
-            ]);
-            return {
-                ...statsResponse,
-                todasVendedoras: todasVendedorasResponse,
-            };
-        },
+        queryFn: () => ventasVendedorasService.obtenerEstadisticas(filtros),
         enabled,
         staleTime: 1000 * 60 * 5, // 5 minutes cache
     });

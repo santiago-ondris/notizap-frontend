@@ -72,6 +72,15 @@ export interface CambiosEstadisticasData {
   diferencianNeta: number; 
 }
 
+export interface CambiosPaginadosResponse {
+  data: CambioSimpleDto[];
+  totalRegistros: number;
+  pagina: number;
+  pageSize: number;
+  totalPaginas: number;
+  estadisticas: CambiosEstadisticasData;
+}
+
 export const MOTIVOS_CAMBIO = [
   'Talle',
   'Modelo',

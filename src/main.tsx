@@ -10,7 +10,14 @@ import { ToastContainer } from "react-toastify";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@/store/useArchivosAnalisis";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      gcTime: 1000 * 60 * 60,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const LenisWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   useEffect(() => {

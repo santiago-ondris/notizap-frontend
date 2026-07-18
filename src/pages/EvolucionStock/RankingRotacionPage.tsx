@@ -70,7 +70,9 @@ export const RankingRotacionPage: React.FC = () => {
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <h1 className="text-3xl font-bold text-white">Ranking de rotacion</h1>
-              <p className="mt-2 text-sm text-white/55">Detecta rapido candidatos a recompra y productos lentos.</p>
+              <p className="mt-2 text-sm text-white/55">
+                Ventas netas del periodo sobre el total comprado hasta la fecha de cierre.
+              </p>
             </div>
             <button
               onClick={exportar}
@@ -119,9 +121,9 @@ export const RankingRotacionPage: React.FC = () => {
                 <Th onClick={() => sort('codigo')} icon={sortIcon('codigo')}>Codigo</Th>
                 <Th onClick={() => sort('producto')} icon={sortIcon('producto')}>Producto</Th>
                 <Th>Proveedor</Th>
-                <Th align="right" onClick={() => sort('comprado')} icon={sortIcon('comprado')}>Comprado</Th>
-                <Th align="right" onClick={() => sort('vendido')} icon={sortIcon('vendido')}>Vendido</Th>
-                <Th align="right" onClick={() => sort('porcentajeVendido')} icon={sortIcon('porcentajeVendido')}>% vendido</Th>
+                <Th align="right" onClick={() => sort('comprado')} icon={sortIcon('comprado')}>Comprado acum.</Th>
+                <Th align="right" onClick={() => sort('vendido')} icon={sortIcon('vendido')}>Vendido periodo</Th>
+                <Th align="right" onClick={() => sort('porcentajeVendido')} icon={sortIcon('porcentajeVendido')}>% periodo</Th>
                 <Th align="right" onClick={() => sort('porcentaje7')} icon={sortIcon('porcentaje7')}>7 dias</Th>
                 <Th align="right" onClick={() => sort('porcentaje14')} icon={sortIcon('porcentaje14')}>14 dias</Th>
                 <Th align="right" onClick={() => sort('porcentaje30')} icon={sortIcon('porcentaje30')}>30 dias</Th>

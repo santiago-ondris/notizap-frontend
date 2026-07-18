@@ -26,4 +26,16 @@ export interface ActualizarProductoOcultoRequest {
   oculto: boolean;
 }
 
+export interface ActualizarProductosOcultosMasivoRequest {
+  codigosProducto: number[];
+  todosLosResultados: boolean;
+  q?: string;
+  soloOcultos: boolean;
+  oculto: boolean;
+}
+
+export interface ActualizarProductosOcultosMasivoResultado {
+  productosActualizados: number;
+}
+
 export type ProductosGestorResultado = PagedResult<ProductoGestor>;

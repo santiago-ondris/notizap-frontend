@@ -3,6 +3,7 @@ import { evolucionStockKeys } from '@/hooks/evolucionStock/useCargaArchivos';
 import { productosGestorService } from '@/services/evolucionStock/productosGestorService';
 import type {
   ActualizarProductoOcultoRequest,
+  ActualizarProductosOcultosMasivoRequest,
   ProductosGestorFiltros
 } from '@/types/evolucionStock/productosGestorTypes';
 
@@ -24,6 +25,16 @@ export const useActualizarProductoOculto = () => {
   return useMutation({
     mutationFn: (request: ActualizarProductoOcultoRequest) =>
       productosGestorService.actualizarOculto(request),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: evolucionStockKeys.all })
+  });
+};
+
+export const useActualizarProductosOcultosMasivo = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (request: ActualizarProductosOcultosMasivoRequest) =>
+      productosGestorService.actualizarOcultosMasivo(request),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: evolucionStockKeys.all })
   });
 };

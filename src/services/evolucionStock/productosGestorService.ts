@@ -1,6 +1,8 @@
 import api from '@/api/api';
 import type {
   ActualizarProductoOcultoRequest,
+  ActualizarProductosOcultosMasivoRequest,
+  ActualizarProductosOcultosMasivoResultado,
   ProductoGestor,
   ProductosGestorFiltros,
   ProductosGestorResultado
@@ -18,6 +20,13 @@ export const productosGestorService = {
     const response = await api.put(`${BASE_URL}/${request.codigoProducto}/ocultar`, {
       oculto: request.oculto
     });
+    return response.data;
+  },
+
+  async actualizarOcultosMasivo(
+    request: ActualizarProductosOcultosMasivoRequest
+  ): Promise<ActualizarProductosOcultosMasivoResultado> {
+    const response = await api.put(`${BASE_URL}/ocultar-masivo`, request);
     return response.data;
   }
 };
